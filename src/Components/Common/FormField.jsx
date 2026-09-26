@@ -1,10 +1,11 @@
 import React from 'react'
+import SearchableSelect from './SearchableSelect'
 
 const FormField = ({
     label, name, value, onChange,
     type = 'text', placeholder = '',
     required = false, error = '',
-    options = null, textarea = false, accept = null,
+    options = null, textarea = false, accept = null, min = undefined,
 }) => {
     const baseClass = `w-full px-3 py-2 text-sm border rounded-lg outline-none transition bg-white ${error
         ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -23,10 +24,10 @@ const FormField = ({
             </label>
 
             {options ? (
-                <select name={name} value={value || ''} onChange={onChange} className={baseClass}>
-                    <option value=''>Select...</option>
-                    {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
+                <SearchableSelect
+                    name={name} value={value} onChange={onChange}
+                    options={options} error={error} bare
+                />
             ) : textarea ? (
                 <textarea
                     name={name} value={value || ''} onChange={onChange}
@@ -44,6 +45,7 @@ const FormField = ({
             ) : (
                 <input
                     type={type} name={name}
+                    min={min}
                     value={value || ''}
                     onChange={onChange} placeholder={placeholder}
                     className={baseClass}

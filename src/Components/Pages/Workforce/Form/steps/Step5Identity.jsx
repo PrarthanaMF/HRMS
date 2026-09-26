@@ -1,5 +1,5 @@
 import React from 'react'
-import FormField from '../FormField'
+import FormField from '../../../../Common/FormField'
 
 const Step5Identity = ({ form, errors, onChange }) => {
     return (
