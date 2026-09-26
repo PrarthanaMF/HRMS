@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 
 import Home from './Pages/Home'
 import Login from './Pages/Login'
-import Workforce from './Pages/Workforce'
+import Workforce from './Pages/Workforce'   
 import Recruitment from './Pages/Recruitment'
 import CandidateApplicationForm from './Pages/CandidateApplication'
 import ExitProcess from './Pages/ExitProcess'
@@ -25,6 +25,10 @@ import LoginAuth from './Components/Common/LoginAuth'
 import PageLayout from './Components/Common/PageLayout'
 
 import { HeaderDataProvider } from './Store/Context/Header'
+import ResignationFormView from './Components/Pages/ExitProcess/ResignationFormView'
+
+import StagePlaceholder from './Components/Pages/ExitProcess/Stages/StagelaceHolder'
+import ExitDetailView from './Components/Pages/ExitProcess/ExitDetailView'
 
 const App = () => {
   return (
@@ -70,12 +74,24 @@ const App = () => {
           <Route path='edit/:jobId' element={<VacancyFormView mode='edit' />} />
         </Route>
 
+        {/* Exit Process Routes-Prarthana */}
         <Route path='/exit-process' element={<ExitProcess />}>
           <Route index element={<ExitDashboardView />} />
-          <Route path='feedback' element={<ExitFeedbackView />} />
-          <Route path='attrition' element={<AttritionView />} />
+          <Route path='feedback'    element={<ExitFeedbackView />} />
+          <Route path='attrition'   element={<AttritionView />} />
+          <Route path='resignation' element={<ResignationFormView />} />
+          <Route path='records/:id' element={<ExitDetailView />} />
+
+          {/* Stage placeholder routes — replaced one by one in Step 5+ */}
+    <Route path='records/:id/stage-1' element={<StagePlaceholder stage={1} />} />
+    <Route path='records/:id/stage-2' element={<StagePlaceholder stage={2} />} />
+    <Route path='records/:id/stage-3' element={<StagePlaceholder stage={3} />} />
+    <Route path='records/:id/stage-4' element={<StagePlaceholder stage={4} />} />
+    <Route path='records/:id/stage-5' element={<StagePlaceholder stage={5} />} />
         </Route>
       </Route>
+
+      {/* Exit Process Routes-Prarthana  */}
 
       <Route path='*' element={<Navigate to='/' replace />} />
     </Routes>

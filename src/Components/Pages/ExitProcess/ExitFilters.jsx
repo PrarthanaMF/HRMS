@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setFilter, resetFilters, selectFilters } from '../../../Store/Redux/Workforce/EmployeeSlice'
-import { FILTER_OPTIONS } from '../../../Utils/mockEmployees'
+import { setFilter, resetFilters, selectExitFilters } from '../../../Store/Redux/ExitProcess/ExitSlice'
+import { EXIT_FILTER_OPTIONS } from '../../../Utils/mockExits'
 import SearchableSelect from '../../Common/SearchableSelect'
 
 const FilterSelect = ({ label, value, options, onChange }) => (
@@ -15,9 +15,9 @@ const FilterSelect = ({ label, value, options, onChange }) => (
     />
 )
 
-const WorkforceFilters = () => {
+const ExitFilters = () => {
     const dispatch = useDispatch()
-    const filters = useSelector(selectFilters)
+    const filters = useSelector(selectExitFilters)
 
     const update = (key, value) => dispatch(setFilter({ key, value }))
 
@@ -46,16 +46,14 @@ const WorkforceFilters = () => {
             </div>
 
             {/* Filter dropdowns */}
-            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 md:gap-3'>
-                <FilterSelect label='Branch'            value={filters.branch}            options={FILTER_OPTIONS.branch}            onChange={(v) => update('branch', v)} />
-                <FilterSelect label='Status'            value={filters.status}            options={FILTER_OPTIONS.status}            onChange={(v) => update('status', v)} />
-                <FilterSelect label='Department'        value={filters.department}        options={FILTER_OPTIONS.department}        onChange={(v) => update('department', v)} />
-                <FilterSelect label='Designation'       value={filters.designation}       options={FILTER_OPTIONS.designation}       onChange={(v) => update('designation', v)} />
-                <FilterSelect label='Company'           value={filters.company}           options={FILTER_OPTIONS.company}           onChange={(v) => update('company', v)} />
-                <FilterSelect label='Reporting Manager' value={filters.reportingManager}  options={FILTER_OPTIONS.reportingManager}  onChange={(v) => update('reportingManager', v)} />
+            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 md:gap-3'>
+                <FilterSelect label='Branch'        value={filters.branch}       options={EXIT_FILTER_OPTIONS.branch}       onChange={(v) => update('branch', v)} />
+                <FilterSelect label='Status'        value={filters.status}       options={EXIT_FILTER_OPTIONS.status}       onChange={(v) => update('status', v)} />
+                <FilterSelect label='Department'    value={filters.department}   options={EXIT_FILTER_OPTIONS.department}   onChange={(v) => update('department', v)} />
+                <FilterSelect label='Removal Type'  value={filters.removalType}  options={EXIT_FILTER_OPTIONS.removalType}  onChange={(v) => update('removalType', v)} />
             </div>
         </div>
     )
 }
 
-export default WorkforceFilters
+export default ExitFilters

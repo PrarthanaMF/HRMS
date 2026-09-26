@@ -5,7 +5,7 @@ import SearchableSelect from '../../Common/SearchableSelect'
 import Section from '../../Common/FormSection'
 import { selectAllEmployees } from '../../../Store/Redux/Workforce/EmployeeSlice'
 import { todayISO } from '../../../Utils/formatDate'
-import { HR_NAMES, NEXT_DATE_STAGES, RECRUITMENT_STAGES, RECRUITMENT_SOURCES, RECRUITMENT_DIVISIONS } from '../../../Utils/mockRecruitment'
+import { HR_NAMES, NEXT_DATE_STAGES, RECRUITMENT_STAGES, RECRUITMENT_SOURCES, RECRUITMENT_DIVISIONS, COMPANIES, FINAL_STATUSES, DECLINE_REASONS, JOINING_FORM_LINK, INTERVIEWERS } from '../../../Utils/mockRecruitment'
 
 // ---------------------------------------------------------------------------
 // "New Recruitment" — in-app Recruitment Tracker Form
@@ -19,7 +19,21 @@ import { HR_NAMES, NEXT_DATE_STAGES, RECRUITMENT_STAGES, RECRUITMENT_SOURCES, RE
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024
 
-const FIELD_ORDER = ['name', 'contact', 'email', 'salary', 'resume', 'stage', 'source', 'division', 'hrName', 'rating', 'nextDate', 'remarks']
+const FIELD_ORDER = [
+    'name', 'contact', 'email', 'salary', 'resume', 'stage', 'source', 'division', 'hrName', 'rating', 'nextDate', 'remarks',
+    // Stage-specific fields (Interview / Offer / Join / Reject) — same as the Recruitment
+    // Tracker's Update pop-up, so the question set matches whichever stage is picked here.
+    'currentSalary', 'negotiable', 'remarksOfCandidate', 'interviewer',
+    'offerDate', 'joiningDate', 'company',
+    'hiredCost', 'employeeId', 'joiningForm',
+    'declineReason', 'connectFuture', 'nextConnectDate',
+]
+
+const ErrorText = ({ children }) => children ? (
+    <p className='text-[11px] text-red-600 flex items-center gap-1'>
+        <i className='fa-solid fa-circle-exclamation text-[10px]'></i>{children}
+    </p>
+) : null
 
 // "Reference By" — button next to Cancel that opens a list of current employees
 // to pick the person who referred this candidate.
@@ -143,21 +157,44 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
         remarks: '',
         rating: '',
         nextDate: '',
+        // Stage-specific fields — only the ones matching the picked Stage are shown/required,
+        // same rules as the Recruitment Tracker's Update pop-up (see showInterview/showOffer/etc below).
+        currentSalary: '',
+        negotiable: '',
+        negotiableRemarks: '',
+        remarksOfCandidate: '',
+        interviewer: '',
+        offerDate: '',
+        joiningDate: '',
+        company: '',
+        hiredCost: '',
+        finalStatus: '',
+        employeeId: '',
+        declineReason: '',
+        connectFuture: '',
+        nextConnectDate: '',
     })
     const [referral, setReferral] = useState(null) // { empId, name } of the referring current employee
     const [resumeFile, setResumeFile] = useState(null)
+    const [joiningForm, setJoiningForm] = useState(null)
+    const [kybForm, setKybForm] = useState(null)
     const [errors, setErrors] = useState({})
 
-    const handleChange = (e) => {
-        const { name, value } = e.target
+    // Which stage-specific section shows depends only on the Stage dropdown, same mapping
+    // as the Update pop-up: Interview, Offer, Join and Reject each add their own questions.
+    const showInterview = data.stage === 'Interview'
+    const showOffer = data.stage === 'Offer'
+    const showJoin = data.stage === 'Join'
+    const showReject = data.stage === 'Reject'
+    const showNextConnect = showReject && data.connectFuture === 'Yes'
+
+    const set = (name, value) => {
         setData((d) => ({ ...d, [name]: value }))
         if (errors[name]) setErrors((er) => ({ ...er, [name]: undefined }))
     }
+    const handleChange = (e) => set(e.target.name, e.target.value)
 
-    const setRating = (n) => {
-        setData((d) => ({ ...d, rating: n }))
-        if (errors.rating) setErrors((er) => ({ ...er, rating: undefined }))
-    }
+    const setRating = (n) => set('rating', n)
 
     const handleReferral = (emp) => {
         setReferral(emp ? { empId: emp.empId, name: emp.name } : null)
@@ -187,22 +224,52 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
             else if (data.nextDate < todayISO()) next.nextDate = "Next schedule date can't be in the past"
         }
         if (!data.remarks.trim()) next.remarks = 'This field is required'
+        if (showInterview) {
+            if (!data.currentSalary.trim()) next.currentSalary = 'This field is required'
+            if (!data.negotiable) next.negotiable = 'This field is required'
+            if (!data.remarksOfCandidate.trim()) next.remarksOfCandidate = 'This field is required'
+            if (!data.interviewer) next.interviewer = 'This field is required'
+        }
+        if (showOffer) {
+            if (!data.offerDate) next.offerDate = 'This field is required'
+            if (!data.joiningDate) next.joiningDate = 'This field is required'
+            else if (data.offerDate && data.joiningDate < data.offerDate) next.joiningDate = "Can't be before the offer date"
+            if (!data.company) next.company = 'This field is required'
+        }
+        if (showJoin) {
+            if (!data.hiredCost.trim()) next.hiredCost = 'This field is required'
+            else if (!/^\d+(\.\d+)?$/.test(data.hiredCost.replace(/,/g, '').trim())) next.hiredCost = 'Enter the cost as a number'
+            if (!data.employeeId.trim()) next.employeeId = 'This field is required'
+            if (!joiningForm) next.joiningForm = 'Please upload the joining form (max 10 MB)'
+        }
+        if (showReject) {
+            if (!data.declineReason) next.declineReason = 'This field is required'
+            if (!data.connectFuture) next.connectFuture = 'This field is required'
+            if (showNextConnect) {
+                if (!data.nextConnectDate) next.nextConnectDate = 'This field is required'
+                else if (data.nextConnectDate < todayISO()) next.nextConnectDate = "Date can't be before today"
+            }
+        }
         setErrors(next)
         return next
     }
 
-    const handleFile = (e) => {
+    // Shared by every file field in this form — pass which setter/error-key to update.
+    const makeFileHandler = (setFile, errorKey) => (e) => {
         const f = e.target.files?.[0]
         if (!f) return
         if (f.size > MAX_FILE_BYTES) {
-            setErrors((er) => ({ ...er, resume: 'That file is larger than 10 MB. Please choose a smaller file.' }))
+            setErrors((er) => ({ ...er, [errorKey]: 'That file is larger than 10 MB. Please choose a smaller file.' }))
             e.target.value = ''
-            setResumeFile(null)
+            setFile(null)
             return
         }
-        setResumeFile(f)
-        setErrors((er) => ({ ...er, resume: undefined }))
+        setFile(f)
+        setErrors((er) => ({ ...er, [errorKey]: undefined }))
     }
+    const handleFile = makeFileHandler(setResumeFile, 'resume')
+    const handleJoiningFormFile = makeFileHandler(setJoiningForm, 'joiningForm')
+    const handleKybFile = makeFileHandler(setKybForm, 'kybForm')
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -222,6 +289,8 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
             resumeFileName: resumeFile?.name || '',
             referredBy: referral?.name || '',
             referredByEmpId: referral?.empId || '',
+            joiningFormFileName: joiningForm?.name || '',
+            kybFormFileName: kybForm?.name || '',
         })
         // No stacked-card confirmation screen anymore — the candidate now shows up
         // as a real row in the Recruitment Tracker table, so just close the popup.
@@ -300,7 +369,179 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
                 </div>
             </Section>
 
-            {/* ---------- 3. Evaluation & Next Steps ---------- */}
+            {/* ---------- Stage-specific sections ----------
+                Right after Recruitment Details, so they follow the Stage dropdown that decides
+                which one shows. Same rules as the Recruitment Tracker's Update pop-up. */}
+            {showInterview && (
+                <div className='!mt-2'>
+                <Section icon='fa-comments' title='Interview Update Section' subtitle=''>
+                    <div id='q-currentSalary'>
+                        <FormField label='Current Salary' name='currentSalary' value={data.currentSalary} error={errors.currentSalary} required {...fieldProps} />
+                    </div>
+
+                    <div id='q-negotiable' className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-medium text-slate-700'>
+                            Negotiable <span className='text-red-500'>*</span>
+                        </label>
+                        <div className='flex gap-4 pt-1'>
+                            {['Yes', 'No'].map((opt) => (
+                                <label key={opt} className='inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer'>
+                                    <input type='radio' name='negotiable' checked={data.negotiable === opt}
+                                        onChange={() => set('negotiable', opt)} className='accent-[#062139]' />
+                                    {opt}
+                                </label>
+                            ))}
+                        </div>
+                        <ErrorText>{errors.negotiable}</ErrorText>
+                    </div>
+
+                    <div id='q-negotiableRemarks'>
+                        <FormField label='Negotiable Remarks' name='negotiableRemarks' value={data.negotiableRemarks} error={errors.negotiableRemarks} {...fieldProps} />
+                    </div>
+
+                    <div id='q-remarksOfCandidate'>
+                        <FormField label='Remarks Of Candidate' name='remarksOfCandidate' value={data.remarksOfCandidate} error={errors.remarksOfCandidate} required {...fieldProps} />
+                    </div>
+
+                    <div id='q-interviewer' className='md:col-span-2'>
+                        <SearchableSelect label='Interviewer' name='interviewer' value={data.interviewer} error={errors.interviewer} required options={INTERVIEWERS} placeholder='Choose' {...fieldProps} />
+                    </div>
+                </Section>
+                </div>
+            )}
+
+            {showOffer && (
+                <div className='!mt-2'>
+                <Section icon='fa-file-signature' title='Offer Details' subtitle='If we offered'>
+                    <div id='q-offerDate'>
+                        <FormField label='Offer Date' name='offerDate' type='date' value={data.offerDate} error={errors.offerDate} required {...fieldProps} />
+                    </div>
+                    <div id='q-joiningDate'>
+                        <FormField label='Expected date of joining' name='joiningDate' type='date' min={data.offerDate || undefined} value={data.joiningDate} error={errors.joiningDate} required {...fieldProps} />
+                    </div>
+                    <div id='q-company' className='md:col-span-2'>
+                        <SearchableSelect label='Company' name='company' value={data.company} error={errors.company} required options={COMPANIES} placeholder='Choose' {...fieldProps} />
+                    </div>
+                </Section>
+                </div>
+            )}
+
+            {showJoin && (
+                <div className='!mt-2'>
+                <Section icon='fa-user-check' title='Joining Details' subtitle='If joined'>
+                    <div className='md:col-span-2 flex flex-col gap-1.5'>
+                        <label className='text-xs font-medium text-slate-700'>
+                            Final Status <span className='text-slate-400 text-[10px] ml-1 font-normal'>(optional)</span>
+                        </label>
+                        <div className='flex flex-wrap gap-x-4 gap-y-2 pt-1'>
+                            {FINAL_STATUSES.map((s) => (
+                                <label key={s} className='inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer'>
+                                    <input type='radio' name='finalStatus' checked={data.finalStatus === s}
+                                        onChange={() => set('finalStatus', s)} className='accent-[#062139]' />
+                                    {s}
+                                </label>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div id='q-hiredCost'>
+                        <FormField label='Hired Cost' name='hiredCost' value={data.hiredCost} error={errors.hiredCost} required {...fieldProps} />
+                    </div>
+
+                    <div id='q-employeeId'>
+                        <FormField label='Employee ID' name='employeeId' value={data.employeeId} error={errors.employeeId} required {...fieldProps} />
+                        <p className='text-[11px] font-semibold text-amber-700 mt-1.5 flex items-center gap-1'>
+                            <i className='fa-solid fa-triangle-exclamation text-[10px]'></i>
+                            This is very critical, check twice before you submit.
+                        </p>
+                    </div>
+
+                    <div id='q-joiningForm' className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-medium text-slate-700'>
+                            Upload Joining Form <span className='text-red-500'>*</span>
+                        </label>
+                        {!joiningForm ? (
+                            <label className={`flex items-center gap-3 border border-dashed rounded-lg bg-white px-3 py-2.5 cursor-pointer transition ${errors.joiningForm ? 'border-red-300' : 'border-slate-300 hover:border-[#062139]'}`}>
+                                <i className='fa-solid fa-cloud-arrow-up text-slate-400'></i>
+                                <span className='text-sm text-slate-600'><b className='text-[#062139] font-medium'>Add file</b> (1 file, max 10 MB)</span>
+                                <input type='file' className='hidden' accept='.pdf,.doc,.docx,.jpg,.jpeg,.png' onChange={handleJoiningFormFile} />
+                            </label>
+                        ) : (
+                            <div className='flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm'>
+                                <span className='truncate text-slate-700'>{joiningForm.name} · {(joiningForm.size / (1024 * 1024)).toFixed(2)} MB</span>
+                                <button type='button' onClick={() => setJoiningForm(null)} aria-label='Remove file'
+                                    className='text-slate-400 hover:text-slate-700 text-lg leading-none px-1'>&times;</button>
+                            </div>
+                        )}
+                        <ErrorText>{errors.joiningForm}</ErrorText>
+                    </div>
+
+                    <div id='q-kybForm' className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-medium text-slate-700'>
+                            KYB Form <span className='text-slate-400 text-[10px] ml-1 font-normal'>(optional)</span>
+                        </label>
+                        {!kybForm ? (
+                            <label className={`flex items-center gap-3 border border-dashed rounded-lg bg-white px-3 py-2.5 cursor-pointer transition ${errors.kybForm ? 'border-red-300' : 'border-slate-300 hover:border-[#062139]'}`}>
+                                <i className='fa-solid fa-cloud-arrow-up text-slate-400'></i>
+                                <span className='text-sm text-slate-600'><b className='text-[#062139] font-medium'>Add file</b> (1 file, max 10 MB)</span>
+                                <input type='file' className='hidden' accept='.pdf,.doc,.docx,.jpg,.jpeg,.png' onChange={handleKybFile} />
+                            </label>
+                        ) : (
+                            <div className='flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm'>
+                                <span className='truncate text-slate-700'>{kybForm.name} · {(kybForm.size / (1024 * 1024)).toFixed(2)} MB</span>
+                                <button type='button' onClick={() => setKybForm(null)} aria-label='Remove file'
+                                    className='text-slate-400 hover:text-slate-700 text-lg leading-none px-1'>&times;</button>
+                            </div>
+                        )}
+                        <ErrorText>{errors.kybForm}</ErrorText>
+                    </div>
+
+                    <div className='md:col-span-2 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5'>
+                        <i className='fa-solid fa-circle-info text-amber-500 text-xs mt-0.5'></i>
+                        <p className='text-xs text-amber-800'>
+                            Please submit the Employee Joining Form:{' '}
+                            <a href={JOINING_FORM_LINK} target='_blank' rel='noreferrer' className='font-medium underline'>
+                                {JOINING_FORM_LINK}
+                            </a>
+                        </p>
+                    </div>
+                </Section>
+                </div>
+            )}
+
+            {showReject && (
+                <div className='!mt-2'>
+                <Section icon='fa-user-xmark' title='Reason for Decline' subtitle=''>
+                    <div id='q-declineReason' className='md:col-span-2'>
+                        <SearchableSelect label='Decline reasons' name='declineReason' value={data.declineReason} error={errors.declineReason} required options={DECLINE_REASONS} placeholder='Choose' {...fieldProps} />
+                    </div>
+
+                    <div id='q-connectFuture' className='flex flex-col gap-1.5 md:col-span-2'>
+                        <label className='text-xs font-medium text-slate-700'>
+                            Whether to Connect This Candidate in Future <span className='text-red-500'>*</span>
+                        </label>
+                        <div className='flex gap-4 pt-1'>
+                            {['Yes', 'No'].map((opt) => (
+                                <label key={opt} className='inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer'>
+                                    <input type='radio' name='connectFuture' checked={data.connectFuture === opt}
+                                        onChange={() => set('connectFuture', opt)} className='accent-[#062139]' />
+                                    {opt}
+                                </label>
+                            ))}
+                        </div>
+                        <ErrorText>{errors.connectFuture}</ErrorText>
+                    </div>
+
+                    {showNextConnect && (
+                        <div id='q-nextConnectDate'>
+                            <FormField label='Next Connect Date' name='nextConnectDate' type='date' min={todayISO()} value={data.nextConnectDate} error={errors.nextConnectDate} required {...fieldProps} />
+                        </div>
+                    )}
+                </Section>
+                </div>
+            )}
+
+            {/* ---------- 3. Evaluation & Next Steps ---------- (kept last, after the stage-specific section) */}
             <Section step={3} icon='fa-clipboard-check' title='Evaluation & Next Steps' subtitle='How the candidate did and what happens next'>
                 {/* Rating — navy/slate scale instead of the purple radio row */}
                 <div id='q-rating' className='flex flex-col gap-1.5'>
