@@ -12,20 +12,20 @@ export function HeaderDataProvider({ children }) {
             IconColor: 'text-orange-800'
         },
         {
+            name: 'Recruitment',
+            description: 'Manage Hiring And Recruitment Processes',
+            icon: 'fa-solid fa-people-pulling',
+            bgIconColor: 'bg-pink-100',
+            IconColor: 'text-pink-800',
+            btnText: 'Manage Hiring'
+        },
+        {
             name: 'Workforce',
             description: 'Manage Employees And Their Information',
             icon: 'fa-solid fa-user-group',
             bgIconColor: 'bg-blue-100',
             IconColor: 'text-blue-800',
             btnText: 'Manage'
-        },
-        {
-            name: 'Payroll',
-            description: 'Manage Salaries Payments And Deductions',
-            icon: 'fa-solid fa-indian-rupee-sign',
-            bgIconColor: 'bg-green-100',
-            IconColor: 'text-green-800',
-            btnText: 'View Payroll'
         },
         {
             name: 'Attendance',
@@ -36,13 +36,15 @@ export function HeaderDataProvider({ children }) {
             btnText: 'View Attendance'
         },
         {
-            name: 'Recruitment',
-            description: 'Manage Hiring And Recruitment Processes',
-            icon: 'fa-solid fa-people-pulling',
-            bgIconColor: 'bg-pink-100',
-            IconColor: 'text-pink-800',
-            btnText: 'Manage Hiring'
+            name: 'Payroll',
+            description: 'Manage Salaries Payments And Deductions',
+            icon: 'fa-solid fa-indian-rupee-sign',
+            bgIconColor: 'bg-green-100',
+            IconColor: 'text-green-800',
+            btnText: 'View Payroll'
         },
+
+
         {
             name: 'Onboarding',
             description: 'Manage New Employee Joining Process',

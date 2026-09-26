@@ -3,24 +3,9 @@ import logo from '../../assets/logo.png'
 import { useDispatch, useSelector } from "react-redux"
 import { removeAuth } from "../../Store/Redux/Login/AuthSlice"
 import HeaderData from "../../Store/Context/Header"
-import { Link, useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { LINK_ACCESS } from "../../Utils/roleAccess"
-
-// Maps sidebar link names → route paths
-const ROUTES = {
-    'Dashboard': '/',
-    'Workforce': '/workforce',
-    'Payroll': '/',
-    'Attendance': '/',
-    'Recruitment': '/',
-    'Onboarding': '/',
-    'Exit Process': '/',
-    'MIS Reports': '/',
-    'Expenses': '/',
-    'Assets': '/',
-    'Helpdesk': '/',
-    'Master': '/',
-}
+import { ROUTES } from "../../Utils/routes"
 
 const Header = ({ isOpen, onClose }) => {
     const { data } = useContext(HeaderData)
@@ -33,6 +18,7 @@ const Header = ({ isOpen, onClose }) => {
         navigate('/login')
     }
 
+    // Filter sidebar links by role
     const filteredData = data.filter((item) => {
         const allowedRoles = LINK_ACCESS[item.name]
         if (!allowedRoles) return true
@@ -52,7 +38,7 @@ const Header = ({ isOpen, onClose }) => {
             {/* Sidebar */}
             <header
                 className={`
-                    w-64 bg-[#062139] h-screen p-2.5
+                    w-56 bg-[#062139] h-screen p-2
                     fixed md:sticky top-0 shrink-0
                     z-[60] md:z-50
                     transition-transform duration-300 ease-in-out
@@ -64,7 +50,7 @@ const Header = ({ isOpen, onClose }) => {
                 <div className="flex gap-1 items-center justify-between shrink-0">
                     <div className="flex gap-1 items-center">
                         <img src={logo} className="w-6 h-6" alt="logo" />
-                        <h3 className="text-start text-[18px] ml-1.5 text-slate-100 mb-1">Marutiflex</h3>
+                        <h3 className="text-start text-[16px] ml-1.5 text-slate-100 mb-1">Marutiflex</h3>
                     </div>
 
                     <button
@@ -76,22 +62,29 @@ const Header = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Links */}
-                <ul className="flex flex-col gap-1 mt-3 flex-1 overflow-y-auto">
-                    {filteredData.map((icon, index) => (
-                        <li
-                            key={index}
-                            className={`relative group cursor-pointer transform duration-200 hover:bg-[#05325a] py-1.5 px-2 rounded ${index === 0 ? 'bg-[#21537e]' : ''}`}
-                        >
-                            <Link
-                                to={ROUTES[icon.name] || '/'}
-                                onClick={onClose}
-                                className="flex items-center"
-                            >
-                                <i className={`${icon.icon} w-6 text-[15px] text-slate-50 duration-200 transform hover:translate-y-0.5`}></i>
-                                <span className="text-slate-50 ml-1 text-[13px]">{icon.name}</span>
-                            </Link>
-                        </li>
-                    ))}
+                <ul className="flex flex-col gap-1 mt-3 flex-1 overflow-y-auto hide-scrollbar">
+                    {filteredData.map((icon, index) => {
+                        const linkPath = ROUTES[icon.name] || '/'
+
+                        return (
+                            <li key={index} className="relative group">
+                                <NavLink
+                                    to={linkPath}
+                                    end={linkPath === '/'}
+                                    onClick={onClose}
+                                    className={({ isActive }) =>
+                                        `flex items-center py-1.5 px-2 rounded duration-200 transform ${isActive
+                                            ? 'bg-[#21537e]'
+                                            : 'hover:bg-[#05325a]'
+                                        }`
+                                    }
+                                >
+                                    <i className={`${icon.icon} w-6 text-[15px] text-slate-50 duration-200`}></i>
+                                    <span className="text-slate-50 ml-1 text-[13px]">{icon.name}</span>
+                                </NavLink>
+                            </li>
+                        )
+                    })}
                 </ul>
 
                 {/* Logout */}
