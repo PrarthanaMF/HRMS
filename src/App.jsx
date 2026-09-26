@@ -1,26 +1,118 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
+
 import Home from './Pages/Home'
 import Login from './Pages/Login'
 import Workforce from './Pages/Workforce'
+import Recruitment from './Pages/Recruitment'
+import CandidateApplicationForm from './Pages/CandidateApplication'
+
 import EmployeeListView from './Components/Pages/Workforce/EmployeeListView'
 import EmployeeFormView from './Components/Pages/Workforce/EmployeeFormView'
+import EmployeeDetailModal from './Components/Pages/Workforce/EmployeeDetailModal'
+
+import VacancyListView from './Components/Pages/recruitment/VacancyListView'
+import VacancyFormView from './Components/Pages/recruitment/VacancyFormView'
+import RecruitmentTracker from './Components/Pages/recruitment/RecruitmentTracker'
+import RecruitmentMis from './Components/Pages/recruitment/RecruitmentMis'
+
 import Protection from './Components/Common/Protection'
 import LoginAuth from './Components/Common/LoginAuth'
+import PageLayout from './Components/Common/PageLayout'
+
 import { HeaderDataProvider } from './Store/Context/Header'
+
 
 const App = () => {
   return (
     <Routes>
-      <Route path='/' element={<Protection><HeaderDataProvider><Home /></HeaderDataProvider></Protection>} />
 
-      <Route path='/workforce' element={<Protection><HeaderDataProvider><Workforce /></HeaderDataProvider></Protection>}>
-        <Route index element={<EmployeeListView />} />
-        <Route path='add' element={<EmployeeFormView mode='add' />} />
-        <Route path='edit/:empId' element={<EmployeeFormView mode='edit' />} />
+      <Route
+        path='/login'
+        element={
+          <LoginAuth>
+            <Login />
+          </LoginAuth>
+        }
+      />
+
+      <Route
+        path='/candidates/apply'
+        element={<CandidateApplicationForm />}
+      />
+
+      <Route
+        element={
+          <Protection>
+            <HeaderDataProvider>
+              <PageLayout />
+            </HeaderDataProvider>
+          </Protection>
+        }
+      >
+
+        <Route path='/' element={<Home />} />
+
+        <Route
+          path='/profile'
+          element={<div>Profile Page</div>}
+        />
+
+        <Route path='/workforce' element={<Workforce />}>
+
+          <Route
+            index
+            element={<EmployeeListView />}
+          />
+
+          <Route
+            path='add'
+            element={<EmployeeFormView mode='add' />}
+          />
+
+          <Route
+            path='edit/:empId'
+            element={<EmployeeFormView mode='edit' />}
+          />
+
+        </Route>
+
+        <Route path='/recruitment' element={<Recruitment />}>
+
+          <Route
+            index
+            element={<Navigate to='vacancy' replace />}
+          />
+
+          <Route
+            path='vacancy'
+            element={<VacancyListView />}
+          />
+
+          <Route
+            path='tracker'
+            element={<RecruitmentTracker />}
+          />
+
+          <Route
+            path='mis'
+            element={<RecruitmentMis />}
+          />
+
+          <Route
+            path='add'
+            element={<VacancyFormView mode='add' />}
+          />
+
+          <Route
+            path='edit/:jobId'
+            element={<VacancyFormView mode='edit' />}
+          />
+
+        </Route>
+
       </Route>
 
-      <Route path='/login' element={<LoginAuth><Login /></LoginAuth>} />
     </Routes>
   )
 }

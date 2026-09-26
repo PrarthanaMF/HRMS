@@ -61,35 +61,40 @@ const HomeHeader = ({ onMenuClick }) => {
             </div>
 
             {/* ================= MOBILE LAYOUT ================= */}
-            <div className='flex md:hidden items-center justify-between w-full gap-3'>
+            <div className='flex md:hidden items-center justify-between w-full gap-2.5'>
 
-                {/* LEFT: Hamburger */}
-                <button
-                    onClick={onMenuClick}
-                    className='w-10 h-8 flex items-center justify-center rounded-lg bg-[#062139] text-white hover:bg-[#0a2f52] transition shadow-sm shrink-0'
-                    aria-label='Open menu'
-                >
-                    <i className="fa-solid fa-bars text-[15px]"></i>
-                </button>
+                {/* LEFT: Hamburger + compact greeting (keeps page context instead of a bare icon bar) */}
+                <div className='flex items-center gap-2.5 min-w-0'>
+                    <button
+                        onClick={onMenuClick}
+                        className='w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-[#062139] text-white hover:bg-[#0a2f52] transition shadow-sm'
+                        aria-label='Open menu'
+                    >
+                        <i className="fa-solid fa-bars text-[14px]"></i>
+                    </button>
+                    <div className='min-w-0'>
+                        <h3 className='font-bold text-[13px] text-slate-800 truncate leading-tight'>
+                            Hi, {firstName} 👋
+                        </h3>
+                        <p className='text-gray-400 text-[9.5px] truncate leading-tight'>
+                            Welcome back
+                        </p>
+                    </div>
+                </div>
 
                 {/* RIGHT: Actions + Profile */}
-                <div className='flex items-center gap-3'>
-                    {/* Mobile Search icon */}
-                    <button className='cursor-pointer'>
-                        <i className="fa-solid fa-magnifying-glass text-gray-600 text-[16px]"></i>
-                    </button>
-
+                <div className='flex items-center gap-3 shrink-0'>
                     {/* Notification Bell */}
                     <button className='relative cursor-pointer'>
-                        <i className="fa-regular fa-bell text-gray-600 text-[16px]"></i>
-                        <span className='bg-red-500 text-slate-50 w-4 h-4 leading-4 block text-center text-[8px] rounded-[50%] absolute -top-1.5 -right-2'>
+                        <i className="fa-regular fa-bell text-gray-600 text-[15px]"></i>
+                        <span className='bg-red-500 text-slate-50 w-3.5 h-3.5 leading-[14px] block text-center text-[7px] rounded-[50%] absolute -top-1 -right-1.5'>
                             17
                         </span>
                     </button>
 
                     {/* Theme Toggle */}
                     <button className='cursor-pointer'>
-                        <i className="fa-regular fa-moon text-gray-600 text-[16px]"></i>
+                        <i className="fa-regular fa-moon text-gray-600 text-[15px]"></i>
                     </button>
 
                     {/* USER MENU */}

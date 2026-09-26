@@ -1,5 +1,5 @@
 import React from 'react'
-import FormField from '../FormField'
+import FormField from '../../../../Common/FormField'
 import { DROPDOWN_OPTIONS, REQUIRED_FIELDS } from '../../../../../Utils/employeeSchema'
 
 const Step1Personal = ({ form, errors, onChange }) => {

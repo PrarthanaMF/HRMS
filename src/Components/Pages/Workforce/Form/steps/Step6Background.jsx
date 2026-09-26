@@ -1,5 +1,5 @@
 import React from 'react'
-import FormField from '../FormField'
+import FormField from '../../../../Common/FormField'
 import { DROPDOWN_OPTIONS } from '../../../../../Utils/employeeSchema'
 
 const Step6Background = ({ form, errors, onChange }) => {
