@@ -119,13 +119,11 @@ const Login = () => {
             </div>
 
             {/* Password */}
+            {/* Password */}
             <div>
-              <div className='flex justify-between items-center mb-1.5'>
-                <label className='block text-sm font-medium text-slate-700'>Password</label>
-                <button type='button' className='text-xs text-[#062139] hover:underline font-medium'>
-                  Forgot password?
-                </button>
-              </div>
+              <label className='block text-sm font-medium text-slate-700 mb-1.5'>
+                Password
+              </label>
               <div className='relative'>
                 <i className="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input
@@ -141,13 +139,16 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className='absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600'
                 >
-                  <i className={`fa-regular ${showPassword ? 'fa-eye' : 'fa-eye-slash'} text-sm`}></i>
+                  <i className={`fa-regular ${showPassword ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
                 </button>
               </div>
-              {/* Demo hint */}
-              <p className='text-[10px] text-slate-400 mt-1.5'>
-                Demo password: <span className='font-mono font-semibold text-slate-600'>1234</span>
-              </p>
+
+              {/* Forgot password — right-aligned, below the input */}
+              <div className='flex justify-end mt-2'>
+                <button type='button' className='text-xs text-[#062139] hover:underline font-medium'>
+                  Forgot password?
+                </button>
+              </div>
             </div>
 
             {error && (
