@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 export const ROUTES = {
+=======
+  export const ROUTES = {
+>>>>>>> origin/main
     'Dashboard': '/',
     'Workforce': '/workforce',
     'Payroll': '/payroll',
