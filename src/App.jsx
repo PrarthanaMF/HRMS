@@ -27,8 +27,13 @@ import PageLayout from './Components/Common/PageLayout'
 import { HeaderDataProvider } from './Store/Context/Header'
 import ResignationFormView from './Components/Pages/ExitProcess/ResignationFormView'
 
-import StagePlaceholder from './Components/Pages/ExitProcess/Stages/StagelaceHolder'
+import StagePlaceholder from './Components/Pages/ExitProcess/Stages/StagePlaceholder'
 import ExitDetailView from './Components/Pages/ExitProcess/ExitDetailView'
+import Stage1AcceptanceForm from './Components/Pages/ExitProcess/Stages/Stage1AcceptanceForm'
+import Stage2DecisionForm from './Components/Pages/ExitProcess/Stages/Stage2DecisionForm'
+import Stage3ExitInterviewForm from './Components/Pages/ExitProcess/Stages/Stage3ExitInterviewForm'
+import Stage4NoDueForm from './Components/Pages/ExitProcess/Stages/Stage4NoDueForm'
+import Stage5FNFClearanceForm from './Components/Pages/ExitProcess/Stages/Stage5FNFClearanceForm'
 
 const App = () => {
   return (
@@ -82,12 +87,12 @@ const App = () => {
           <Route path='resignation' element={<ResignationFormView />} />
           <Route path='records/:id' element={<ExitDetailView />} />
 
-          {/* Stage placeholder routes — replaced one by one in Step 5+ */}
-    <Route path='records/:id/stage-1' element={<StagePlaceholder stage={1} />} />
-    <Route path='records/:id/stage-2' element={<StagePlaceholder stage={2} />} />
-    <Route path='records/:id/stage-3' element={<StagePlaceholder stage={3} />} />
-    <Route path='records/:id/stage-4' element={<StagePlaceholder stage={4} />} />
-    <Route path='records/:id/stage-5' element={<StagePlaceholder stage={5} />} />
+          {/* Stages */}
+          <Route path='records/:id/stage-1' element={<Stage1AcceptanceForm />} />
+          <Route path='records/:id/stage-2' element={<Stage2DecisionForm />} />
+          <Route path='records/:id/stage-3' element={<Stage3ExitInterviewForm />} />
+          <Route path='records/:id/stage-4' element={<Stage4NoDueForm />} />
+           <Route path='records/:id/stage-5' element={<Stage5FNFClearanceForm/>} /> 
         </Route>
       </Route>
 

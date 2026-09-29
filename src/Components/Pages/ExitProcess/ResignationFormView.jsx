@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { addExit, selectAllExits } from '../../../Store/Redux/ExitProcess/ExitSlice'
 import { MOCK_USERS } from '../../../Utils/mockUsers'
 import { validateResignationForm } from '../../../Utils/validation'
+import FormField from '../../Common/FormField'
+import SuccessScreen, { PreviewRow, PreviewSection } from '../../Common/SuccessScreen'
 
 const ResignationFormView = () => {
     const dispatch = useDispatch()
@@ -17,6 +19,7 @@ const ResignationFormView = () => {
     })
     const [errors, setErrors] = useState({})
     const [selectedEmployee, setSelectedEmployee] = useState(null)
+    const [submitted, setSubmitted] = useState(null)   // null or the submitted payload
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -47,8 +50,7 @@ const ResignationFormView = () => {
 
         const employee = MOCK_USERS[formData.empId.trim()]
 
-        dispatch(addExit({
-            // Basic info from employee record
+        const payload = {
             empId: employee.empId,
             name: employee.name,
             email: employee.email,
@@ -62,36 +64,63 @@ const ResignationFormView = () => {
             reportingManagerContact: employee.reportingManagerContact || '',
             divisionHead: employee.divisionHead || '',
             divisionHeadContact: employee.divisionHeadContact || '',
-
-            // Stage 0 — submission details
             resignationDate: new Date().toISOString().split('T')[0],
             lastWorkingDate: formData.lastWorkingDate,
             reason: formData.reasonForResignation,
             noticePeriod: '30 days',
             removalType: 'Resigned',
-
-            // Workflow
             status: 'Pending HR',
             stage1: null,
             stage2: null,
             stage3: null,
             stage4: null,
             stage5: null,
-        }))
+        }
 
-        navigate('/exit-process')
+        dispatch(addExit(payload))
+
+        // Show success screen with a temporary ID (the real _id is generated in the slice)
+        setSubmitted({
+            ...payload,
+            _id: 'pending',   // we don't have the real _id here
+        })
     }
 
     const handleCancel = () => navigate('/exit-process')
 
+    // ---- SUCCESS SCREEN ----
+    if (submitted) {
+        return (
+            <SuccessScreen
+                title='Resignation Submitted'
+                subtitle='The resignation has been recorded and is now pending HR review'
+                recordId={submitted._id}
+            >
+                <PreviewSection title='Employee Details' icon='fa-user'>
+                    <PreviewRow label='Employee ID' value={submitted.empId} />
+                    <PreviewRow label='Name' value={submitted.name} />
+                    <PreviewRow label='Email' value={submitted.email} />
+                    <PreviewRow label='Department' value={submitted.department} />
+                    <PreviewRow label='Designation' value={submitted.designation} />
+                    <PreviewRow label='Branch' value={submitted.branch} />
+                </PreviewSection>
+
+                <PreviewSection title='Resignation Details' icon='fa-file-signature'>
+                    <PreviewRow label='Resignation Date' value={submitted.resignationDate} />
+                    <PreviewRow label='Expected Last Working Date' value={submitted.lastWorkingDate} />
+                    <PreviewRow label='Notice Period' value={submitted.noticePeriod} />
+                    <PreviewRow label='Reason for Resignation' value={submitted.reason} full />
+                </PreviewSection>
+            </SuccessScreen>
+        )
+    }
+
+    // ---- FORM ----
     return (
         <div className='w-full max-w-xl mx-auto'>
-            <form
-                onSubmit={handleSubmit}
-                className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'
-            >
+            <form onSubmit={handleSubmit} className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
 
-                {/* Header with back arrow */}
+                {/* Header */}
                 <div className='flex items-center gap-3 px-5 py-4 border-b border-slate-100'>
                     <button
                         type='button'
@@ -115,34 +144,16 @@ const ResignationFormView = () => {
                 {/* Body */}
                 <div className='p-5 space-y-4'>
 
-                    {/* Employee ID */}
                     <div>
-                        <label className='block text-xs font-medium text-slate-700 mb-1.5'>
-                            Employee ID <span className='text-red-500'>*</span>
-                        </label>
-                        <div className='relative'>
-                            <i className="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input
-                                type='text'
-                                name='empId'
-                                value={formData.empId}
-                                onChange={handleChange}
-                                placeholder='e.g. 1008'
-                                className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg outline-none transition ${
-                                    errors.empId
-                                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                                        : 'border-slate-200 focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
-                                }`}
-                            />
-                        </div>
-                        {errors.empId && (
-                            <p className='text-[11px] text-red-600 flex items-center gap-1 mt-1'>
-                                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
-                                {errors.empId}
-                            </p>
-                        )}
-
-                        {/* Employee preview */}
+                        <FormField
+                            label='Employee ID'
+                            name='empId'
+                            value={formData.empId}
+                            onChange={handleChange}
+                            required
+                            error={errors.empId}
+                            placeholder='e.g. 1008'
+                        />
                         {selectedEmployee && !errors.empId && (
                             <div className='mt-2.5 flex items-center gap-2.5 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100'>
                                 <div className='w-8 h-8 rounded-full bg-gradient-to-br from-[#062139] to-[#0a3f6e] flex items-center justify-center text-[10px] font-bold text-white shrink-0'>
@@ -158,67 +169,26 @@ const ResignationFormView = () => {
                         )}
                     </div>
 
-                    {/* Expected Date to Relieve */}
-                    <div>
-                        <label className='block text-xs font-medium text-slate-700 mb-1.5'>
-                            Expected Date to Relieve <span className='text-red-500'>*</span>
-                        </label>
-                        <div className='relative'>
-                            <i className="fa-solid fa-calendar-days absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <input
-                                type='date'
-                                name='lastWorkingDate'
-                                value={formData.lastWorkingDate}
-                                onChange={handleChange}
-                                className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg outline-none transition ${
-                                    errors.lastWorkingDate
-                                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                                        : 'border-slate-200 focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
-                                }`}
-                            />
-                        </div>
-                        {errors.lastWorkingDate && (
-                            <p className='text-[11px] text-red-600 flex items-center gap-1 mt-1'>
-                                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
-                                {errors.lastWorkingDate}
-                            </p>
-                        )}
-                    </div>
+                    <FormField
+                        label='Expected Date to Relieve'
+                        name='lastWorkingDate'
+                        type='date'
+                        value={formData.lastWorkingDate}
+                        onChange={handleChange}
+                        required
+                        error={errors.lastWorkingDate}
+                    />
 
-                    {/* Reason for Resignation */}
-                    <div>
-                        <label className='block text-xs font-medium text-slate-700 mb-1.5'>
-                            Reason for Resignation <span className='text-red-500'>*</span>
-                        </label>
-                        <div className='relative'>
-                            <i className="fa-solid fa-comment-dots absolute left-3.5 top-4 text-slate-400 text-sm"></i>
-                            <textarea
-                                name='reasonForResignation'
-                                value={formData.reasonForResignation}
-                                onChange={handleChange}
-                                rows={4}
-                                placeholder='Please provide a brief reason for the resignation...'
-                                className={`w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg outline-none transition resize-none ${
-                                    errors.reasonForResignation
-                                        ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-                                        : 'border-slate-200 focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
-                                }`}
-                            />
-                        </div>
-                        <div className='flex items-center justify-between mt-1'>
-                            {errors.reasonForResignation ? (
-                                <p className='text-[11px] text-red-600 flex items-center gap-1'>
-                                    <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
-                                    {errors.reasonForResignation}
-                                </p>
-                            ) : (
-                                <span></span>
-                            )}
-                            <span className='text-[10px] text-slate-400'>
-                                {formData.reasonForResignation.length} characters
-                            </span>
-                        </div>
-                    </div>
+                    <FormField
+                        label='Reason for Resignation'
+                        name='reasonForResignation'
+                        value={formData.reasonForResignation}
+                        onChange={handleChange}
+                        required
+                        error={errors.reasonForResignation}
+                        textarea
+                        placeholder='Please provide a brief reason for the resignation...'
+                    />
 
                 </div>
 
@@ -234,7 +204,7 @@ const ResignationFormView = () => {
 
                     <button
                         type='submit'
-                        className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'
+                        className='w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'
                     >
                         Submit Resignation
                     </button>

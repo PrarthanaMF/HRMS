@@ -2,6 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import { selectExitById } from '../../../Store/Redux/ExitProcess/ExitSlice'
+import { RatingPreview } from '../../Common/SuccessScreen'
 
 // ============================================================
 // Shared helpers
@@ -43,12 +44,14 @@ const StatusBadge = ({ status, size = 'md' }) => {
         'F&F Initiated': 'bg-indigo-50 text-indigo-700 border-indigo-200',
         'F&F Pending': 'bg-purple-50 text-purple-700 border-purple-200',
         'No Due Cleared': 'bg-teal-50 text-teal-700 border-teal-200',
+        'No Due Pending': 'bg-orange-50 text-orange-700 border-orange-200',
         'Withdrawn': 'bg-slate-100 text-slate-600 border-slate-200',
         'Exited': 'bg-emerald-50 text-emerald-700 border-emerald-200',
     }
     const dots = {
         'Pending HR': 'bg-amber-500', 'HR Reviewing': 'bg-blue-500', 'F&F Initiated': 'bg-indigo-500',
-        'F&F Pending': 'bg-purple-500', 'No Due Cleared': 'bg-teal-500', 'Withdrawn': 'bg-slate-400', 'Exited': 'bg-emerald-500',
+        'F&F Pending': 'bg-purple-500', 'No Due Cleared': 'bg-teal-500', 'No Due Pending': 'bg-orange-500',
+        'Withdrawn': 'bg-slate-400', 'Exited': 'bg-emerald-500',
     }
     const sizing = size === 'lg' ? 'px-3 py-1 text-[11px]' : 'px-2.5 py-0.5 text-[10px]'
     return (
@@ -59,18 +62,6 @@ const StatusBadge = ({ status, size = 'md' }) => {
     )
 }
 
-const RatingRow = ({ label, value }) => (
-    <div className='flex items-center justify-between gap-3 py-2 border-b border-slate-50 last:border-0'>
-        <p className='text-xs text-slate-600 flex-1'>{label}</p>
-        <div className='flex items-center gap-0.5 shrink-0'>
-            {[1, 2, 3, 4, 5].map((star) => (
-                <i key={star} className={`fa-solid fa-star text-[10px] ${star <= value ? 'text-amber-400' : 'text-slate-200'}`}></i>
-            ))}
-            <span className='text-[11px] text-slate-500 ml-1.5 font-medium'>{value}/5</span>
-        </div>
-    </div>
-)
-
 const Chip = ({ icon, text, mono = false }) => (
     <span className='inline-flex items-center gap-1.5 text-[11px] text-slate-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full'>
         <i className={`fa-solid ${icon} text-slate-400 text-[10px]`}></i>
@@ -79,7 +70,7 @@ const Chip = ({ icon, text, mono = false }) => (
 )
 
 // ============================================================
-// Horizontal stepper (all 6 stages)
+// Horizontal stepper
 // ============================================================
 const HorizontalStepper = ({ record }) => {
     const stages = [
@@ -132,6 +123,7 @@ const getNextAction = (record) => {
         case 'F&F Initiated':   return { label: 'Start Exit Interview',   icon: 'fa-comment-dots',       stage: 3 }
         case 'F&F Pending':     return { label: 'Start No Due Clearance', icon: 'fa-clipboard-check',    stage: 4 }
         case 'No Due Cleared':  return { label: 'Start F&F Clearance',    icon: 'fa-money-check-dollar', stage: 5 }
+        case 'No Due Pending':  return { label: 'Start F&F Clearance',    icon: 'fa-money-check-dollar', stage: 5 }
         default:                return null
     }
 }
@@ -165,7 +157,7 @@ const TerminalCard = ({ record }) => (
 )
 
 // ============================================================
-// Main component — Design 2
+// Main component — Design 2 (Header bar + chips + stepper)
 // ============================================================
 const ExitDetailView = () => {
     const { id } = useParams()
@@ -174,7 +166,9 @@ const ExitDetailView = () => {
 
     if (!record) return <NotFound navigate={navigate} />
 
-    const initials = record.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    const initials = record.name
+        ? record.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+        : '?'
     const nextAction = getNextAction(record)
     const isTerminal = record.status === 'Exited' || record.status === 'Withdrawn'
 
@@ -183,11 +177,10 @@ const ExitDetailView = () => {
             <BackLink navigate={navigate} />
 
             {/* ============================================================
-                Header Bar — profile + chips + stepper
+                Header Bar
                 ============================================================ */}
             <Card className='p-5 md:p-6 mb-4'>
 
-                {/* Top row: avatar + name + action button */}
                 <div className='flex flex-col md:flex-row md:items-center gap-4 mb-5'>
                     <div className='w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-600 to-rose-800 flex items-center justify-center text-xl font-bold text-white shrink-0 shadow-sm'>
                         {initials}
@@ -218,7 +211,7 @@ const ExitDetailView = () => {
                     )}
                 </div>
 
-                {/* Quick chips */}
+                {/* Chips */}
                 <div className='flex flex-wrap gap-2 mb-5'>
                     <Chip icon='fa-id-badge' text={record.empId} mono />
                     <Chip icon='fa-location-dot' text={record.branch} />
@@ -229,7 +222,7 @@ const ExitDetailView = () => {
                     <Chip icon='fa-clock' text={record.noticePeriod} />
                 </div>
 
-                {/* Horizontal stepper */}
+                {/* Stepper */}
                 <div className='pt-4 border-t border-slate-100'>
                     <p className='text-[10px] uppercase text-slate-400 font-semibold tracking-wide mb-3'>Workflow Progress</p>
                     <HorizontalStepper record={record} />
@@ -333,13 +326,13 @@ const ExitDetailView = () => {
                             <Card className='p-5 md:p-6'>
                                 <SectionHeader title='Reporting Manager Ratings' icon='fa-user-tie' />
                                 <div className='space-y-0'>
-                                    <RatingRow label='Recognition in your job?' value={record.stage3.reportingManagerRatings.recognition} />
-                                    <RatingRow label='Regular feedback on performance' value={record.stage3.reportingManagerRatings.regularFeedback} />
-                                    <RatingRow label='Resolved complaints & concerns promptly' value={record.stage3.reportingManagerRatings.promptResolutions} />
-                                    <RatingRow label='Equitable treatment (impartial)' value={record.stage3.reportingManagerRatings.equitableTreatment} />
-                                    <RatingRow label='Upgraded knowledge & development interest' value={record.stage3.reportingManagerRatings.knowledgeUpgrade} />
-                                    <RatingRow label='Encouraged feedback & suggestions' value={record.stage3.reportingManagerRatings.encouragedFeedback} />
-                                    <RatingRow label='Provided leadership' value={record.stage3.reportingManagerRatings.providedLeadership} />
+                                    <RatingPreview label='Recognition in your job?' value={record.stage3.reportingManagerRatings.recognition} />
+                                    <RatingPreview label='Regular feedback on performance' value={record.stage3.reportingManagerRatings.regularFeedback} />
+                                    <RatingPreview label='Resolved complaints & concerns promptly' value={record.stage3.reportingManagerRatings.promptResolutions} />
+                                    <RatingPreview label='Equitable treatment (impartial)' value={record.stage3.reportingManagerRatings.equitableTreatment} />
+                                    <RatingPreview label='Upgraded knowledge & development interest' value={record.stage3.reportingManagerRatings.knowledgeUpgrade} />
+                                    <RatingPreview label='Encouraged feedback & suggestions' value={record.stage3.reportingManagerRatings.encouragedFeedback} />
+                                    <RatingPreview label='Provided leadership' value={record.stage3.reportingManagerRatings.providedLeadership} />
                                 </div>
                             </Card>
                         )}
@@ -348,19 +341,19 @@ const ExitDetailView = () => {
                             <Card className='p-5 md:p-6'>
                                 <SectionHeader title='Company Ratings' icon='fa-building' />
                                 <div className='space-y-0'>
-                                    <RatingRow label="Performance Review System" value={record.stage3.companyRatings.performanceReviewSystem} />
-                                    <RatingRow label="Induction program" value={record.stage3.companyRatings.inductionProgram} />
-                                    <RatingRow label='Rate of pay for your job role' value={record.stage3.companyRatings.payRate} />
-                                    <RatingRow label='Career development opportunities' value={record.stage3.companyRatings.careerDevelopment} />
-                                    <RatingRow label='Work environment and timing' value={record.stage3.companyRatings.workEnvironment} />
-                                    <RatingRow label="Sensitive to employees' needs" value={record.stage3.companyRatings.sensitiveToNeeds} />
-                                    <RatingRow label='Administration' value={record.stage3.companyRatings.administration} />
-                                    <RatingRow label='Duties and responsibilities' value={record.stage3.companyRatings.duties} />
-                                    <RatingRow label='Employee benefit facilities' value={record.stage3.companyRatings.benefits} />
-                                    <RatingRow label='Keeping employee informed' value={record.stage3.companyRatings.employeeInforming} />
-                                    <RatingRow label='Treating employee fairly' value={record.stage3.companyRatings.fairTreatment} />
-                                    <RatingRow label='Cooperation within department' value={record.stage3.companyRatings.cooperation} />
-                                    <RatingRow label='Recommend for job openings' value={record.stage3.companyRatings.recommendation} />
+                                    <RatingPreview label="Performance Review System" value={record.stage3.companyRatings.performanceReviewSystem} />
+                                    <RatingPreview label="Induction program" value={record.stage3.companyRatings.inductionProgram} />
+                                    <RatingPreview label='Rate of pay for your job role' value={record.stage3.companyRatings.payRate} />
+                                    <RatingPreview label='Career development opportunities' value={record.stage3.companyRatings.careerDevelopment} />
+                                    <RatingPreview label='Work environment and timing' value={record.stage3.companyRatings.workEnvironment} />
+                                    <RatingPreview label="Sensitive to employees' needs" value={record.stage3.companyRatings.sensitiveToNeeds} />
+                                    <RatingPreview label='Administration' value={record.stage3.companyRatings.administration} />
+                                    <RatingPreview label='Duties and responsibilities' value={record.stage3.companyRatings.duties} />
+                                    <RatingPreview label='Employee benefit facilities' value={record.stage3.companyRatings.benefits} />
+                                    <RatingPreview label='Keeping employee informed' value={record.stage3.companyRatings.employeeInforming} />
+                                    <RatingPreview label='Treating employee fairly' value={record.stage3.companyRatings.fairTreatment} />
+                                    <RatingPreview label='Cooperation within department' value={record.stage3.companyRatings.cooperation} />
+                                    <RatingPreview label='Recommend for job openings' value={record.stage3.companyRatings.recommendation} />
                                 </div>
                             </Card>
                         )}
