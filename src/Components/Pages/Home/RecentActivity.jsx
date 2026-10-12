@@ -11,8 +11,8 @@ import {
 const RecentActivity = () => {
     return (
         <div className='w-full max-w-350 mx-auto px-4 md:px-6 pb-7 pt-3.5'>
-            {/* 3-column on desktop, 1-column on mobile */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            {/* 3-column on large screens, 2 on tablets, 1 on mobile */}
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                 <ActivityTable />
                 <MyPieChart />
                 <ActivityTable />
@@ -31,7 +31,7 @@ const MyPieChart = () => {
     ];
 
     return (
-        <div className="bg-white shadow rounded-md w-full h-70">
+        <div className="bg-white shadow rounded-md w-full h-70 overflow-hidden">
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
@@ -61,7 +61,7 @@ const MyPieChart = () => {
 
 function ActivityTable() {
     return (
-        <div className='shadow-lg rounded-[10px] overflow-hidden bg-white flex flex-col'>
+        <div className='shadow-lg rounded-[10px] overflow-hidden bg-white flex flex-col min-w-0'>
             <div className='flex justify-between bg-slate-800 px-3 py-2'>
                 <h4 className='text-[13px] font-semibold text-gray-100'>Today Assigned</h4>
                 <button className='text-[11px] bg-slate-700 text-slate-100 px-3 py-1 rounded cursor-pointer'>
@@ -77,15 +77,15 @@ function ActivityTable() {
                             <span className='text-[10px] font-bold text-orange-800'>05</span>
                         </p>
 
-                        <div className='flex flex-1 justify-between items-start min-w-0'>
-                            <div className='flex min-w-0'>
+                        <div className='flex flex-1 justify-between items-start gap-2 min-w-0'>
+                            <div className='flex min-w-0 flex-1'>
                                 <span className='w-2 h-2 shrink-0 rounded-[50%] bg-green-700 block mt-2.5 mr-2.5'></span>
                                 <div className='min-w-0'>
                                     <p className='text-[14px] text-gray-800 truncate'>Team Meeting</p>
                                     <p className='text-[11px] text-gray-500 truncate'>10:00 AM to 11:00 AM</p>
                                 </div>
                             </div>
-                            <span className='text-[10px] text-gray-500 font-bold mt-2.5 ml-2 shrink-0 text-right'>
+                            <span className='text-[10px] text-gray-500 font-bold mt-2.5 shrink-0 text-right whitespace-nowrap'>
                                 IT Department
                             </span>
                         </div>

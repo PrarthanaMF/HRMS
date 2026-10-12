@@ -1,109 +1,106 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
-import ProfileCard from '../../Common/ProfileCard'
+import React from "react";
+import { useSelector } from "react-redux";
+
+import ProfileCard from "../../Common/ProfileCard";
+import NotificationBell from "../../Common/NotificationBell";
 
 const HomeHeader = ({ onMenuClick }) => {
-    const user = useSelector(state => state.auth.value)
-    const firstName = user?.name ? user.name.split(' ')[0] : 'User'
+  const user = useSelector((state) => state.auth.value);
 
-    return (
-        <div className='bg-white h-16 flex items-center justify-between sticky top-0 shadow z-50 px-4 md:px-5 overflow-visible gap-3'>
+  const firstName = user?.name ? user.name.split(" ")[0] : "User";
 
-            {/* ================= DESKTOP LAYOUT (3-column grid) ================= */}
-            <div className='hidden md:grid md:grid-cols-3 items-center w-full gap-4'>
+  return (
+    <div className="sticky top-0 z-50 flex h-16 items-center justify-between gap-3 overflow-visible bg-white px-4 shadow md:px-5">
+      {/* ================= DESKTOP ================= */}
+      <div className="hidden w-full items-center gap-4 md:grid md:grid-cols-3">
+        {/* LEFT */}
+        <div className="min-w-0">
+          <h3 className="truncate whitespace-nowrap text-[14px] font-bold">
+            Welcome back, {firstName} 👏
+          </h3>
 
-                {/* LEFT: Greeting */}
-                <div className='min-w-0'>
-                    <h3 className='font-bold text-[14px] whitespace-nowrap truncate'>
-                        Welcome back, {firstName} 👏
-                    </h3>
-                    <p className='text-gray-400 text-[10px] truncate'>
-                        Here is what's happening in your organization today.
-                    </p>
-                </div>
-
-                {/* MIDDLE: Search bar (centered) */}
-                <div className='flex justify-center'>
-                    <div className='flex border border-gray-300 px-2 rounded py-1 items-center w-full max-w-md'>
-                        <label htmlFor="search" className='cursor-pointer'>
-                            <i className="fa-solid fa-magnifying-glass text-slate-700/90 mr-2.5 font-normal text-[14px]"></i>
-                        </label>
-                        <input
-                            type="text"
-                            className='h-full w-full text-[12px] border-0 outline-0 bg-transparent'
-                            placeholder='Search employees, modules, documents'
-                            id='search'
-                        />
-                        <span className='text-gray-600 text-[12px] border border-gray-200 px-1.5 rounded ml-2 whitespace-nowrap'>
-                            Ctrl+/
-                        </span>
-                    </div>
-                </div>
-
-                {/* RIGHT: Actions + Profile */}
-                <div className='flex items-center justify-end gap-5'>
-                    {/* Notification Bell */}
-                    <button className='relative cursor-pointer'>
-                        <i className="fa-regular fa-bell text-gray-600 text-[16px]"></i>
-                        <span className='bg-red-500 text-slate-50 w-4 h-4 leading-4 block text-center text-[8px] rounded-[50%] absolute -top-1.5 -right-2'>
-                            17
-                        </span>
-                    </button>
-
-                    {/* Theme Toggle */}
-                    <button className='cursor-pointer'>
-                        <i className="fa-regular fa-moon text-gray-600 text-[16px]"></i>
-                    </button>
-
-                    {/* USER MENU */}
-                    <ProfileCard />
-                </div>
-            </div>
-
-            {/* ================= MOBILE LAYOUT ================= */}
-            <div className='flex md:hidden items-center justify-between w-full gap-2.5'>
-
-                {/* LEFT: Hamburger + compact greeting (keeps page context instead of a bare icon bar) */}
-                <div className='flex items-center gap-2.5 min-w-0'>
-                    <button
-                        onClick={onMenuClick}
-                        className='w-9 h-9 shrink-0 flex items-center justify-center rounded-lg bg-[#062139] text-white hover:bg-[#0a2f52] transition shadow-sm'
-                        aria-label='Open menu'
-                    >
-                        <i className="fa-solid fa-bars text-[14px]"></i>
-                    </button>
-                    <div className='min-w-0'>
-                        <h3 className='font-bold text-[13px] text-slate-800 truncate leading-tight'>
-                            Hi, {firstName} 👋
-                        </h3>
-                        <p className='text-gray-400 text-[9.5px] truncate leading-tight'>
-                            Welcome back
-                        </p>
-                    </div>
-                </div>
-
-                {/* RIGHT: Actions + Profile */}
-                <div className='flex items-center gap-3 shrink-0'>
-                    {/* Notification Bell */}
-                    <button className='relative cursor-pointer'>
-                        <i className="fa-regular fa-bell text-gray-600 text-[15px]"></i>
-                        <span className='bg-red-500 text-slate-50 w-3.5 h-3.5 leading-[14px] block text-center text-[7px] rounded-[50%] absolute -top-1 -right-1.5'>
-                            17
-                        </span>
-                    </button>
-
-                    {/* Theme Toggle */}
-                    <button className='cursor-pointer'>
-                        <i className="fa-regular fa-moon text-gray-600 text-[15px]"></i>
-                    </button>
-
-                    {/* USER MENU */}
-                    <ProfileCard />
-                </div>
-            </div>
-
+          <p className="truncate text-[10px] text-gray-400">
+            Here is what's happening in your organization today.
+          </p>
         </div>
-    )
-}
 
-export default HomeHeader
+        {/* CENTER */}
+        <div className="flex justify-center">
+          <div className="flex w-full max-w-md items-center rounded border border-gray-300 px-2 py-1">
+            <label htmlFor="search" className="cursor-pointer">
+              <i className="fa-solid fa-magnifying-glass mr-2.5 text-[14px] font-normal text-slate-700/90" />
+            </label>
+
+            <input
+              id="search"
+              type="text"
+              placeholder="Search employees, modules, documents"
+              className="h-full w-full border-0 bg-transparent text-[12px] outline-0"
+            />
+
+            <span className="ml-2 whitespace-nowrap rounded border border-gray-200 px-1.5 text-[12px] text-gray-600">
+              Ctrl+/
+            </span>
+          </div>
+        </div>
+
+        {/* RIGHT */}
+        <div className="flex items-center justify-end gap-5">
+          <NotificationBell />
+
+          <button
+            type="button"
+            className="cursor-pointer"
+            aria-label="Toggle theme"
+          >
+            <i className="fa-regular fa-moon text-[16px] text-gray-600" />
+          </button>
+
+          <ProfileCard />
+        </div>
+      </div>
+
+      {/* ================= MOBILE ================= */}
+      <div className="flex w-full items-center justify-between gap-2.5 md:hidden">
+        {/* LEFT */}
+        <div className="flex min-w-0 items-center gap-2.5">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Open menu"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#062139] text-white shadow-sm transition hover:bg-[#0a2f52]"
+          >
+            <i className="fa-solid fa-bars text-[14px]" />
+          </button>
+
+          <div className="min-w-0">
+            <h3 className="truncate text-[13px] font-bold leading-tight text-slate-800">
+              Hi, {firstName} 👋
+            </h3>
+
+            <p className="truncate text-[9.5px] leading-tight text-gray-400">
+              Welcome back
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT */}
+        <div className="flex shrink-0 items-center gap-3">
+          <NotificationBell />
+
+          <button
+            type="button"
+            className="cursor-pointer"
+            aria-label="Toggle theme"
+          >
+            <i className="fa-regular fa-moon text-[15px] text-gray-600" />
+          </button>
+
+          <ProfileCard />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomeHeader;
