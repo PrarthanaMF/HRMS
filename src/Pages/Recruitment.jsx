@@ -78,11 +78,12 @@ const Recruitment = () => {
                     )}
 
                     {/* Hiring Request is available from every tab (Current Vacancy, Tracker, MIS Reports) —
-                        only hidden while the Hiring Request form itself is open */}
+                        only hidden while the Hiring Request form itself is open. Same simple standalone
+                        button style as "Add Employee" on the Workforce page — no extra frame. */}
                     {!isForm && (
                         <button
                             onClick={() => navigate('/recruitment/add')}
-                            className='flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-[#062139] hover:bg-[#0a2f52] text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-md'
+                            className='flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-[#062139] hover:bg-[#0a2f52] text-white px-4 py-[13px] rounded-lg text-[12px] sm:text-sm font-semibold transition shadow-sm hover:shadow-md'
                         >
                             <i className="fa-solid fa-user-plus text-xs"></i>
                             Hiring Request
