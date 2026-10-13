@@ -751,7 +751,7 @@ const CalendarActionBar = ({
   if (!actionsAllowed) {
     return (
       <div className="att-actions bg-white px-2 py-2.5 sm:px-3">
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1">
           <div className="flex items-start gap-2">
             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
               <i className="fa-solid fa-lock text-xs" />
@@ -1213,7 +1213,7 @@ const AttendanceReport = ({
         onSelect={onSelectedDateChange}
       />
 
-      <div className="att-action-slot h-18 shrink-0 overflow-y-auto overscroll-contain border-t border-slate-100">
+      <div className="att-action-slot h-17 shrink-0 overflow-y-auto overscroll-contain border-t border-slate-100">
         <CalendarActionBar
           date={selected}
           record={selectedRecord}
