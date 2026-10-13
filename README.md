@@ -12,7 +12,11 @@ In development Vite forwards every `/api` call to http://localhost:8000 (`vite.c
 
 All calls go through `src/api/client.js`. Endpoints are documented in the backend's `docs/API.md`.
 
-Screens not yet connected (recruitment, exit process, parts of attendance and workforce) still use the mock data in `src/Utils/mock*.js` and `src/Mocks`.
+Attendance (calendar, summary, leave / WFH / missed punch / comp-off, web punch, approvals, holidays, month lock, import) and the notification bell use the backend. `src/api/attendance.js` turns the backend responses into the shapes the attendance screens use.
+
+Web punch: the first punch from a browser registers it as that employee's punch device (one per employee; HR can reset it), and each punch sends the browser's location, so location access must be allowed.
+
+Screens not yet connected (recruitment, exit process, workforce) still use the mock data in `src/Utils/mock*.js`. `src/Mocks/attendanceFixture.json` is no longer used.
 
 # React + Vite
 

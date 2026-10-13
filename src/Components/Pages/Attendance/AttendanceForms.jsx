@@ -521,6 +521,11 @@ export const ApplyLeaveModal = ({ open, initialDate, onClose, onSubmit, isSubmit
 
   const [form, setForm] = useState(createInitialForm);
 
+  // Earliest date depends on the leave type (HR decides whether it can be backdated)
+  const leaveMinDate =
+    (formOptions.leaveTypes || []).find((type) => type.value === form.leaveType)?.minDate ||
+    formOptions.leaveMinDate;
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -694,7 +699,7 @@ export const ApplyLeaveModal = ({ open, initialDate, onClose, onSubmit, isSubmit
 
               <DatePicker
                 value={form.from}
-                min={formOptions.leaveMinDate}
+                min={leaveMinDate}
                 onChange={updateFromDate}
                 placeholder="Select from date"
               />
@@ -705,7 +710,7 @@ export const ApplyLeaveModal = ({ open, initialDate, onClose, onSubmit, isSubmit
 
               <DatePicker
                 value={form.to}
-                min={form.from || formOptions.leaveMinDate}
+                min={form.from || leaveMinDate}
                 onChange={updateToDate}
                 placeholder="Select to date"
               />
@@ -1361,13 +1366,13 @@ export const ImportAttendanceModal = ({ open, onClose, onSubmit, isSubmitting = 
     setError("");
     setResult(null);
     if (!selected) return;
-    if (!/\.(csv|xlsx|xls)$/i.test(selected.name)) {
-      setError("Choose a CSV or Excel (.xlsx or .xls) file.");
+    if (!/\.(csv|xlsx)$/i.test(selected.name)) {
+      setError("Choose a CSV or Excel (.xlsx) file.");
       event.target.value = "";
       return;
     }
-    if (!selected.size || selected.size > 10 * 1024 * 1024) {
-      setError("Choose a non-empty file no larger than 10 MB.");
+    if (!selected.size || selected.size > 5 * 1024 * 1024) {
+      setError("Choose a non-empty file no larger than 5 MB.");
       event.target.value = "";
       return;
     }
@@ -1392,26 +1397,26 @@ export const ImportAttendanceModal = ({ open, onClose, onSubmit, isSubmitting = 
     <RequestModal
       open={open}
       title="Import Attendance"
-      subtitle="Super Admin · attendance for multiple employees"
+      subtitle="HR · attendance for multiple employees"
       icon="fa-solid fa-file-import"
       onClose={() => { if (!isSubmitting) onClose(); }}
     >
       <form onSubmit={submit} className="space-y-4 p-4 sm:p-5" aria-busy={isSubmitting}>
         <p className="text-xs leading-5 text-slate-600">
-          Upload one sheet containing attendance for any number of employees. Each row is matched using Employee ID, regardless of the employee currently selected on this page.
+          Upload the biometric device's daily export (or the HRMS attendance template) for any number of employees. Rows are matched to employees by their biometric code, regardless of the employee currently selected on this page.
         </p>
         <div>
           <label htmlFor={inputId} className="mb-1.5 block text-xs font-semibold text-slate-700">Attendance sheet</label>
           <input
             id={inputId}
             type="file"
-            accept=".csv,.xlsx,.xls"
+            accept=".csv,.xlsx"
             disabled={isSubmitting}
             onChange={selectFile}
             aria-describedby={`${inputId}-help`}
             className="block w-full min-w-0 rounded-xl border border-slate-200 bg-white p-2 text-xs text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#F0F6FA] file:px-3 file:py-2 file:font-semibold file:text-[#1B4A7B] disabled:opacity-50"
           />
-          <p id={`${inputId}-help`} className="mt-1 text-[11px] text-slate-500">CSV or Excel · maximum 10 MB</p>
+          <p id={`${inputId}-help`} className="mt-1 text-[11px] text-slate-500">CSV or Excel (.xlsx) · maximum 5 MB</p>
           {file && <p className="mt-2 break-all text-xs font-medium text-slate-700">Selected: {file.name}</p>}
         </div>
         {error && <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">{error}</p>}

@@ -30,7 +30,7 @@ import {
   useAttendanceRequests,
 } from "../Hooks/useAttendance";
 
-import { ROLES } from "../Utils/roles";
+import { HR_ROLES } from "../Utils/roles";
 
 import {
   ATTENDANCE_STATUS,
@@ -697,7 +697,7 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
             <strong
               className="att-attendance-rate rounded-lg border border-white/15 bg-white/10 px-2 py-1.5 text-sm text-[#7FBBD8]"
               aria-label={`Attendance ${rate}%`}
-              title="Present and WFH count as 1 attendance day; Half Day counts as 0.5. Approved leave, holidays and week offs are excluded. This is separate from payroll."
+              title="Payable days as a share of the days so far (today and future days are left out). Present, holidays, week offs and approved leave count 1; Half Day and WFH 0.5; Unapproved Leave 0."
             >
               {rate}%
             </strong>
@@ -873,13 +873,14 @@ const Attendance = () => {
     setImportOpen(false);
     navigate("/attendance/holidays");
   };
-  const canImportAttendance = user?.role === ROLES.SUPER_ADMIN;
+  const canImportAttendance = HR_ROLES.includes(user?.role);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [wfhOpen, setWfhOpen] = useState(false);
   const [punchOpen, setPunchOpen] = useState(false);
   const [punchType, setPunchType] = useState(null);
   const [lockDialogMonth, setLockDialogMonth] = useState("");
   const [lockError, setLockError] = useState("");
+  const [unlockReason, setUnlockReason] = useState("");
   const [initializedViewer, setInitializedViewer] = useState(null);
   // Demo fixtures have a fixed date; use the device date for calendar navigation.
   // With a backend, prefer its authoritative current date.
@@ -1460,7 +1461,7 @@ const Attendance = () => {
       <RequestModal
         open={Boolean(lockDialogMonth)}
         title={`${isDialogMonthLocked ? "Reopen" : "Lock"} attendance month`}
-        subtitle="Super Admin · payroll month control"
+        subtitle="Payroll month control"
         icon="fa-solid fa-lock"
         onClose={() => setLockDialogMonth("")}
       >
@@ -1470,10 +1471,18 @@ const Attendance = () => {
               ? `Reopen ${lockDialogMonth} only if payroll permits corrections. Missed-punch applications and approvals will become available again.`
               : `Confirm payroll is closed for ${lockDialogMonth}. Locking stops new missed-punch applications and approval of pending corrections for this month.`}
           </p>
-          <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs font-semibold text-amber-950">
-            Month-lock changes require backend confirmation. Demo previews do
-            not change payroll or save locks.
-          </p>
+          {isDialogMonthLocked && (
+            <label className="grid gap-1.5 text-xs font-medium text-slate-600">
+              Reason for reopening (recorded in the change history)
+              <textarea
+                value={unlockReason}
+                onChange={(event) => setUnlockReason(event.target.value)}
+                maxLength={500}
+                rows={2}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#3A7DC0]"
+              />
+            </label>
+          )}
           {lockError && (
             <p role="alert" className="text-xs text-rose-700">
               {lockError}
@@ -1489,16 +1498,18 @@ const Attendance = () => {
             </button>
             <button
               type="button"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (isDialogMonthLocked && !unlockReason.trim())}
               onClick={async () => {
                 const result = await setMonthLocked({
                   month: lockDialogMonth,
                   locked: !isDialogMonthLocked,
+                  reason: unlockReason.trim(),
                 });
                 if (!result.ok) {
                   setLockError(result.message);
                   return;
                 }
+                setUnlockReason("");
                 setLockDialogMonth("");
               }}
               className="rounded-lg bg-gradient-to-r from-[#133F66] to-[#2A5F98] px-4 py-2 font-semibold text-white"

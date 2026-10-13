@@ -34,14 +34,17 @@ const LABELS = { requests: "My Requests", applications: "Applications", inbox: "
 // Display names only; backend leave codes remain unchanged. Extend for company-specific types.
 const LEAVE_NAMES = { CL: "Casual Leave", SL: "Sick Leave", EL: "Earned Leave", CO: "Compensatory Leave" };
 const leaveName = (payload) => {
-  const value = String(payload.leaveTypeName || payload.leaveType || "").trim();
-  return LEAVE_NAMES[value.toUpperCase()] || (value.includes(" ") ? value : "Leave name not provided");
+  // The backend sends the leave type's name as HR set it up; codes are the fallback
+  if (payload.leaveTypeName) return String(payload.leaveTypeName).trim();
+  const value = String(payload.leaveType || "").trim();
+  return LEAVE_NAMES[value.toUpperCase()] || value || "Leave name not provided";
 };
-const TYPES = { LEAVE: "Leave", WFH: "Work From Home", MISSED_PUNCH: "Missed Punch" };
+const TYPES = { LEAVE: "Leave", WFH: "Work From Home", MISSED_PUNCH: "Missed Punch", COMP_OFF: "Comp-off Day", COMP_OFF_CLAIM: "Comp-off Claim" };
 const TONES = {
   PENDING: { label: "Pending", icon: "fa-regular fa-clock", badge: "border-amber-200 bg-amber-50 text-amber-800", dot: "bg-amber-500" },
   APPROVED: { label: "Approved", icon: "fa-solid fa-check", badge: "border-emerald-200 bg-emerald-50 text-emerald-800", dot: "bg-emerald-500" },
   REJECTED: { label: "Rejected", icon: "fa-solid fa-xmark", badge: "border-red-200 bg-red-50 text-red-800", dot: "bg-red-500" },
+  CANCELLED: { label: "Cancelled", icon: "fa-solid fa-ban", badge: "border-slate-200 bg-slate-50 text-slate-600", dot: "bg-slate-400" },
 };
 const UNKNOWN = { label: "Not provided", icon: "fa-regular fa-circle", badge: "border-slate-200 bg-slate-50 text-slate-600", dot: "bg-slate-400" };
 const buttonClass = "inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-lg border px-3 text-xs font-semibold sm:min-h-9 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
@@ -177,7 +180,7 @@ function FilterDropdown({ label, value, options, onChange }) {
   </div>;
 }
 
-function ApplicationBrowser({ requests, pendingIds = new Set(), onDecision, busy = false }) {
+function ApplicationBrowser({ requests, pendingIds = new Set(), onDecision, onCancel, busy = false }) {
   const [view, setView] = useState("tiles");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filterId = useId();
@@ -189,6 +192,8 @@ function ApplicationBrowser({ requests, pendingIds = new Set(), onDecision, busy
   // Resolve the current record on every render so refreshed decisions stay current.
   const selected = requests.find(request => String(request.id) === selectedId);
   const canDecide = Boolean(selected && onDecision && selected.status === "PENDING" && pendingIds.has(String(selected.id)) && selected.canDecide !== false);
+  // Withdraw your own application (the backend decides what may still be cancelled)
+  const canCancel = Boolean(selected && onCancel && selected.canCancel);
   const startDecision = (status) => {
     setSelectedId(""); // Close details before opening the confirmation dialog.
     onDecision(selected, status);
@@ -210,7 +215,7 @@ function ApplicationBrowser({ requests, pendingIds = new Set(), onDecision, busy
       {filtersOpen && <>
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
           <label className="min-w-0 text-xs font-medium text-slate-600 sm:col-span-2 lg:col-span-1">Search applications<input type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="ID, employee, approver or reason" className={cn(inputClass, "mt-1")} /></label>
-          <FilterDropdown label="Status" value={status} onChange={setStatus} options={["ALL", "PENDING", "APPROVED", "REJECTED"].map(value => ({ value, label: value === "ALL" ? "All statuses" : toneFor(value).label, count: value === "ALL" ? requests.length : requests.filter(item => item.status === value).length }))} />
+          <FilterDropdown label="Status" value={status} onChange={setStatus} options={["ALL", "PENDING", "APPROVED", "REJECTED", "CANCELLED"].map(value => ({ value, label: value === "ALL" ? "All statuses" : toneFor(value).label, count: value === "ALL" ? requests.length : requests.filter(item => item.status === value).length }))} />
           <FilterDropdown label="Application type" value={type} onChange={setType} options={[{ value: "ALL", label: "All types" }, ...Object.entries(TYPES).map(([value, label]) => ({ value, label }))]} />
         </div>
         <div className="mt-3 flex justify-end gap-2 border-t border-slate-100 pt-2">
@@ -229,6 +234,9 @@ function ApplicationBrowser({ requests, pendingIds = new Set(), onDecision, busy
           <button type="button" disabled={busy} className={cn(buttonClass, "border-red-200 text-red-700 hover:bg-red-50")} onClick={() => startDecision("REJECTED")}>Reject</button>
           <button type="button" disabled={busy} className={cn(buttonClass, "border-[#1B4A7B] bg-[#1B4A7B] text-white")} onClick={() => startDecision("APPROVED")}>Approve</button>
         </div>}
+        {canCancel && <div className="flex justify-end border-t border-slate-100 pt-3">
+          <button type="button" disabled={busy} className={cn(buttonClass, "border-red-200 text-red-700 hover:bg-red-50")} onClick={() => onCancel(selected)}>Cancel application</button>
+        </div>}
       </div>}
     </RequestModal>
   </>;
@@ -243,8 +251,18 @@ function LoadState({ loading, error }) {
 }
 
 export function AttendanceRequestsPage() {
-  const { myRequests = [], isLoading, error } = useAttendanceRequests();
-  return <PageShell title={LABELS.requests} subtitle="Track your applications and their current reviewer.">{isLoading || error ? <LoadState loading={isLoading} error={error} /> : <ApplicationBrowser requests={myRequests} />}</PageShell>;
+  const { myRequests = [], isLoading, error, isSubmitting, cancelRequest } = useAttendanceRequests();
+  const [cancelError, setCancelError] = useState("");
+  const cancel = async (request) => {
+    if (!window.confirm(`Cancel this ${typeLabel(request).toLowerCase()} application?`)) return;
+    setCancelError("");
+    const result = await cancelRequest(request.id);
+    if (!result?.ok) setCancelError(result?.message || "Unable to cancel the application.");
+  };
+  return <PageShell title={LABELS.requests} subtitle="Track your applications and their current reviewer.">
+    {cancelError && <p role="alert" className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{cancelError}</p>}
+    {isLoading || error ? <LoadState loading={isLoading} error={error} /> : <ApplicationBrowser requests={myRequests} onCancel={cancel} busy={isSubmitting} />}
+  </PageShell>;
 }
 
 export function AttendanceApplicationsPage() {

@@ -119,6 +119,9 @@ export const ATTENDANCE_STATUS = {
 Object.assign(ATTENDANCE_STATUS, {
   AL: { label: "Approved Leave", shortLabel: "AL", dotClass: "bg-slate-500", cellClass: "border-slate-300 bg-slate-100 text-slate-700" },
   L: { label: "Approved Leave", shortLabel: "L", dotClass: "bg-slate-500", cellClass: "border-slate-300 bg-slate-100 text-slate-700" },
+  // Backend codes (see the backend's docs/API.md, "Day status codes")
+  HOP: { label: "Present On Holiday", shortLabel: "HOP", dotClass: "bg-green-400", cellClass: "border-green-200 bg-green-50 text-green-700" },
+  IP: { label: "In Progress", shortLabel: "IP", dotClass: "bg-blue-400", cellClass: "border-blue-200 bg-blue-50 text-blue-700" },
   LC: { label: "Late Entry", shortLabel: "LC", markerClass: "bg-[#881337]", dotClass: "bg-[#881337]", cellClass: "border-rose-200 bg-rose-50 text-[#881337]" },
   EL: { label: "Early Leaving", shortLabel: "EL", markerClass: "bg-[#92400E]", dotClass: "bg-[#92400E]", cellClass: "border-amber-200 bg-amber-50 text-[#92400E]" },
 });
@@ -127,9 +130,9 @@ ATTENDANCE_STATUS.WOP.label = "Present On Week Off";
 
 export const LEGEND_GROUPS = [
   { title: "Discipline", items: [["LC", "Late Entry"], ["EL", "Early Leaving"]] },
-  { title: "Present", items: [["P", "Present"], ["HD", "Half Day"], ["WOP", "Present On Week Off"], ["WFH", "Work From Home"]] },
+  { title: "Present", items: [["P", "Present"], ["HD", "Half Day"], ["WOP", "Present On Week Off"], ["HOP", "Present On Holiday"], ["WFH", "Work From Home"], ["IP", "In Progress (today)"]] },
   { title: "Off Days", items: [["H", "Holiday"], ["WO", "Week Off"]] },
-  { title: "Leave", items: [["AL", "Approved Leave"], ["UL", "Unapproved Leave"]] },
+  { title: "Leave", items: [["AL", "Approved Leave"], ["CO", "Comp Off"], ["UL", "Unapproved Leave"]] },
 ];
 export const LEGEND_ITEMS = [...new Map(LEGEND_GROUPS.flatMap(group => group.items)).entries()];
 

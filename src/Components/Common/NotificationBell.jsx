@@ -1,84 +1,64 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
-import {
-  markAllNotificationsRead,
-  markNotificationRead,
-  selectNotifications,
-} from "../../Store/Redux/Notifications/NotificationSlice";
+import { api } from "../../api/client";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
+
+// In-app notifications come from the backend (GET /api/notifications); each user sees only their own
+const REFRESH_MS = 60 * 1000;
+
+// Where a notification takes you
+const LINKS = {
+  APPROVAL_NEEDED: "/attendance/applications",
+  REMINDER_APPROVALS: "/attendance/applications",
+  REQUEST_PROGRESS: "/attendance/requests",
+  REQUEST_APPROVED: "/attendance/requests",
+  REQUEST_REJECTED: "/attendance/requests",
+  REQUEST_CANCELLED: "/attendance/requests",
+  REQUEST_RAISED_FOR_YOU: "/attendance/requests",
+  REMINDER_MISSING_PUNCH: "/attendance",
+  REMINDER_COMP_OFF_EXPIRY: "/attendance",
+};
+
+const toItem = (notification) => ({
+  id: notification._id,
+  type: notification.type,
+  title: notification.title,
+  message: notification.message,
+  createdAt: notification.createdAt,
+  isRead: Boolean(notification.readAt),
+  link: LINKS[notification.type],
+});
 
 // ============================================================
 // NOTIFICATION VISUALS
 // ============================================================
 
-const getNotificationVisual = (type) => {
-  switch (type) {
-    case "ATTENDANCE_LEAVE_APPROVAL_REQUIRED":
-      return {
-        icon: "fa-regular fa-calendar-check",
-        iconBg: "bg-blue-100",
-        iconText: "text-blue-600",
-        unreadBg: "bg-blue-50/60",
-      };
-
-    case "ATTENDANCE_PUNCH_APPROVAL_REQUIRED":
-      return {
-        icon: "fa-regular fa-clock",
-        iconBg: "bg-amber-100",
-        iconText: "text-amber-700",
-        unreadBg: "bg-amber-50/60",
-      };
-
-    case "ATTENDANCE_WFH_APPROVAL_REQUIRED":
-      return {
-        icon: "fa-solid fa-house-laptop",
-        iconBg: "bg-violet-100",
-        iconText: "text-violet-700",
-        unreadBg: "bg-violet-50/60",
-      };
-
-    case "ATTENDANCE_REQUEST_APPROVED":
-      return {
-        icon: "fa-solid fa-circle-check",
-        iconBg: "bg-emerald-100",
-        iconText: "text-emerald-600",
-        unreadBg: "bg-emerald-50/50",
-      };
-
-    case "ATTENDANCE_REQUEST_REJECTED":
-      return {
-        icon: "fa-solid fa-circle-xmark",
-        iconBg: "bg-rose-100",
-        iconText: "text-rose-600",
-        unreadBg: "bg-rose-50/50",
-      };
-
-    /*
-      Backward compatibility with notifications
-      already created using the previous generic type.
-    */
-    case "ATTENDANCE_APPROVAL_REQUIRED":
-      return {
-        icon: "fa-solid fa-user-check",
-        iconBg: "bg-violet-100",
-        iconText: "text-violet-600",
-        unreadBg: "bg-violet-50/50",
-      };
-
-    default:
-      return {
-        icon: "fa-regular fa-bell",
-        iconBg: "bg-slate-100",
-        iconText: "text-slate-500",
-        unreadBg: "bg-blue-50/50",
-      };
-  }
+const VISUALS = {
+  approval: { icon: "fa-solid fa-user-check", iconBg: "bg-violet-100", iconText: "text-violet-600", unreadBg: "bg-violet-50/50" },
+  reminder: { icon: "fa-regular fa-clock", iconBg: "bg-amber-100", iconText: "text-amber-700", unreadBg: "bg-amber-50/60" },
+  compOff: { icon: "fa-solid fa-arrow-rotate-left", iconBg: "bg-amber-100", iconText: "text-amber-700", unreadBg: "bg-amber-50/60" },
+  progress: { icon: "fa-regular fa-calendar-check", iconBg: "bg-blue-100", iconText: "text-blue-600", unreadBg: "bg-blue-50/60" },
+  approved: { icon: "fa-solid fa-circle-check", iconBg: "bg-emerald-100", iconText: "text-emerald-600", unreadBg: "bg-emerald-50/50" },
+  rejected: { icon: "fa-solid fa-circle-xmark", iconBg: "bg-rose-100", iconText: "text-rose-600", unreadBg: "bg-rose-50/50" },
+  other: { icon: "fa-regular fa-bell", iconBg: "bg-slate-100", iconText: "text-slate-500", unreadBg: "bg-blue-50/50" },
 };
+
+const VISUAL_BY_TYPE = {
+  APPROVAL_NEEDED: "approval",
+  REMINDER_APPROVALS: "reminder",
+  REMINDER_MISSING_PUNCH: "reminder",
+  REMINDER_COMP_OFF_EXPIRY: "compOff",
+  REQUEST_PROGRESS: "progress",
+  REQUEST_RAISED_FOR_YOU: "progress",
+  REQUEST_APPROVED: "approved",
+  REQUEST_REJECTED: "rejected",
+  REQUEST_CANCELLED: "rejected",
+};
+
+const getNotificationVisual = (type) => VISUALS[VISUAL_BY_TYPE[type] || "other"];
 
 const formatNotificationTime = (value) => {
   if (!value) {
@@ -128,13 +108,9 @@ const formatNotificationTime = (value) => {
 // ============================================================
 
 const NotificationBell = () => {
-  const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const user = useSelector((state) => state.auth.value);
-
-  const allNotifications = useSelector(selectNotifications);
 
   const triggerRef = useRef(null);
   const popupRef = useRef(null);
@@ -143,25 +119,43 @@ const NotificationBell = () => {
 
   const [position, setPosition] = useState(null);
 
+  const [notifications, setNotifications] = useState([]);
+
+  const [unread, setUnread] = useState(0);
+
   // ==========================================================
-  // INDIVIDUAL USER NOTIFICATIONS
+  // LOAD FROM THE BACKEND
   // ==========================================================
 
-  const notifications = useMemo(() => {
-    if (!user?.empId) {
-      return [];
+  // Latest 20 (read and unread) plus the unread total
+  const load = useCallback(() => {
+    api
+      .get("/notifications", { limit: 20 })
+      .then((data) => {
+        setNotifications(data.notifications.map(toItem));
+        setUnread(data.unread);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!user?._id) return undefined;
+    // Notifications used to live in this browser's storage; that copy is no longer used
+    try {
+      localStorage.removeItem("hrms_notifications");
+    } catch {
+      // storage unavailable
     }
+    load();
+    const timer = window.setInterval(() => {
+      api.get("/notifications/unread-count").then((data) => setUnread(data.unread)).catch(() => {});
+    }, REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [user?._id, load]);
 
-    return [...allNotifications]
-      .filter((item) => String(item.recipientEmpId ?? "") === String(user.empId))
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt || 0).getTime() -
-          new Date(a.createdAt || 0).getTime(),
-      );
-  }, [allNotifications, user?.empId]);
-
-  const unread = notifications.length;
+  useEffect(() => {
+    if (open) load();
+  }, [open, load]);
 
   // ==========================================================
   // RESPONSIVE POPOVER POSITION
@@ -274,7 +268,9 @@ const NotificationBell = () => {
 
   const openNotification = (notification) => {
     if (!notification.isRead) {
-      dispatch(markNotificationRead(notification.id));
+      setNotifications((items) => items.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)));
+      setUnread((count) => Math.max(0, count - 1));
+      api.patch(`/notifications/${notification.id}/read`).catch(() => {});
     }
 
     setOpen(false);
@@ -282,6 +278,12 @@ const NotificationBell = () => {
     if (notification.link) {
       navigate(notification.link);
     }
+  };
+
+  const markAllRead = () => {
+    setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
+    setUnread(0);
+    api.patch("/notifications/read-all").catch(() => {});
   };
 
   // ==========================================================
@@ -378,9 +380,7 @@ const NotificationBell = () => {
               {unread > 0 && (
                 <button
                   type="button"
-                  onClick={() =>
-                    dispatch(markAllNotificationsRead(user?.empId))
-                  }
+                  onClick={markAllRead}
                   className="shrink-0 rounded-lg px-2 py-1.5 text-[9px] font-bold text-blue-600 transition hover:bg-blue-50"
                 >
                   Mark all read
@@ -398,11 +398,11 @@ const NotificationBell = () => {
                   </span>
 
                   <p className="mt-3 text-[11px] font-bold text-slate-600">
-                    No new notifications
+                    No notifications yet
                   </p>
 
                   <p className="mt-1 text-[9.5px] leading-4 text-slate-400">
-                    New attendance updates will appear here.
+                    Approvals, decisions on your requests and reminders will appear here.
                   </p>
                 </div>
               )}
