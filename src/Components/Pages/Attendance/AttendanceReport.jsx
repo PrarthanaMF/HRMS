@@ -1213,7 +1213,7 @@ const AttendanceReport = ({
         onSelect={onSelectedDateChange}
       />
 
-      <div className="att-action-slot h-17 shrink-0 overflow-y-auto overscroll-contain border-t border-slate-100">
+      <div className="att-action-slot h-18 shrink-0 overflow-y-auto overscroll-contain border-t border-slate-100">
         <CalendarActionBar
           date={selected}
           record={selectedRecord}
