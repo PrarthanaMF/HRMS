@@ -1,18 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Load user from localStorage on app boot
-const loadUserFromStorage = () => {
-    try {
-        const saved = localStorage.getItem('auth_user')
-        return saved ? JSON.parse(saved) : {}
-    } catch (err) {
-        console.error('Failed to load auth from localStorage:', err)
-        return {}
-    }
-}
-
+// The signed-in user lives in the httpOnly cookie on the server; this slice only mirrors it.
+// status: "checking" (asking the server on start-up), "authenticated" or "anonymous".
 const initialState = {
-    value: loadUserFromStorage()
+    value: {},
+    status: "checking",
 }
 
 const AuthSlice = createSlice({
@@ -21,17 +13,11 @@ const AuthSlice = createSlice({
     reducers: {
         updateAuth: (state, actions) => {
             state.value = actions.payload
-            // Persist to localStorage
-            try {
-                localStorage.setItem('auth_user', JSON.stringify(actions.payload))
-            } catch (err) {
-                console.error('Failed to save auth to localStorage:', err)
-            }
+            state.status = "authenticated"
         },
         removeAuth: (state) => {
             state.value = {}
-            // Clear from localStorage
-            localStorage.removeItem('auth_user')
+            state.status = "anonymous"
         }
     }
 })

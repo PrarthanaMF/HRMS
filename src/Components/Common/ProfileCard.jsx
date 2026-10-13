@@ -2,16 +2,16 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { removeAuth } from '../../Store/Redux/Login/AuthSlice'
+import { logout } from '../../api/auth'
+import { ROLE_LABELS } from '../../Utils/roles'
 
 const ROLE_STYLES = {
-    'Super_admin': { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200', dot: 'bg-purple-500' },
-    'Admin': { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' },
-    'Management': { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', dot: 'bg-indigo-500' },
-    'HR_manager': { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
-    'HR_executive': { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-200', dot: 'bg-teal-500' },
-    'Manager': { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
-    'Team_leader': { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-500' },
-    'Employee': { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', dot: 'bg-slate-500' },
+    'SUPER_ADMIN': { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200', dot: 'bg-purple-500' },
+    'ADMIN': { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' },
+    'MANAGEMENT': { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-200', dot: 'bg-indigo-500' },
+    'HR_MANAGER': { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500' },
+    'HR_EXECUTIVE': { bg: 'bg-teal-100', text: 'text-teal-700', border: 'border-teal-200', dot: 'bg-teal-500' },
+    'EMPLOYEE': { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200', dot: 'bg-slate-500' },
 }
 
 const ProfileCard = () => {
@@ -39,16 +39,17 @@ const ProfileCard = () => {
         ? user.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
         : 'U'
 
-    const roleStyle = ROLE_STYLES[user.role] || ROLE_STYLES['Employee']
-    const displayRole = user.role.replace(/_/g, ' ')
+    const roleStyle = ROLE_STYLES[user.role] || ROLE_STYLES['EMPLOYEE']
+    const displayRole = ROLE_LABELS[user.role] || user.role
 
     const handleMyProfile = () => {
         setIsOpen(false)
         navigate('/profile')
     }
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsOpen(false)
+        await logout()
         dispatch(removeAuth())
         navigate('/login')
     }

@@ -1,3 +1,19 @@
+# Marutiflex HRMS (frontend)
+
+## Running with the backend
+
+The app talks to the HRMS backend (Node/Express, repo `hrms-backend`) for login and, step by step, for its data.
+
+1. Start the backend on port 8000 (`npm run dev` in the backend folder).
+2. Start this app: `npm install`, then `npm run dev`. It opens on http://localhost:4500.
+3. Sign in with a backend login (email and password). Logins are created by an admin in the backend.
+
+In development Vite forwards every `/api` call to http://localhost:8000 (`vite.config.js`), so the login cookie works without CORS set-up. Use `VITE_API_PROXY` for a backend on another address, and `VITE_API_BASE` for the API URL in a production build.
+
+All calls go through `src/api/client.js`. Endpoints are documented in the backend's `docs/API.md`.
+
+Screens not yet connected (recruitment, exit process, parts of attendance and workforce) still use the mock data in `src/Utils/mock*.js` and `src/Mocks`.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

@@ -2,6 +2,7 @@ import { useContext } from "react"
 import logo from '../../assets/logo.png'
 import { useDispatch, useSelector } from "react-redux"
 import { removeAuth } from "../../Store/Redux/Login/AuthSlice"
+import { logout } from "../../api/auth"
 import HeaderData from "../../Store/Context/Header"
 import { NavLink, useNavigate } from "react-router-dom"
 import { LINK_ACCESS } from "../../Utils/roleAccess"
@@ -13,7 +14,8 @@ const Header = ({ isOpen, onClose }) => {
     const navigate = useNavigate()
     const user = useSelector(state => state.auth.value)
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await logout()
         dispatch(removeAuth())
         navigate('/login')
     }

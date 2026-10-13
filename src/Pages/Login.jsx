@@ -2,48 +2,38 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { updateAuth } from '../Store/Redux/Login/AuthSlice'
-import { MOCK_USERS } from '../Utils/mockUsers'
+import { login } from '../api/auth'
 import logo from '../assets/logo.png'
 
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [empId, setEmpId] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
-    if (!empId || !password) {
-      setError('Please enter both Employee ID and Password')
+    if (!email.trim() || !password) {
+      setError('Please enter both email and password')
       return
     }
 
-    const user = MOCK_USERS[empId.trim()]
-
-    // Check user exists AND password matches
-    if (!user || user.password !== password) {
-      setError('Invalid Employee ID or Password')
-      return
+    setSubmitting(true)
+    try {
+      // The server sets the login cookie; we keep only who is signed in
+      dispatch(updateAuth(await login(email.trim(), password)))
+      navigate('/')
+    } catch (err) {
+      // e.g. "Invalid email or password", "Account is inactive", too many attempts
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
     }
-
-    dispatch(updateAuth({
-      empId: user.empId,
-      name: user.name,
-      role: user.role,
-      branches: user.branches,
-      designation: user.designation,
-      department: user.department,
-      email: user.email,
-      phone: user.phone,
-      _id: user._id,
-      token: user.token,
-    }))
-
-    navigate('/')
   }
 
   return (
@@ -103,16 +93,17 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className='space-y-5'>
 
-            {/* Employee ID */}
+            {/* Email */}
             <div>
-              <label className='block text-sm font-medium text-slate-700 mb-1.5'>Employee ID</label>
+              <label className='block text-sm font-medium text-slate-700 mb-1.5'>Email</label>
               <div className='relative'>
-                <i className="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <i className="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input
-                  type="text"
-                  value={empId}
-                  onChange={(e) => setEmpId(e.target.value)}
-                  placeholder='e.g. 1001'
+                  type="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder='you@marutiflex.com'
                   className='w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#062139] focus:ring-4 focus:ring-slate-100 transition'
                 />
               </div>
@@ -130,8 +121,8 @@ const Login = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   placeholder='Enter your password'
-                  maxLength={4}
                   className='w-full pl-10 pr-11 py-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#062139] focus:ring-4 focus:ring-slate-100 transition'
                 />
                 <button
@@ -160,9 +151,10 @@ const Login = () => {
 
             <button
               type='submit'
-              className='w-full bg-[#062139] hover:bg-[#0a2f52] text-white py-3 rounded-lg font-semibold text-sm transition shadow-sm hover:shadow-md'
+              disabled={submitting}
+              className='w-full bg-[#062139] hover:bg-[#0a2f52] disabled:opacity-60 text-white py-3 rounded-lg font-semibold text-sm transition shadow-sm hover:shadow-md'
             >
-              Sign in
+              {submitting ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
 

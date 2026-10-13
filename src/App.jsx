@@ -1,6 +1,9 @@
 import AttendanceHolidays from "./Pages/AttendanceHolidays";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { fetchCurrentUser } from "./api/auth";
+import { removeAuth, updateAuth } from "./Store/Redux/Login/AuthSlice";
 
 import Home from "./Pages/Home";
 import Login from "./Pages/Login";
@@ -41,6 +44,15 @@ import PageLayout from "./Components/Common/PageLayout";
 import { HeaderDataProvider } from "./Store/Context/Header";
 
 const App = () => {
+  const dispatch = useDispatch();
+
+  // Ask the server who is signed in (the login cookie survives page reloads)
+  useEffect(() => {
+    fetchCurrentUser()
+      .then((user) => dispatch(updateAuth(user)))
+      .catch(() => dispatch(removeAuth()));
+  }, [dispatch]);
+
   return (
     <Routes>
       {/* ==============================

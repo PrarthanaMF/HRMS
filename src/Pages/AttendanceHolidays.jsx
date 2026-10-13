@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAttendanceAccess } from "../Hooks/useAttendance";
 import { invalidateAttendance } from "../Store/Redux/Attendance/AttendanceSlice";
 import { RequestModal } from "../Components/Pages/Attendance/AttendanceForms";
+import { ROLES } from "../Utils/roles";
 
 /*
  * Place in src/Pages/AttendanceHolidays.jsx.
@@ -44,7 +45,7 @@ const dateText = value => {
 export function canManageAttendanceHolidays(access) {
   return Boolean(access?.user?.empId && (API_BASE
     ? access.canManageHolidays === true
-    : access.demo === true && access.user.role === "Super_admin"));
+    : access.demo === true && access.user.role === ROLES.SUPER_ADMIN));
 }
 
 async function request(path, { method = "GET", body, signal } = {}) {
