@@ -16,7 +16,9 @@ Attendance (calendar, summary, leave / WFH / missed punch / comp-off, web punch,
 
 Web punch: the first punch from a browser registers it as that employee's punch device (one per employee; HR can reset it), and each punch sends the browser's location, so location access must be allowed.
 
-Screens not yet connected (recruitment, exit process, workforce) still use the mock data in `src/Utils/mock*.js`. `src/Mocks/attendanceFixture.json` is no longer used.
+Workforce (employee list, form with documents, detail view) and HR Set-up (`/master`: users, branches, leave types, leave balances, week-off policies, employee and holiday imports) use the backend too.
+
+Screens not yet connected (recruitment, exit process, dashboard figures) still use the mock data in `src/Utils/mock*.js`. `src/Mocks/attendanceFixture.json` is no longer used.
 
 # React + Vite
 

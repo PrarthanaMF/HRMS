@@ -12,6 +12,7 @@ import Recruitment from "./Pages/Recruitment";
 import CandidateApplicationForm from "./Pages/CandidateApplication";
 import ExitProcess from "./Pages/ExitProcess";
 import Attendance from "./Pages/Attendance";
+import Master from "./Pages/Master";
 
 import {
   AttendanceApprovalsPage,
@@ -149,6 +150,13 @@ const App = () => {
           path="/attendance/applications"
           element={<AttendanceApprovalsPage />}
         />
+
+        {/* ==============================
+            HR SET-UP (MASTER)
+        ============================== */}
+
+        <Route path="/master" element={<Master />} />
+        <Route path="/master/:tab" element={<Master />} />
 
         {/* ==============================
             EXIT PROCESS
