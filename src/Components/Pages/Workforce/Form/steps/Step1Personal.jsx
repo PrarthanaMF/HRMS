@@ -2,8 +2,8 @@ import React from 'react'
 import FormField from '../../../../Common/FormField'
 import { DROPDOWN_OPTIONS, REQUIRED_FIELDS } from '../../../../../Utils/employeeSchema'
 
-const Step1Personal = ({ form, errors, onChange }) => {
-    const isReq = (f) => REQUIRED_FIELDS.includes(f)
+const Step1Personal = ({ form, errors, onChange, requiredFields = REQUIRED_FIELDS, fileHint }) => {
+    const isReq = (f) => requiredFields.includes(f)
 
     return (
         <div className='space-y-8'>
@@ -16,12 +16,12 @@ const Step1Personal = ({ form, errors, onChange }) => {
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Employee Name' name='name' value={form.name} onChange={onChange} required={isReq('name')} error={errors.name} placeholder='e.g. Rahul Mehta' />
                     <FormField label='Gender' name='gender' value={form.gender} onChange={onChange} required={isReq('gender')} error={errors.gender} options={DROPDOWN_OPTIONS.gender} />
-                    <FormField label='Personal Number' name='personalNumber' value={form.personalNumber} onChange={onChange} required={isReq('personalNumber')} error={errors.personalNumber} placeholder='+91 98765 43210' />
+                    <FormField label='Personal Number' name='personalNumber' value={form.personalNumber} onChange={onChange} required={isReq('personalNumber')} error={errors.personalNumber} placeholder='98765 43210' />
                     <FormField label='Personal Email' name='personalEmail' value={form.personalEmail} onChange={onChange} required={isReq('personalEmail')} error={errors.personalEmail} type='email' placeholder='rahul@example.com' />
                     <FormField label='Date of Birth' name='dateOfBirth' value={form.dateOfBirth} onChange={onChange} required={isReq('dateOfBirth')} error={errors.dateOfBirth} type='date' />
                     <FormField label='Date of Anniversary' name='dateOfAnniversary' value={form.dateOfAnniversary} onChange={onChange} error={errors.dateOfAnniversary} type='date' />
                     <FormField label='Blood Group' name='bloodGroup' value={form.bloodGroup} onChange={onChange} required={isReq('bloodGroup')} error={errors.bloodGroup} options={DROPDOWN_OPTIONS.bloodGroup} />
-                    <FormField label='Photo' name='photo' value={form.photo} onChange={onChange} error={errors.photo} type='file' accept='image/*' />
+                    <FormField label='Photo (JPG or PNG, up to 5 MB)' name='photo' value={form.photo} onChange={onChange} error={errors.photo} type='file' accept='image/jpeg,image/png' hint={fileHint('photo')} />
                 </div>
             </div>
 

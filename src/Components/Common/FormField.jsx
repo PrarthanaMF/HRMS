@@ -6,6 +6,8 @@ const FormField = ({
     type = 'text', placeholder = '',
     required = false, error = '',
     options = null, textarea = false, accept = null, min = undefined,
+    // Optional note under the input (e.g. the file already uploaded)
+    hint = null,
 }) => {
     const baseClass = `w-full px-3 py-2 text-sm border rounded-lg outline-none transition bg-white ${error
         ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
@@ -51,6 +53,8 @@ const FormField = ({
                     className={baseClass}
                 />
             )}
+
+            {hint && <p className='text-[11px] text-slate-500 break-all'>{hint}</p>}
 
             {error && (
                 <p className='text-[11px] text-red-600 flex items-center gap-1'>

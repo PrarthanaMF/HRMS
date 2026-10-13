@@ -3,6 +3,8 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 // A dropdown with a search box — drop-in replacement for FormField's <select>.
 // Calls onChange with a { target: { name, value } } object, so it works with the
 // same handleChange used for the regular FormField inputs.
+// Options are plain strings, or { value, label } when the stored value (e.g. an id) differs
+// from what is shown.
 const SearchableSelect = ({
     label, name, value, onChange, options = [],
     placeholder = 'Select...', searchPlaceholder = 'Search...',
@@ -22,10 +24,16 @@ const SearchableSelect = ({
     const [active, setActive] = useState(0)
     const [dropUp, setDropUp] = useState(false)
 
+    const items = useMemo(
+        () => options.map((o) => (typeof o === 'string' ? { value: o, label: o } : { value: o.value, label: o.label ?? String(o.value) })),
+        [options]
+    )
+    const selectedLabel = items.find((o) => o.value === value)?.label ?? value
+
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase()
-        return q ? options.filter((o) => o.toLowerCase().includes(q)) : options
-    }, [options, query])
+        return q ? items.filter((o) => o.label.toLowerCase().includes(q)) : items
+    }, [items, query])
 
     const openList = () => {
         // Open upwards when there isn't room below (e.g. field near the bottom of the popup)
@@ -34,7 +42,7 @@ const SearchableSelect = ({
             const below = window.innerHeight - rect.bottom
             setDropUp(below < 280 && rect.top > below)
         }
-        setActive(Math.max(0, options.indexOf(value)))
+        setActive(Math.max(0, items.findIndex((o) => o.value === value)))
         setOpen(true)
     }
 
@@ -44,7 +52,7 @@ const SearchableSelect = ({
     }
 
     const choose = (opt) => {
-        onChange({ target: { name, value: opt } })
+        onChange({ target: { name, value: opt.value } })
         closeList()
     }
 
@@ -115,7 +123,7 @@ const SearchableSelect = ({
                     }}
                     className={triggerClass}
                 >
-                    <span className={`truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>{value || placeholder}</span>
+                    <span className={`truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>{(value && selectedLabel) || placeholder}</span>
                     <i className={`fa-solid fa-chevron-down text-[10px] text-slate-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}></i>
                 </button>
 
@@ -140,15 +148,15 @@ const SearchableSelect = ({
                             ) : (
                                 filtered.map((opt, i) => (
                                     <li
-                                        key={opt}
+                                        key={opt.value}
                                         role='option'
-                                        aria-selected={opt === value}
+                                        aria-selected={opt.value === value}
                                         onMouseEnter={() => setActive(i)}
                                         onClick={() => choose(opt)}
-                                        className={`px-3 py-2 text-sm cursor-pointer flex items-center justify-between gap-2 ${i === active ? 'bg-slate-100' : ''} ${opt === value ? 'font-semibold text-[#062139]' : 'text-slate-700'}`}
+                                        className={`px-3 py-2 text-sm cursor-pointer flex items-center justify-between gap-2 ${i === active ? 'bg-slate-100' : ''} ${opt.value === value ? 'font-semibold text-[#062139]' : 'text-slate-700'}`}
                                     >
-                                        <span className='truncate'>{opt}</span>
-                                        {opt === value && <i className='fa-solid fa-check text-[10px] text-[#062139]'></i>}
+                                        <span className='truncate'>{opt.label}</span>
+                                        {opt.value === value && <i className='fa-solid fa-check text-[10px] text-[#062139]'></i>}
                                     </li>
                                 ))
                             )}

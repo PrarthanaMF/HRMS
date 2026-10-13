@@ -14,15 +14,28 @@ export const DROPDOWN_OPTIONS = {
     emergencyRelation: ['Father', 'Mother', 'Guardian', 'Spouse', 'Sibling'],
     salaryTerms: ['Monthly', 'Quarterly', 'Half-Yearly', 'Annually'],
     removalType: ['Resigned', 'Terminated', 'Absconded', 'Terminated Based on PIP'],
+    // Backend employment statuses
+    employmentStatus: [
+        { value: 'DRAFT', label: 'Draft' },
+        { value: 'OFFERED', label: 'Offered' },
+        { value: 'ACTIVE', label: 'Active' },
+        { value: 'ON_NOTICE', label: 'On notice' },
+        { value: 'EXIT_IN_PROGRESS', label: 'Exit in progress' },
+        { value: 'EXITED', label: 'Exited' },
+        { value: 'TERMINATED', label: 'Terminated' },
+    ],
 }
 
 export const REQUIRED_FIELDS = [
     'name', 'gender', 'personalNumber', 'personalEmail', 'dateOfBirth', 'bloodGroup',
-    'company', 'branch', 'department', 'designation', 'dateOfJoining', 'employeeType',
+    'company', 'branchId', 'department', 'designation', 'dateOfJoining', 'employeeType',
     'emergencyContactName', 'emergencyContactRelation', 'emergencyContactNumber',
     'presentAddress',
     'officialEmail',
 ]
+
+// Editing an existing employee (e.g. one brought in by bulk import) only needs what the backend requires
+export const EDIT_REQUIRED_FIELDS = ['name', 'gender', 'personalNumber', 'dateOfBirth', 'department', 'designation']
 
 export const FORM_STEPS = [
     { key: 'personal', label: 'Personal' },
@@ -35,9 +48,9 @@ export const FORM_STEPS = [
 
 export const STEP_FIELD_MAP = {
     personal: ['name', 'gender', 'personalNumber', 'personalEmail', 'dateOfBirth', 'dateOfAnniversary', 'bloodGroup', 'photo', 'presentAddress', 'permanentAddress'],
-    employment: ['company', 'branch', 'location', 'department', 'division', 'designation', 'reportingManager', 'divisionHead', 'applicationApprover', 'dateOfJoining', 'employeeType'],
+    employment: ['company', 'branchId', 'location', 'department', 'division', 'designation', 'reportingManagerId', 'dateOfJoining', 'employeeType', 'employmentStatus', 'biometricCode', 'shiftStart', 'shiftEnd', 'weekOffPolicyId', 'category'],
     contact: ['emergencyContactName', 'emergencyContactRelation', 'emergencyContactNumber'],
-    financial: ['monthlySalary', 'nextIncrement', 'salaryTerms', 'bankName', 'accountNumber', 'ifscCode'],
+    financial: ['monthlySalary', 'bankName', 'accountNumber', 'ifscCode'],
     identity: ['panNumber', 'panPhoto', 'aadhaarNumber', 'aadhaarPhoto', 'tenthCertificate', 'twelfthCertificate', 'degreeCertificate', 'mastersCertificate'],
-    background: ['previousCompanyName', 'previousCompanyManager', 'previousCompanyContact', 'relievingLetter', 'experienceLetter', 'lastPaySlip1', 'lastPaySlip2', 'lastPaySlip3', 'resume', 'offerLetter', 'appointmentLetter', 'officialEmail', 'companyNumber', 'lastWorkingDate', 'removalType', 'exitRemarks'],
+    background: ['previousCompanyName', 'previousCompanyManager', 'previousCompanyContact', 'relievingLetter', 'experienceLetter', 'lastPaySlip1', 'lastPaySlip2', 'lastPaySlip3', 'resume', 'offerLetter', 'appointmentLetter', 'officialEmail', 'companyNumber'],
 }

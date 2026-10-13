@@ -30,16 +30,9 @@ export const isValidIFSC = (ifsc) => {
 // ============================================================
 // Employee Form Validation (Add / Edit Employee)
 // ============================================================
-export const validateEmployeeForm = (form) => {
+// `required`: the fields that must be filled (REQUIRED_FIELDS when adding, EDIT_REQUIRED_FIELDS when editing)
+export const validateEmployeeForm = (form, required) => {
     const errors = {}
-
-    const required = [
-        'name', 'gender', 'personalNumber', 'personalEmail', 'dateOfBirth', 'bloodGroup',
-        'company', 'branch', 'department', 'designation', 'dateOfJoining', 'employeeType',
-        'emergencyContactName', 'emergencyContactRelation', 'emergencyContactNumber',
-        'presentAddress',
-        'officialEmail',
-    ]
 
     required.forEach((field) => {
         const value = form[field]
@@ -60,6 +53,9 @@ export const validateEmployeeForm = (form) => {
     if (form.panNumber && !isValidPAN(form.panNumber)) errors.panNumber = 'Invalid PAN format (e.g. ABCDE1234F)'
     if (form.aadhaarNumber && !isValidAadhaar(form.aadhaarNumber)) errors.aadhaarNumber = 'Aadhaar must be 12 digits'
     if (form.ifscCode && !isValidIFSC(form.ifscCode)) errors.ifscCode = 'Invalid IFSC format (e.g. HDFC0001234)'
+    if (form.accountNumber && !/^\d{9,18}$/.test(String(form.accountNumber).replace(/\s/g, ''))) errors.accountNumber = 'Account number must be 9 to 18 digits'
+    if (form.monthlySalary !== '' && form.monthlySalary != null && !(Number(form.monthlySalary) >= 0)) errors.monthlySalary = 'Enter the monthly salary as a number'
+    if (form.shiftStart && form.shiftEnd && form.shiftEnd <= form.shiftStart) errors.shiftEnd = 'Shift must end after it starts'
 
     return errors
 }

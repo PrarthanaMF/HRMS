@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { listDocuments, documentUrl, photoUrl } from '../../../api/employees'
 
 const Section = ({ title, icon, children }) => (
     <div className='mb-5 last:mb-0'>
@@ -22,6 +23,54 @@ const InfoRow = ({ label, value, mono = false, full = false }) => (
         </p>
     </div>
 )
+
+const time12 = (hhmm) => {
+    if (!hhmm) return ''
+    const [h, m] = hhmm.split(':').map(Number)
+    return `${String(h % 12 || 12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
+}
+
+// Photo from the backend, or initials when there is none
+const Avatar = ({ employee, initials }) => {
+    const [failed, setFailed] = useState(false)
+    if (!failed) {
+        return <img src={photoUrl(employee._id)} alt='' onError={() => setFailed(true)} className='w-20 h-20 rounded-2xl object-cover shrink-0' />
+    }
+    return (
+        <div className='w-20 h-20 rounded-2xl bg-gradient-to-br from-[#062139] to-[#0a3f6e] flex items-center justify-center text-xl font-bold text-white shrink-0'>
+            {initials}
+        </div>
+    )
+}
+
+// The documents this user may see, each a download link
+const Documents = ({ employeeId }) => {
+    const [state, setState] = useState({ documents: null, error: '' })
+
+    useEffect(() => {
+        let active = true
+        listDocuments(employeeId).then(
+            (documents) => { if (active) setState({ documents, error: '' }) },
+            (error) => { if (active) setState({ documents: [], error: error.message }) },
+        )
+        return () => { active = false }
+    }, [employeeId])
+
+    if (state.error) return <p className='sm:col-span-2 text-xs text-red-700'>{state.error}</p>
+    if (!state.documents) return <p className='sm:col-span-2 text-xs text-slate-400'>Loading documents…</p>
+    if (!state.documents.length) return <p className='sm:col-span-2 text-xs text-slate-400'>No documents uploaded yet.</p>
+
+    return state.documents.map((doc) => (
+        <div key={doc._id}>
+            <p className='text-[10px] uppercase text-slate-400 font-semibold tracking-wide mb-0.5'>
+                {doc.label}{doc.restricted && <i className='fa-solid fa-lock ml-1 text-[9px]' title='Salary roles only'></i>}
+            </p>
+            <a href={documentUrl(employeeId, doc._id)} className='text-sm text-[#1B4A7B] underline break-all'>
+                {doc.originalName}
+            </a>
+        </div>
+    ))
+}
 
 const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
     if (!employee) return null
@@ -57,10 +106,7 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                 <div className='px-6 pt-5 pb-5 border-b border-slate-100 bg-white'>
                     <div className='flex flex-col sm:flex-row sm:items-center gap-4'>
 
-                        {/* Avatar */}
-                        <div className='w-20 h-20 rounded-2xl bg-gradient-to-br from-[#062139] to-[#0a3f6e] flex items-center justify-center text-xl font-bold text-white shrink-0'>
-                            {initials}
-                        </div>
+                        <Avatar key={employee._id} employee={employee} initials={initials} />
 
                         {/* Name + designation + status badge */}
                         <div className='flex-1 min-w-0'>
@@ -80,8 +126,8 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                             </p>
                         </div>
 
-                        {/* Edit button — disabled for inactive employees */}
-                        {isActive ? (
+                        {/* Edit button — HR only, and not for inactive employees */}
+                        {onEdit && (isActive ? (
                             <button
                                 onClick={() => onEdit(employee)}
                                 className='flex items-center gap-2 bg-[#062139] hover:bg-[#0a2f52] text-white px-4 py-2 rounded-lg text-sm font-medium transition shrink-0 cursor-pointer'
@@ -98,7 +144,7 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                                 <i className="fa-solid fa-lock text-xs"></i>
                                 Edit Disabled
                             </button>
-                        )}
+                        ))}
                     </div>
                 </div>
 
@@ -113,7 +159,6 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                         <InfoRow label='Date of Birth' value={employee.dateOfBirth} />
                         <InfoRow label='Date of Anniversary' value={employee.dateOfAnniversary} />
                         <InfoRow label='Blood Group' value={employee.bloodGroup} />
-                        <InfoRow label='Photo' value={employee.photo?.name} />
                         <InfoRow label='Present Address' value={employee.presentAddress} full />
                         <InfoRow label='Permanent Address' value={employee.permanentAddress} full />
                     </Section>
@@ -127,11 +172,15 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                         <InfoRow label='Division' value={employee.division} />
                         <InfoRow label='Designation' value={employee.designation} />
                         <InfoRow label='Reporting Manager' value={employee.reportingManager} />
-                        <InfoRow label='Division Head' value={employee.divisionHead} />
-                        <InfoRow label='Application Approver' value={employee.applicationApprover} />
                         <InfoRow label='Date of Joining' value={employee.dateOfJoining} />
                         <InfoRow label='Employee Type' value={employee.employeeType} />
                         <InfoRow label='Status' value={employee.status} />
+                    </Section>
+
+                    <Section title='Attendance Set-up' icon='fa-fingerprint'>
+                        <InfoRow label='Biometric Code' value={employee.biometricCode} mono />
+                        <InfoRow label='Shift' value={`${time12(employee.shiftStart)} – ${time12(employee.shiftEnd)}`} />
+                        <InfoRow label='Category' value={employee.category} />
                     </Section>
 
                     <Section title='Emergency Contact' icon='fa-phone'>
@@ -140,44 +189,29 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                         <InfoRow label='Contact Number' value={employee.emergencyContactNumber} />
                     </Section>
 
-                    <Section title='Salary & Bank Details' icon='fa-indian-rupee-sign'>
-                        <InfoRow label='Monthly Salary' value={employee.monthlySalary} />
-                        <InfoRow label='Next Terms of Increment' value={employee.nextIncrement} />
-                        <InfoRow label='Salary Terms' value={employee.salaryTerms} />
-                        <InfoRow label='Bank Name' value={employee.bankName} />
-                        <InfoRow label='Account Number' value={employee.accountNumber} mono />
-                        <InfoRow label='IFSC Code' value={employee.ifscCode} mono />
-                    </Section>
-
-                    <Section title='Identity & Documents' icon='fa-id-card'>
-                        <InfoRow label='PAN Number' value={employee.panNumber} mono />
-                        <InfoRow label='PAN Photo' value={employee.panPhoto?.name} />
-                        <InfoRow label='Aadhaar Number' value={employee.aadhaarNumber} mono />
-                        <InfoRow label='Aadhaar Photo' value={employee.aadhaarPhoto?.name} />
-                    </Section>
-
-                    <Section title='Educational Qualification' icon='fa-graduation-cap'>
-                        <InfoRow label='10th Certificate' value={employee.tenthCertificate?.name} />
-                        <InfoRow label='2nd PUC Certificate' value={employee.twelfthCertificate?.name} />
-                        <InfoRow label='Degree Certificate' value={employee.degreeCertificate?.name} />
-                        <InfoRow label="Master's Certificate" value={employee.mastersCertificate?.name} />
-                    </Section>
+                    {employee.hasSalaryAccess ? (
+                        <>
+                            <Section title='Salary & Bank Details' icon='fa-indian-rupee-sign'>
+                                <InfoRow label='Monthly Salary (gross)' value={employee.monthlySalary} />
+                                <InfoRow label='Bank Name' value={employee.bankName} />
+                                <InfoRow label='Account Number' value={employee.accountNumber} mono />
+                                <InfoRow label='IFSC Code' value={employee.ifscCode} mono />
+                            </Section>
+                            <Section title='Identity' icon='fa-id-card'>
+                                <InfoRow label='PAN Number' value={employee.panNumber} mono />
+                                <InfoRow label='Aadhaar Number' value={employee.aadhaarNumber} mono />
+                            </Section>
+                        </>
+                    ) : (
+                        <Section title='Identity' icon='fa-id-card'>
+                            <InfoRow label='Aadhaar Number' value={employee.aadhaarMasked} mono />
+                        </Section>
+                    )}
 
                     <Section title='Previous Employment' icon='fa-history'>
                         <InfoRow label='Previous Company' value={employee.previousCompanyName} />
                         <InfoRow label='Previous Manager' value={employee.previousCompanyManager} />
-                        <InfoRow label='Contact Number' value={employee.previousCompanyContact} />
-                        <InfoRow label='Relieving Letter' value={employee.relievingLetter?.name} />
-                        <InfoRow label='Experience Letter' value={employee.experienceLetter?.name} />
-                        <InfoRow label='Last Pay Slip 1' value={employee.lastPaySlip1?.name} />
-                        <InfoRow label='Last Pay Slip 2' value={employee.lastPaySlip2?.name} />
-                        <InfoRow label='Last Pay Slip 3' value={employee.lastPaySlip3?.name} />
-                    </Section>
-
-                    <Section title='Recruitment Documents' icon='fa-file-alt'>
-                        <InfoRow label='Resume' value={employee.resume?.name} />
-                        <InfoRow label='Offer Letter' value={employee.offerLetter?.name} />
-                        <InfoRow label='Appointment Letter' value={employee.appointmentLetter?.name} />
+                        <InfoRow label='Contact' value={employee.previousCompanyContact} />
                     </Section>
 
                     <Section title='Company Contact' icon='fa-building'>
@@ -185,13 +219,9 @@ const EmployeeDetailModal = ({ employee, onClose, onEdit }) => {
                         <InfoRow label='Company Contact Number' value={employee.companyNumber} />
                     </Section>
 
-                    {(employee.lastWorkingDate || employee.removalType || employee.exitRemarks) && (
-                        <Section title='Exit Details' icon='fa-door-open'>
-                            <InfoRow label='Last Date of Working' value={employee.lastWorkingDate} />
-                            <InfoRow label='Type of Removal' value={employee.removalType} />
-                            <InfoRow label='Exit Remarks' value={employee.exitRemarks} full />
-                        </Section>
-                    )}
+                    <Section title='Documents' icon='fa-file-alt'>
+                        <Documents employeeId={employee._id} />
+                    </Section>
 
                 </div>
 

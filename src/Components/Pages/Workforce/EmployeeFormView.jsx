@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { addEmployee, updateEmployee, selectAllEmployees } from '../../../Store/Redux/Workforce/EmployeeSlice'
-import { FORM_STEPS, STEP_FIELD_MAP } from '../../../Utils/employeeSchema'
+import { employeesChanged } from '../../../Store/Redux/Workforce/EmployeeSlice'
+import { FORM_STEPS, STEP_FIELD_MAP, REQUIRED_FIELDS, EDIT_REQUIRED_FIELDS } from '../../../Utils/employeeSchema'
 import { validateEmployeeForm } from '../../../Utils/validation'
+import { getEmployee, listDocuments, saveEmployee, DOCUMENT_FIELDS, SALARY_ROLES } from '../../../api/employees'
+import { useEmployeeOptions } from '../../../Hooks/useEmployees'
 import ProgressStepper from './Form/ProgressStepper'
 
 import Step1Personal from './Form/steps/Step1Personal';
@@ -16,12 +18,13 @@ import Step6Background from './Form/steps/Step6Background'
 const EMPTY_FORM = {
     name: '', gender: '', personalNumber: '', personalEmail: '',
     dateOfBirth: '', dateOfAnniversary: '', bloodGroup: '', photo: null,
-    company: '', branch: '', location: '', department: '', division: '',
-    designation: '', reportingManager: '', divisionHead: '', applicationApprover: '',
-    dateOfJoining: '', employeeType: '',
+    company: '', branchId: '', location: '', department: '', division: '',
+    designation: '', reportingManagerId: '',
+    dateOfJoining: '', employeeType: '', employmentStatus: '',
+    biometricCode: '', shiftStart: '09:00', shiftEnd: '18:00', weekOffPolicyId: '', category: '',
     emergencyContactName: '', emergencyContactRelation: '', emergencyContactNumber: '',
     presentAddress: '', permanentAddress: '',
-    monthlySalary: '', nextIncrement: '', salaryTerms: '',
+    monthlySalary: '',
     bankName: '', accountNumber: '', ifscCode: '',
     panNumber: '', panPhoto: null, aadhaarNumber: '', aadhaarPhoto: null,
     tenthCertificate: null, twelfthCertificate: null, degreeCertificate: null, mastersCertificate: null,
@@ -30,31 +33,51 @@ const EMPTY_FORM = {
     lastPaySlip1: null, lastPaySlip2: null, lastPaySlip3: null,
     resume: null, offerLetter: null, appointmentLetter: null,
     officialEmail: '', companyNumber: '',
-    lastWorkingDate: '', removalType: '', exitRemarks: '',
 }
 
 const EmployeeFormView = ({ mode = 'add' }) => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const { empId } = useParams()
-    const employees = useSelector(selectAllEmployees)
+    const { empId: employeeId } = useParams()
+    const user = useSelector(state => state.auth.value)
+    const { options } = useEmployeeOptions()
 
     const isEdit = mode === 'edit'
+    const canSalary = SALARY_ROLES.includes(user?.role)
+    const requiredFields = isEdit ? EDIT_REQUIRED_FIELDS : REQUIRED_FIELDS
 
     const [activeStep, setActiveStep] = useState(0)
     const [completedSteps, setCompletedSteps] = useState([])
     const [formData, setFormData] = useState(EMPTY_FORM)
+    const [existing, setExisting] = useState(null)
+    const [documents, setDocuments] = useState([])
     const [errors, setErrors] = useState({})
+    const [loadError, setLoadError] = useState('')
+    const [saveError, setSaveError] = useState('')
+    const [saving, setSaving] = useState(false)
 
+    // Editing: load the employee and the documents already uploaded
     useEffect(() => {
-        if (isEdit) {
-            const emp = employees.find(e => e.empId === empId)
-            if (emp) {
-                setFormData({ ...EMPTY_FORM, ...emp })
+        if (!isEdit) return undefined
+        let active = true
+        Promise.all([getEmployee(employeeId), listDocuments(employeeId)]).then(
+            ([employee, docs]) => {
+                if (!active) return
+                setExisting(employee)
+                setFormData({ ...EMPTY_FORM, ...employee })
+                setDocuments(docs)
                 setCompletedSteps([0, 1, 2, 3, 4, 5])
-            }
-        }
-    }, [isEdit, empId, employees])
+            },
+            (error) => { if (active) setLoadError(error.message || 'Unable to load the employee.') },
+        )
+        return () => { active = false }
+    }, [isEdit, employeeId])
+
+    // "Uploaded: cv.pdf" under a file input when that document already exists
+    const fileHint = (field) => {
+        const doc = documents.find((item) => item.type === DOCUMENT_FIELDS[field])
+        return doc ? `Uploaded: ${doc.originalName} (choose a file to replace it)` : null
+    }
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target
@@ -70,7 +93,7 @@ const EmployeeFormView = ({ mode = 'add' }) => {
     }
 
     const validateCurrentStep = () => {
-        const allErrors = validateEmployeeForm(formData)
+        const allErrors = validateEmployeeForm(formData, requiredFields)
         const stepFields = STEP_FIELD_MAP[FORM_STEPS[activeStep].key] || []
         const stepErrors = {}
         stepFields.forEach((field) => {
@@ -97,8 +120,8 @@ const EmployeeFormView = ({ mode = 'add' }) => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    const handleSubmit = () => {
-        const allErrors = validateEmployeeForm(formData)
+    const handleSubmit = async () => {
+        const allErrors = validateEmployeeForm(formData, requiredFields)
         if (Object.keys(allErrors).length > 0) {
             setErrors(allErrors)
             for (let i = 0; i < FORM_STEPS.length; i++) {
@@ -112,16 +135,26 @@ const EmployeeFormView = ({ mode = 'add' }) => {
             return
         }
 
-        if (isEdit) {
-            dispatch(updateEmployee(formData))
-        } else {
-            dispatch(addEmployee(formData))
+        setSaving(true)
+        setSaveError('')
+        try {
+            const { warnings } = await saveEmployee(formData, { canSalary, existing })
+            dispatch(employeesChanged())
+            if (warnings.length) {
+                window.alert(`The employee was saved, but some files were not uploaded:\n\n${warnings.join('\n')}`)
+            }
+            navigate('/workforce')
+        } catch (error) {
+            // e.g. "biometricCode already exists", "Phone number must contain exactly 10 digits"
+            setSaveError(error.message || 'Unable to save the employee.')
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+        } finally {
+            setSaving(false)
         }
-        navigate('/workforce')
     }
 
     const renderStep = () => {
-        const props = { form: formData, errors, onChange: handleChange }
+        const props = { form: formData, errors, onChange: handleChange, requiredFields, options, canSalary, fileHint }
         switch (activeStep) {
             case 0: return <Step1Personal {...props} />
             case 1: return <Step2Employment {...props} />
@@ -131,6 +164,19 @@ const EmployeeFormView = ({ mode = 'add' }) => {
             case 5: return <Step6Background {...props} />
             default: return null
         }
+    }
+
+    if (loadError) {
+        return (
+            <div role='alert' className='bg-red-50 rounded-xl border border-red-200 p-6 text-sm text-red-800'>
+                {loadError}
+                <button type='button' onClick={() => navigate('/workforce')} className='ml-3 underline'>Back to list</button>
+            </div>
+        )
+    }
+
+    if (isEdit && !existing) {
+        return <div role='status' className='bg-white rounded-xl border border-slate-100 p-12 text-center text-sm text-slate-500'>Loading employee…</div>
     }
 
     return (
@@ -150,7 +196,7 @@ const EmployeeFormView = ({ mode = 'add' }) => {
                             {isEdit ? `Edit Employee — ${formData.name}` : 'Add New Employee'}
                         </h2>
                         <p className='text-[11px] md:text-xs text-slate-500 truncate'>
-                            {isEdit ? `Employee ID: ${formData.empId}` : 'Fill in the details and click submit at the end'}
+                            {isEdit ? `Employee ID: ${formData.empId}` : 'Fill in the details and click submit at the end. The Employee ID is assigned automatically.'}
                         </p>
                     </div>
                 </div>
@@ -162,6 +208,12 @@ const EmployeeFormView = ({ mode = 'add' }) => {
                 completedSteps={completedSteps}
                 onStepClick={setActiveStep}
             />
+
+            {saveError && (
+                <div role='alert' className='mx-4 md:mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800'>
+                    {saveError}
+                </div>
+            )}
 
             <div className='p-4 md:p-6'>
                 {renderStep()}
@@ -192,10 +244,11 @@ const EmployeeFormView = ({ mode = 'add' }) => {
                         <button
                             type='button'
                             onClick={handleSubmit}
-                            className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition shadow-sm'
+                            disabled={saving}
+                            className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 rounded-lg transition shadow-sm'
                         >
                             <i className="fa-solid fa-check text-xs"></i>
-                            {isEdit ? 'Save Changes' : 'Create Employee'}
+                            {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Employee'}
                         </button>
                     ) : (
                         <button

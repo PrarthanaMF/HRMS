@@ -1,20 +1,27 @@
 import React from 'react'
 import FormField from '../../../../Common/FormField'
-import { DROPDOWN_OPTIONS } from '../../../../../Utils/employeeSchema'
 
-const Step4Financial = ({ form, errors, onChange }) => {
+// Salary and bank details: only Super Admin, Admin and HR Manager see or change them
+const Step4Financial = ({ form, errors, onChange, canSalary }) => {
+    if (!canSalary) {
+        return (
+            <div className='rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600'>
+                <i className='fa-solid fa-lock mr-2 text-slate-400'></i>
+                Salary and bank details can only be seen and changed by an HR Manager or an Admin.
+            </div>
+        )
+    }
+
     return (
         <div className='space-y-8'>
 
             {/* Salary */}
             <div>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Salary & Increment Details</h3>
-                <p className='text-xs text-slate-500 mb-5'>Salary structure and increment cycle</p>
+                <h3 className='text-sm font-bold text-slate-800 mb-1'>Salary</h3>
+                <p className='text-xs text-slate-500 mb-5'>Gross monthly salary (the salary break-up is managed with payroll)</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    <FormField label='Monthly Salary' name='monthlySalary' value={form.monthlySalary} onChange={onChange} error={errors.monthlySalary} placeholder='e.g. 45000' />
-                    <FormField label='Next Terms of Increment' name='nextIncrement' value={form.nextIncrement} onChange={onChange} error={errors.nextIncrement} type='date' />
-                    <FormField label='Salary Terms' name='salaryTerms' value={form.salaryTerms} onChange={onChange} error={errors.salaryTerms} options={DROPDOWN_OPTIONS.salaryTerms} />
+                    <FormField label='Monthly Salary (gross)' name='monthlySalary' value={form.monthlySalary} onChange={onChange} error={errors.monthlySalary} type='number' min={0} placeholder='e.g. 45000' />
                 </div>
             </div>
 

@@ -1,5 +1,7 @@
 
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { HR_ROLES } from '../Utils/roles'
 
 const TABS = [
     { key: 'employees', label: 'Employee List', icon: 'fa-users', path: '/workforce' },
@@ -9,6 +11,8 @@ const TABS = [
 const Workforce = () => {
     const navigate = useNavigate()
     const location = useLocation()
+    // Branch managers can look; only HR adds or edits employees
+    const canEdit = HR_ROLES.includes(useSelector(state => state.auth.value)?.role)
 
     const isMis = location.pathname.startsWith('/workforce/mis')
     const isForm = location.pathname.includes('/add') || location.pathname.includes('/edit')
@@ -35,7 +39,7 @@ const Workforce = () => {
                         })}
                     </div>
 
-                    {!isMis && (
+                    {!isMis && canEdit && (
                         <button
                             onClick={() => navigate('/workforce/add')}
                             className='flex items-center justify-center gap-2 bg-[#062139] hover:bg-[#0a2f52] text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-md cursor-pointer'

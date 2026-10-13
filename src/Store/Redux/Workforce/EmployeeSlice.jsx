@@ -1,45 +1,27 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { MOCK_EMPLOYEES } from '../../../Utils/mockEmployees'
 
+// Employees come from the backend (src/api/employees.js); this slice keeps the list filters
+// and a revision number that makes open lists reload after a save.
 const initialFilters = {
-    branch: 'All',
+    branchId: 'All',
     search: '',
-    status: 'All',
+    status: 'Active',
     department: 'All',
     designation: 'All',
     company: 'All',
-    reportingManager: 'All',
+    reportingManagerId: 'All',
 }
 
 const initialState = {
-    list: MOCK_EMPLOYEES,
     filters: initialFilters,
+    revision: 0,
 }
 
 const EmployeeSlice = createSlice({
     name: 'employees',
     initialState,
     reducers: {
-        addEmployee: (state, action) => {
-            const nextId = String(1000 + state.list.length + 1)
-            state.list.unshift({
-                _id: `emp_${Date.now()}`,
-                empId: nextId,
-                status: 'Active',
-                ...action.payload,
-            })
-        },
-
-        updateEmployee: (state, action) => {
-            const { _id, ...updates } = action.payload
-            const idx = state.list.findIndex(e => e._id === _id)
-            if (idx !== -1) state.list[idx] = { ...state.list[idx], ...updates }
-        },
-
-        deleteEmployee: (state, action) => {
-            state.list = state.list.filter(e => e._id !== action.payload)
-        },
-
         setFilter: (state, action) => {
             const { key, value } = action.payload
             state.filters[key] = value
@@ -48,40 +30,24 @@ const EmployeeSlice = createSlice({
         resetFilters: (state) => {
             state.filters = initialFilters
         },
+
+        employeesChanged: (state) => {
+            state.revision += 1
+        },
     },
 })
 
 export const {
-    addEmployee,
-    updateEmployee,
-    deleteEmployee,
     setFilter,
     resetFilters,
+    employeesChanged,
 } = EmployeeSlice.actions
 
 // ----- Selectors -----
-export const selectAllEmployees = (state) => state.employees.list
 export const selectFilters = (state) => state.employees.filters
+export const selectEmployeesRevision = (state) => state.employees.revision
 
-export const selectFilteredEmployees = (state) => {
-    const { list, filters } = state.employees
-    return list.filter((emp) => {
-        if (filters.branch !== 'All' && emp.branch !== filters.branch) return false
-        if (filters.status !== 'All' && emp.status !== filters.status) return false
-        if (filters.department !== 'All' && emp.department !== filters.department) return false
-        if (filters.designation !== 'All' && emp.designation !== filters.designation) return false
-        if (filters.company !== 'All' && emp.company !== filters.company) return false
-        if (filters.reportingManager !== 'All' && emp.reportingManager !== filters.reportingManager) return false
-        if (filters.search) {
-            const q = filters.search.toLowerCase()
-            const match = emp.name.toLowerCase().includes(q) || emp.empId.toLowerCase().includes(q)
-            if (!match) return false
-        }
-        return true
-    })
-}
-
-export const selectEmployeeByEmpId = (empId) => (state) =>
-    state.employees.list.find(e => e.empId === empId)
+// Recruitment is still a demo (no backend yet) and picks people from the sample list
+export const selectAllEmployees = () => MOCK_EMPLOYEES
 
 export default EmployeeSlice.reducer

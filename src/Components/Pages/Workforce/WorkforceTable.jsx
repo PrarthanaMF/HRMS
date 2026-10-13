@@ -1,6 +1,4 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
-import { selectFilteredEmployees } from '../../../Store/Redux/Workforce/EmployeeSlice'
 
 const StatusBadge = ({ status }) => (
     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${status === 'Active'
@@ -24,8 +22,22 @@ const Initials = ({ name, size = 'md' }) => {
     )
 }
 
-const WorkforceTable = ({ onMoreInfo }) => {
-    const employees = useSelector(selectFilteredEmployees)
+const WorkforceTable = ({ employees, pagination, loading, error, page, onPage, onMoreInfo }) => {
+    if (error) {
+        return (
+            <div role='alert' className='bg-red-50 rounded-xl border border-red-200 p-6 text-sm text-red-800'>
+                {error.message || 'Unable to load employees.'}
+            </div>
+        )
+    }
+
+    if (loading && employees.length === 0) {
+        return (
+            <div role='status' className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center text-sm text-slate-500'>
+                Loading employees…
+            </div>
+        )
+    }
 
     if (employees.length === 0) {
         return (
@@ -133,8 +145,17 @@ const WorkforceTable = ({ onMoreInfo }) => {
             {/* Footer */}
             <div className='flex justify-between items-center px-4 py-3 border-t border-slate-100 bg-slate-50'>
                 <p className='text-xs text-slate-500'>
-                    Showing <span className='font-semibold text-slate-700'>{employees.length}</span> employees
+                    Showing <span className='font-semibold text-slate-700'>{employees.length}</span> of{' '}
+                    <span className='font-semibold text-slate-700'>{pagination?.total ?? employees.length}</span> employees
+                    {loading && <span className='ml-2 text-slate-400'>Updating…</span>}
                 </p>
+                {pagination?.pages > 1 && (
+                    <div className='flex items-center gap-2'>
+                        <button type='button' disabled={page <= 1} onClick={() => onPage(page - 1)} className='px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg bg-white disabled:opacity-40'>Previous</button>
+                        <span className='text-xs text-slate-500'>Page {page} of {pagination.pages}</span>
+                        <button type='button' disabled={page >= pagination.pages} onClick={() => onPage(page + 1)} className='px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg bg-white disabled:opacity-40'>Next</button>
+                    </div>
+                )}
             </div>
         </div>
     )
