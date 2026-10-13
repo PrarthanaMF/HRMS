@@ -556,7 +556,7 @@ const CalendarView = ({
             ),
           )}
 
-          {dates.map((date, index) => {
+          {dates.map((date) => {
             const key = toDateKey(date);
 
             const record = recordMap.get(key);
@@ -642,11 +642,6 @@ const CalendarView = ({
                     )}
                   >
                     {date.getDate()}
-                    {(index === 0 || date.getDate() === 1) && (
-                      <span className="mt-0.5 block text-[9px] font-medium leading-none sm:text-[10px]">
-                        {date.toLocaleDateString("en-GB", { month: "short" })}
-                      </span>
-                    )}
                   </span>
 
                   {today && (
