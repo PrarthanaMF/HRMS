@@ -1,4 +1,3 @@
-import AttendanceHolidays from "./Pages/AttendanceHolidays";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -139,7 +138,7 @@ const App = () => {
 
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/attendance/approvals" element={<Navigate to="/attendance/applications" replace />} />
-        <Route path="/attendance/holidays" element={<AttendanceHolidays />} />
+        <Route path="/attendance/holidays" element={<Navigate to="/master/imports" replace />} />
 
         <Route
           path="/attendance/requests"

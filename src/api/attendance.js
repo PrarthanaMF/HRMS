@@ -286,6 +286,7 @@ const summarise = (days) => {
     unapprovedLeave: count(["UL"]), unapprovedLeavePayable: pay(["UL"]),
     lateIn: late.length, lateInPayable: 0, lateInMinutes: late.reduce((sum, day) => sum + day.lateEntryMinutes, 0),
     earlyLeaving: early.length, earlyLeavingPayable: 0,
+    lateAndEarly: late.filter((day) => day.isEarlyLeaving).length, lateAndEarlyPayable: 0,
     missingPunch: days.filter((day) => day.missingPunch).length,
     recordedDays: days.filter((day) => day.hasRecord).length,
     totalPayable: days.reduce((sum, day) => sum + (day.payable || 0), 0),
@@ -589,19 +590,6 @@ const ACTIONS = {
     if (locked) await api.post("/attendance/locks", { month });
     else await api.post(`/attendance/locks/${month}/unlock`, { reason });
     return { ok: true };
-  },
-  importAttendance: async ({ file }) => {
-    const form = new FormData();
-    form.append("file", file);
-    const batch = await api.post("/attendance/import", form);
-    const unmatched = batch.unmatchedCodes?.length ? ` Device codes not matched to anyone: ${batch.unmatchedCodes.join(", ")}.` : "";
-    return {
-      ok: batch.status !== "FAILED",
-      message: `${batch.format === "BIOMETRIC" ? "Biometric export" : "Attendance sheet"} imported: ${batch.createdCount} new and ${batch.updatedCount} updated day(s), ${batch.unchangedCount} unchanged.${unmatched}`,
-      importedCount: batch.createdCount + batch.updatedCount,
-      skippedCount: batch.skippedCount,
-      failedCount: batch.failedCount,
-    };
   },
 };
 

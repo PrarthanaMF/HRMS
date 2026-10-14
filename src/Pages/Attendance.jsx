@@ -1,4 +1,3 @@
-import { canManageAttendanceHolidays } from "./AttendanceHolidays";
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +9,6 @@ import AttendanceReport from "../Components/Pages/Attendance/AttendanceReport";
 
 import {
   ApplyLeaveModal,
-  ImportAttendanceModal,
   MissedPunchModal,
   RequestModal,
   WorkFromHomeModal,
@@ -29,8 +27,6 @@ import {
   useAttendanceReport,
   useAttendanceRequests,
 } from "../Hooks/useAttendance";
-
-import { HR_ROLES } from "../Utils/roles";
 
 import {
   ATTENDANCE_STATUS,
@@ -637,6 +633,12 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
           summary.earlyLeavingPayable ?? summary.lessThanDurationPayable,
           "EL",
         ],
+        [
+          "Late Entry & Early Leaving",
+          summary.lateAndEarly,
+          summary.lateAndEarlyPayable,
+          "LE",
+        ],
       ],
     },
     {
@@ -845,7 +847,6 @@ const Attendance = () => {
     isLoading: accessLoading,
     error: accessError,
   } = attendanceAccess;
-  const canManageHolidays = canManageAttendanceHolidays(attendanceAccess);
 
   const defaultEmployee = useMemo(
     () =>
@@ -868,12 +869,6 @@ const Attendance = () => {
 
   const [selectedDate, setSelectedDate] = useState(() => toDateKey(new Date()));
 
-  const [importOpen, setImportOpen] = useState(false);
-  const openHolidayManagement = () => {
-    setImportOpen(false);
-    navigate("/attendance/holidays");
-  };
-  const canImportAttendance = HR_ROLES.includes(user?.role);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [wfhOpen, setWfhOpen] = useState(false);
   const [punchOpen, setPunchOpen] = useState(false);
@@ -964,7 +959,6 @@ const Attendance = () => {
     submitPunch,
     pendingRequestCount,
     setMonthLocked,
-    importAttendance,
     isSubmitting,
   } = useAttendanceRequests();
   const { pendingApprovalCount, canAccessApprovals } = useAttendanceApprovals();
@@ -1171,31 +1165,7 @@ const Attendance = () => {
                 sm+: labels and inline counts are restored.
             ================================================== */}
 
-            <div className="flex w-full flex-wrap items-center justify-start gap-2 pb-1">
-              {canManageHolidays && (
-                <button
-                  type="button"
-                  onClick={openHolidayManagement}
-                  title="Manage Holidays"
-                  aria-label="Manage Holidays"
-                  className={toolbarButtonClass}
-                >
-                  <i aria-hidden="true" className="fa-regular fa-calendar" />
-                  <span className="hidden sm:inline">Manage Holidays</span>
-                </button>
-              )}
-              {canImportAttendance && (
-                <button
-                  type="button"
-                  onClick={() => setImportOpen(true)}
-                  aria-label="Import Attendance"
-                  title="Import Attendance"
-                  className={toolbarButtonClass}
-                >
-                  <i aria-hidden="true" className="fa-solid fa-file-import" />
-                  <span className="hidden sm:inline">Import Attendance</span>
-                </button>
-              )}
+            <div className="flex w-full flex-wrap items-center justify-end gap-2 pb-1">
               {monthControls[selectedMonth]?.visible && (
                 <button
                   type="button"
@@ -1439,15 +1409,6 @@ const Attendance = () => {
         onClose={() => setWfhOpen(false)}
         onSubmit={submitWFH}
       />
-
-      {canImportAttendance && importOpen && (
-        <ImportAttendanceModal
-          open={importOpen}
-          onClose={() => setImportOpen(false)}
-          onSubmit={importAttendance}
-          isSubmitting={isSubmitting}
-        />
-      )}
 
       <MissedPunchModal
         isSubmitting={isSubmitting}

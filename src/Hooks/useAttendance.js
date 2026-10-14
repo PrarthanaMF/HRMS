@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { invalidateAttendance } from '../Store/Redux/Attendance/AttendanceSlice';
 import { toDateKey } from '../Utils/attendance';
-import { HR_ROLES } from '../Utils/roles';
 
 // BEGIN ATTENDANCE TRANSPORT
 // The real backend, adapted to the shapes these screens use (src/api/attendance.js)
@@ -123,10 +122,7 @@ export function useAttendanceRequests() {
     submitMissedPunch: payload => mutation.submit('missedPunch', payload),
     submitPunch: payload => mutation.submit('punch', payload),
     setMonthLocked: payload => mutation.submit('monthLock', payload),
-    cancelRequest: requestId => mutation.submit('cancel', { requestId }),
-    importAttendance: file => HR_ROLES.includes(access.user?.role)
-      ? mutation.submit('importAttendance', { file })
-      : Promise.resolve({ ok: false, message: 'Only HR can import attendance.' }) };
+    cancelRequest: requestId => mutation.submit('cancel', { requestId }) };
 }
 
 export function useAttendanceApprovals() {

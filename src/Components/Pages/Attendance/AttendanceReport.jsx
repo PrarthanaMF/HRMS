@@ -573,6 +573,8 @@ const CalendarView = ({
               record?.lateMinutes > 0 ||
               displayStatusCode === "LC";
             const isEarlyLeaving = record?.isEarlyLeaving === true;
+            const disciplineCode =
+              isLate && isEarlyLeaving ? "LE" : isLate ? "LC" : "EL";
             const tileStatus =
               displayStatusCode === "LC" ? ATTENDANCE_STATUS.P : status;
             // The backend supplies the active application's status for this date.
@@ -609,27 +611,13 @@ const CalendarView = ({
               >
                 {(isLate || isEarlyLeaving) && (
                   <span
-                    title={[
-                      isLate && "Late Entry",
-                      isEarlyLeaving && "Early Leaving",
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
+                    title={ATTENDANCE_STATUS[disciplineCode].label}
                     aria-hidden="true"
                     className={cn(
                       "pointer-events-none absolute right-0 top-0 h-5 w-5 @min-[480px]:h-6 @min-[480px]:w-6 [clip-path:polygon(0_0,100%_0,100%_100%)]",
-                      ATTENDANCE_STATUS[isLate ? "LC" : "EL"].markerClass,
+                      ATTENDANCE_STATUS[disciplineCode].markerClass,
                     )}
-                  >
-                    {isLate && isEarlyLeaving && (
-                      <span
-                        className={cn(
-                          "absolute inset-0 [clip-path:polygon(100%_0,100%_100%,50%_50%)]",
-                          ATTENDANCE_STATUS.EL.markerClass,
-                        )}
-                      />
-                    )}
-                  </span>
+                  />
                 )}
                 {/* TOP */}
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { useAttendanceAccess } from "../Hooks/useAttendance";
 import { invalidateAttendance } from "../Store/Redux/Attendance/AttendanceSlice";
 import { RequestModal } from "../Components/Pages/Attendance/AttendanceForms";
@@ -99,8 +98,7 @@ function HolidayForm({ item, level, options, busy, error, onSave, onClose }) {
   </RequestModal>;
 }
 
-function HolidayWorkspace({ access }) {
-  const navigate = useNavigate();
+function HolidayWorkspace({ access, onClose }) {
   const dispatch = useDispatch();
   const options = useTargets(access);
   const currentYear = Number((access.serverToday || "").slice(0, 4)) || new Date().getFullYear();
@@ -162,8 +160,8 @@ function HolidayWorkspace({ access }) {
     } catch (cause) { setError(cause.message || "Unable to delete holiday."); }
     finally { pending.current = false; setBusy(false); }
   };
-  return <main className="min-h-full bg-[#f3f7fa] px-3 py-3 text-slate-900 sm:px-4"><div className="mx-auto max-w-[1440px]">
-    <header className="mb-4 flex items-start justify-between gap-3"><div><p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500">Attendance</p><h1 className="text-xl font-bold">Holiday Management</h1><p className="mt-1 text-xs text-slate-500">Company, branch and employee holidays</p></div><button type="button" onClick={() => navigate("/attendance")} aria-label="Back to attendance" className={secondary}><i aria-hidden="true" className="fa-solid fa-arrow-left" /></button></header>
+  return <section aria-label="Holiday management" className="rounded-xl border border-slate-200 bg-[#f3f7fa] p-3 text-slate-900">
+    <header className="mb-3 flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold text-slate-800">Manage Holidays</h3><p className="mt-1 text-xs text-slate-500">Company, branch and employee holidays</p></div><button type="button" onClick={onClose} aria-label="Close holiday management" className={secondary}><i aria-hidden="true" className="fa-solid fa-xmark" /></button></header>
     {notice && <p role="status" className="mb-3 text-xs text-[#1B4A7B]">{notice}</p>}
     {loading ? <p role="status" className="p-4 text-sm text-slate-500">Loading holidays…</p> : loadError ? <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"><p>{loadError}</p><button type="button" onClick={() => setRevision(value => value + 1)} className={`${secondary} mt-3`}>Retry</button></div> : <>
       <div role="group" aria-label="Holiday level" className="mb-3 flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white p-1.5">{Object.keys(LEVELS).map(value => <button type="button" key={value} aria-pressed={level === value} onClick={() => { setLevel(value); setTarget(""); }} className={level === value ? primary : `${button} border-transparent text-slate-600 hover:bg-slate-50`}>{LEVELS[value]}</button>)}</div>
@@ -184,13 +182,14 @@ function HolidayWorkspace({ access }) {
     </>}
     {editor && <HolidayForm item={editor.item} level={level} options={options} busy={busy} error={error} onSave={save} onClose={closeEditor} />}
     <RequestModal open={Boolean(deleting)} title="Delete holiday?" subtitle={deleting?.name || ""} icon="fa-regular fa-trash-can" onClose={closeDelete}><div className="space-y-4 p-4"><p className="text-sm text-slate-600">{deleting?.recurring ? "This holiday repeats every year; deleting removes it from every year." : "Remove this holiday for everyone it is assigned to?"}</p>{error && <p role="alert" className="text-sm text-red-700">{error}</p>}<div className="flex justify-end gap-2"><button type="button" disabled={busy} onClick={closeDelete} className={secondary}>Cancel</button><button type="button" disabled={busy} onClick={remove} className={`${button} border-red-700 bg-red-700 text-white`}>{busy ? "Deleting…" : "Delete holiday"}</button></div></div></RequestModal>
-  </div></main>;
+  </section>;
 }
 
-export default function AttendanceHolidays() {
+// Shown on HR Set-up > Imports, under the holiday import
+export function HolidayManager({ onClose }) {
   const access = useAttendanceAccess();
   if (access.isLoading) return <p role="status" className="p-4 text-sm text-slate-500">Loading access…</p>;
   if (access.error) return <p role="alert" className="p-4 text-sm text-red-700">{access.error.message || "Unable to load access."}</p>;
-  if (!canManageAttendanceHolidays(access)) return <div className="p-4"><p role="alert" className="text-sm text-slate-600">You are not assigned to manage holidays.</p><a href="/attendance" className="mt-3 inline-block text-sm text-[#1B4A7B] underline">Back to attendance</a></div>;
-  return <HolidayWorkspace key={String(access.user?._id)} access={access} />;
+  if (!canManageAttendanceHolidays(access)) return <p role="alert" className="p-4 text-sm text-slate-600">You are not assigned to manage holidays.</p>;
+  return <HolidayWorkspace key={String(access.user?._id)} access={access} onClose={onClose} />;
 }
