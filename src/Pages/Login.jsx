@@ -8,7 +8,7 @@ import logo from '../assets/logo.png'
 const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [loginId, setLoginId] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -18,18 +18,18 @@ const Login = () => {
     e.preventDefault()
     setError('')
 
-    if (!email.trim() || !password) {
-      setError('Please enter both email and password')
+    if (!loginId.trim() || !password) {
+      setError('Please enter both employee ID and password')
       return
     }
 
     setSubmitting(true)
     try {
       // The server sets the login cookie; we keep only who is signed in
-      dispatch(updateAuth(await login(email.trim(), password)))
+      dispatch(updateAuth(await login(loginId.trim(), password)))
       navigate('/')
     } catch (err) {
-      // e.g. "Invalid email or password", "Account is inactive", too many attempts
+      // e.g. "Invalid employee ID or password", "Account is inactive", too many attempts
       setError(err.message)
     } finally {
       setSubmitting(false)
@@ -93,17 +93,19 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className='space-y-5'>
 
-            {/* Email */}
+            {/* Employee ID (admins without an employee record type their email here) */}
             <div>
-              <label className='block text-sm font-medium text-slate-700 mb-1.5'>Email</label>
+              <label className='block text-sm font-medium text-slate-700 mb-1.5'>Employee ID</label>
               <div className='relative'>
-                <i className="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <i className="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input
-                  type="email"
+                  type="text"
                   autoComplete="username"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder='you@marutiflex.com'
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                  value={loginId}
+                  onChange={(e) => setLoginId(e.target.value)}
+                  placeholder='e.g. EMP000123'
                   className='w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#062139] focus:ring-4 focus:ring-slate-100 transition'
                 />
               </div>

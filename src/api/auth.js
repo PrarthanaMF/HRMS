@@ -22,7 +22,8 @@ export const toSessionUser = (user) => {
   };
 };
 
-export const login = async (email, password) => toSessionUser((await api.post("/auth/login", { email, password })).user);
+// Sign in with the employee ID (EMP000123); logins with no employee record (e.g. a super admin) use their email
+export const login = async (employeeId, password) => toSessionUser((await api.post("/auth/login", { employeeId, password })).user);
 
 export const fetchCurrentUser = async () => toSessionUser(await api.get("/auth/me"));
 
