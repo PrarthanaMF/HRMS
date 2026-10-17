@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api/client";
 
+import Icon from "./Icon";
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 // In-app notifications come from the backend (GET /api/notifications); each user sees only their own
@@ -107,7 +108,7 @@ const formatNotificationTime = (value) => {
 // COMPONENT
 // ============================================================
 
-const NotificationBell = () => {
+const NotificationBell = ({ onDark = false }) => {
   const navigate = useNavigate();
 
   const user = useSelector((state) => state.auth.value);
@@ -303,19 +304,20 @@ const NotificationBell = () => {
           aria-expanded={open}
           onClick={() => setOpen((current) => !current)}
           className={cn(
-            "relative flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition-all duration-200",
-            "hover:bg-slate-100 hover:text-slate-800",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
+            "relative flex h-10 w-10 items-center justify-center rounded-full border transition-colors duration-200",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] focus-visible:ring-offset-2",
+            onDark
+              ? "border-white/12 bg-white/[0.04] text-slate-200 hover:bg-white/10 hover:text-white"
+              : "text-slate-500 hover:bg-slate-100 hover:text-slate-800",
           )}
         >
-          <i
+          <Icon
             className={cn(
               "text-[14px]",
               unread > 0
-                ? "fa-solid fa-bell text-slate-700"
+                ? cn("fa-solid fa-bell origin-top [animation:notif-ring_2.4s_ease-in-out_infinite]", !onDark && "text-slate-700")
                 : "fa-regular fa-bell",
-            )}
-          />
+            )} />
 
           {unread > 0 && (
             <>
@@ -339,7 +341,7 @@ const NotificationBell = () => {
             ref={popupRef}
             role="dialog"
             aria-label="Notifications"
-            className="fixed z-[100000] flex flex-col overflow-hidden rounded-[18px] border border-slate-200/80 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,.22)] backdrop-blur-xl"
+            className="popover fixed z-[100000] flex flex-col overflow-hidden rounded-2xl shadow-[var(--shadow-pop)] [animation:ui-pop_180ms_var(--ease-out)_backwards]"
             style={{
               top: position.top,
 
@@ -352,26 +354,26 @@ const NotificationBell = () => {
           >
             {/* HEADER */}
 
-            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 via-white to-blue-50/50 px-3.5 py-3">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#f2f5f7] to-white/60 px-4 py-3">
               <div className="flex min-w-0 items-center gap-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                  <i className="fa-regular fa-bell text-[10px]" />
+                <span className="gradient-brand flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white">
+                  <Icon className="fa-regular fa-bell text-[16px]" />
                 </span>
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-[12px] font-extrabold text-slate-800">
+                    <h3 className="text-[15px] font-semibold text-[var(--ink)]">
                       Notifications
                     </h3>
 
                     {unread > 0 && (
-                      <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[8px] font-bold text-blue-700">
+                      <span className="rounded-md bg-[#dce6ed] px-1.5 py-0.5 text-[11px] font-semibold text-[#1f4e6b]">
                         {unread}
                       </span>
                     )}
                   </div>
 
-                  <p className="mt-0.5 text-[9px] text-slate-400">
+                  <p className="mt-0.5 text-[12px] text-slate-500">
                     Notifications for {user?.name || "you"}
                   </p>
                 </div>
@@ -381,7 +383,7 @@ const NotificationBell = () => {
                 <button
                   type="button"
                   onClick={markAllRead}
-                  className="shrink-0 rounded-lg px-2 py-1.5 text-[9px] font-bold text-blue-600 transition hover:bg-blue-50"
+                  className="press shrink-0 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-[#1f4e6b] hover:bg-[#dce6ed]"
                 >
                   Mark all read
                 </button>
@@ -394,14 +396,14 @@ const NotificationBell = () => {
               {!notifications.length && (
                 <div className="flex flex-col items-center justify-center px-5 py-10 text-center">
                   <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                    <i className="fa-regular fa-bell-slash text-[14px]" />
+                    <Icon className="fa-regular fa-bell-slash text-[20px]" />
                   </span>
 
-                  <p className="mt-3 text-[11px] font-bold text-slate-600">
+                  <p className="mt-3 text-[14px] font-semibold text-slate-700">
                     No notifications yet
                   </p>
 
-                  <p className="mt-1 text-[9.5px] leading-4 text-slate-400">
+                  <p className="mt-1 text-[12px] leading-5 text-slate-500">
                     Approvals, decisions on your requests and reminders will appear here.
                   </p>
                 </div>
@@ -416,10 +418,10 @@ const NotificationBell = () => {
                     type="button"
                     onClick={() => openNotification(notification)}
                     className={cn(
-                      "group relative flex w-full items-start border-b border-slate-100 px-3.5 py-3 text-left transition last:border-b-0",
+                      "press group relative flex w-full items-start border-b border-slate-100/80 px-4 py-3 text-left last:border-b-0",
 
                       notification.isRead
-                        ? "bg-white hover:bg-slate-50"
+                        ? "bg-transparent hover:bg-[#f2f5f7]/70"
                         : `${visual.unreadBg} hover:brightness-[.985]`,
                     )}
                   >
@@ -434,14 +436,14 @@ const NotificationBell = () => {
                           : `${visual.iconBg} ${visual.iconText}`,
                       )}
                     >
-                      <i className={`${visual.icon} text-[10px]`} />
+                      <Icon className={`${visual.icon} text-[16px]`} />
                     </span>
 
                     {/* CONTENT */}
 
                     <div className="min-w-0 flex-1 pl-2.5 pr-5">
                       <div className="flex items-start gap-2">
-                        <p className="min-w-0 flex-1 break-words text-[10.5px] font-extrabold leading-4 text-slate-800">
+                        <p className="min-w-0 flex-1 break-words text-[13px] font-semibold leading-5 text-[var(--ink)]">
                           {notification.title}
                         </p>
 
@@ -450,26 +452,23 @@ const NotificationBell = () => {
                         )}
                       </div>
 
-                      <p className="mt-1 break-words text-[9.5px] leading-[15px] text-slate-500">
+                      <p className="mt-0.5 break-words text-[12px] leading-5 text-slate-600">
                         {notification.message}
                       </p>
 
                       <div className="mt-1.5 flex items-center justify-between gap-2">
-                        <span className="text-[8.5px] font-medium text-slate-400">
+                        <span className="text-[11px] font-medium text-slate-400">
                           {formatNotificationTime(notification.createdAt)}
                         </span>
 
                         {!notification.isRead && (
-                          <span className="text-[8px] font-bold text-blue-500">
+                          <span className="text-[11px] font-semibold text-[#1f4e6b]">
                             New
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 transition group-hover:text-blue-500">
-                      <i className="fa-solid fa-chevron-right text-[7px]" />
-                    </span>
                   </button>
                 );
               })}

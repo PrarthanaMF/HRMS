@@ -5,6 +5,7 @@ import { api } from '../../../api/client'
 import { RequestModal } from '../Attendance/AttendanceForms'
 import { Badge, Button, Check, ErrorBanner, Field, LoadState, Notice, Table, inputClass, useAction, useLoad } from './ui'
 
+import Icon from '../../Common/Icon'
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const ORDINAL = ['', '1st', '2nd', '3rd', '4th', '5th']
 
@@ -45,7 +46,7 @@ function PolicyForm({ policy, onSaved, onClose }) {
                 <ErrorBanner message={error} />
                 <fieldset disabled={busy} className='space-y-3'>
                     <Field label='Name'><input required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder='Sundays + 2nd & 4th Saturday' /></Field>
-                    <div className='space-y-2 rounded-lg border border-slate-200 p-3'>
+                    <div className='space-y-2 rounded-xl border border-slate-200/80 bg-white/60 p-3'>
                         {DAYS.map((label, day) => (
                             <div key={label} className='flex flex-wrap items-center gap-3'>
                                 <div className='w-32'><Check label={label} checked={days[day].off} onChange={(off) => setDay(day, { off })} /></div>
@@ -65,8 +66,8 @@ function PolicyForm({ policy, onSaved, onClose }) {
                     <Field label='Description'><textarea rows={2} maxLength={500} value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} /></Field>
                 </fieldset>
                 <div className='flex justify-end gap-2 border-t border-slate-100 pt-3'>
-                    <Button onClick={onClose} disabled={busy}>Cancel</Button>
-                    <Button type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
+                    <Button size='md' onClick={onClose} disabled={busy}>Cancel</Button>
+                    <Button size='md' type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
                 </div>
             </form>
         </RequestModal>
@@ -88,12 +89,12 @@ export default function WeekOffTab() {
 
     return (
         <div className='space-y-3'>
-            <div className='flex justify-end'><Button variant='primary' onClick={() => { setNotice(''); setEditing({ policy: null }) }}><i className='fa-solid fa-plus' />Add policy</Button></div>
+            <div className='flex flex-wrap justify-end gap-2'><Button size='md' variant='primary' onClick={() => { setNotice(''); setEditing({ policy: null }) }}><Icon aria-hidden='true' className='fa-solid fa-plus text-sm' />Add policy</Button></div>
             <Notice message={notice} />
             <ErrorBanner message={remove.error} />
             {policies.loading || policies.error ? <LoadState {...policies} /> : <>
                 {!policies.data.policies.some((p) => p.isDefault) && (
-                    <p className='rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600'>No default policy: employees without one get {describeRules(policies.data.fallbackRules).toLowerCase()} off.</p>
+                    <p className='rounded-xl border border-slate-200/80 bg-white/70 p-3 text-[13px] text-slate-600'>No default policy: employees without one get {describeRules(policies.data.fallbackRules).toLowerCase()} off.</p>
                 )}
                 <Table
                     rows={policies.data.policies}

@@ -11,7 +11,7 @@ export const toSessionUser = (user) => {
     lastName: user.lastName,
     email: user.email,
     role: user.role,
-    // Employee code (EMP000123); empty for logins not linked to an employee (e.g. a super admin)
+    // Employee code (e.g. 10069); empty for logins not linked to an employee (e.g. a super admin)
     empId: employee?.employeeId || "",
     employeeId: employee?._id || null,
     employee,
@@ -22,9 +22,13 @@ export const toSessionUser = (user) => {
   };
 };
 
-export const login = async (email, password) => toSessionUser((await api.post("/auth/login", { email, password })).user);
+// Sign in with the employee ID (e.g. 10069); logins with no employee record (e.g. a super admin) use their email
+export const login = async (employeeId, password) => toSessionUser((await api.post("/auth/login", { employeeId, password })).user);
 
 export const fetchCurrentUser = async () => toSessionUser(await api.get("/auth/me"));
 
 // Clears the cookie on the server; an already expired session is fine
 export const logout = () => api.post("/auth/logout").catch(() => {});
+
+// Ends every session of this login, on every device (this one included)
+export const logoutAllDevices = () => api.post("/auth/logout-all");

@@ -5,6 +5,8 @@ import { updateStage1, selectExitById } from '../../../../Store/Redux/ExitProces
 import FormField from '../../../Common/FormField'
 import SuccessScreen, { PreviewRow, PreviewSection } from '../../../Common/SuccessScreen'
 
+import Icon from '../../../Common/Icon'
+import { primaryButton, secondaryButton } from '../../../Common/PageHeader'
 const Stage1AcceptanceForm = () => {
     const { id } = useParams()
     const navigate = useNavigate()
@@ -20,11 +22,11 @@ const Stage1AcceptanceForm = () => {
     const [submitted, setSubmitted] = useState(null)
 
     if (!record) {
-        return <LockScreen title='Record Not Found' navigate={navigate} />
+        return <LockScreen title='Record not found' navigate={navigate} />
     }
 
     if (record.status !== 'Pending HR' && !submitted) {
-        return <LockScreen title='Stage 1 Already Completed' record={record} navigate={navigate} />
+        return <LockScreen title='Stage 1 already completed' record={record} navigate={navigate} />
     }
 
     const handleChange = (e) => {
@@ -95,16 +97,16 @@ const Stage1AcceptanceForm = () => {
     if (submitted) {
         return (
             <SuccessScreen
-                title='Stage 1 Submitted'
+                title='Stage 1 submitted'
                 subtitle={submitted.status === 'Withdrawn'
-                    ? 'The workflow has ended — employee accepted withdrawal'
-                    : 'The resignation will now proceed to the Decision stage'}
+                    ? 'The workflow has ended because the employee accepted withdrawal'
+                    : 'The resignation now moves on to the decision stage'}
                 recordId={record._id}
             >
-                <PreviewSection title='Submission Details' icon='fa-check-circle'>
-                    <PreviewRow label='Employee Accepted Withdrawal' value={submitted.employeeAcceptedWithdrawal} />
+                <PreviewSection title='Submission details' icon='fa-check-circle'>
+                    <PreviewRow label='Employee accepted withdrawal' value={submitted.employeeAcceptedWithdrawal} />
                     {submitted.emailScreenshot && (
-                        <PreviewRow label='Email Screenshot' value={`${submitted.emailScreenshot.name} (${(submitted.emailScreenshot.size / 1024).toFixed(0)} KB)`} />
+                        <PreviewRow label='Email screenshot' value={`${submitted.emailScreenshot.name} (${(submitted.emailScreenshot.size / 1024).toFixed(0)} KB)`} />
                     )}
                     <PreviewRow label='Remarks' value={submitted.remarks} full />
                 </PreviewSection>
@@ -115,20 +117,20 @@ const Stage1AcceptanceForm = () => {
     // ---- FORM ----
     return (
         <div className='w-full max-w-2xl mx-auto'>
-            <button onClick={handleCancel} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-                <i className="fa-solid fa-arrow-left text-xs"></i>
-                Back to Record
+            <button onClick={handleCancel} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+                <Icon className="fa-solid fa-arrow-left text-xs" />
+                Back to record
             </button>
 
-            <form onSubmit={handleSubmit} className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
+            <form onSubmit={handleSubmit} className='rise glass-strong rounded-2xl overflow-hidden'>
 
-                <div className='flex items-center gap-3 px-5 py-4 border-b border-slate-100'>
-                    <div className='w-10 h-10 rounded-lg bg-[#062139] flex items-center justify-center shrink-0'>
-                        <i className="fa-solid fa-check-circle text-white text-sm"></i>
+                <div className='flex items-center gap-3.5 px-5 py-4 border-b border-slate-200/70'>
+                    <div aria-hidden='true' className='gradient-brand w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white shadow-[0_10px_24px_-12px_rgb(8_26_46/0.9)] ring-1 ring-white/20'>
+                        <Icon className="fa-solid fa-check-circle text-base" />
                     </div>
                     <div className='min-w-0'>
-                        <h2 className='text-base font-bold text-slate-800'>Stage 1 — HR Acceptance</h2>
-                        <p className='text-[11px] text-slate-500'>Employee Acceptance of Withdrawal for {record.name}</p>
+                        <h2 className='text-base font-semibold leading-tight text-[var(--ink)] sm:text-[17px]'>Stage 1: HR acceptance</h2>
+                        <p className='mt-0.5 text-[13px] text-slate-500'>Employee acceptance of withdrawal for {record.name}</p>
                     </div>
                 </div>
 
@@ -136,16 +138,16 @@ const Stage1AcceptanceForm = () => {
 
                     <div>
                         <label className='block text-xs font-medium text-slate-700 mb-2'>
-                            Employee Accepted Withdrawal <span className='text-red-500'>*</span>
+                            Employee accepted withdrawal <span className='text-red-500'>*</span>
                         </label>
                         <div className='flex flex-col sm:flex-row gap-2'>
                             {['Yes', 'No'].map((option) => (
                                 <label
                                     key={option}
-                                    className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition ${
+                                    className={`flex-1 flex items-center gap-3 px-4 py-3 min-h-11 rounded-xl border cursor-pointer transition-colors ${
                                         formData.employeeAcceptedWithdrawal === option
-                                            ? 'border-[#062139] bg-slate-50 ring-2 ring-slate-100'
-                                            : 'border-slate-200 hover:bg-slate-50'
+                                            ? 'border-[#2b6485] bg-[#f2f5f7] ring-2 ring-[#2b6485]/20'
+                                            : 'border-slate-200/80 bg-white/70 hover:border-[#cfdce5] hover:bg-white'
                                     }`}
                                 >
                                     <input
@@ -154,7 +156,7 @@ const Stage1AcceptanceForm = () => {
                                         value={option}
                                         checked={formData.employeeAcceptedWithdrawal === option}
                                         onChange={handleChange}
-                                        className='w-4 h-4 accent-[#062139]'
+                                        className='w-4 h-4 accent-[#1f4e6b]'
                                     />
                                     <span className='text-sm font-medium text-slate-700'>{option}</span>
                                 </label>
@@ -162,14 +164,14 @@ const Stage1AcceptanceForm = () => {
                         </div>
                         {errors.employeeAcceptedWithdrawal && (
                             <p className='text-[11px] text-red-600 flex items-center gap-1 mt-2'>
-                                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                                <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                                 {errors.employeeAcceptedWithdrawal}
                             </p>
                         )}
 
                         {isYes && (
-                            <p className='text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-2 flex items-start gap-2'>
-                                <i className="fa-solid fa-circle-info text-[10px] mt-0.5"></i>
+                            <p className='text-[11px] text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mt-2 flex items-start gap-2'>
+                                <Icon className="fa-solid fa-circle-info text-[10px] mt-0.5" />
                                 If <strong>Yes</strong> is selected, the workflow ends here after submission. You must attach the email screenshot as proof.
                             </p>
                         )}
@@ -189,25 +191,25 @@ const Stage1AcceptanceForm = () => {
                     {isYes && (
                         <div>
                             <label className='block text-xs font-medium text-slate-700 mb-1.5'>
-                                Email Screenshot <span className='text-red-500'>*</span>
+                                Email screenshot <span className='text-red-500'>*</span>
                             </label>
 
                             {!formData.emailScreenshot ? (
-                                <label className={`flex flex-col items-center justify-center gap-2 w-full px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer transition ${
+                                <label className={`flex flex-col items-center justify-center gap-2 w-full px-4 py-6 border-2 border-dashed rounded-xl cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#2b6485] ${
                                     errors.emailScreenshot
                                         ? 'border-red-300 bg-red-50/40 hover:bg-red-50'
-                                        : 'border-slate-300 hover:border-[#062139] hover:bg-slate-50'
+                                        : 'border-slate-300 bg-white/50 hover:border-[#2b6485] hover:bg-[#f2f5f7]/70'
                                 }`}>
-                                    <i className="fa-solid fa-cloud-arrow-up text-2xl text-slate-400"></i>
-                                    <p className='text-sm font-medium text-slate-700'>Click to upload</p>
-                                    <p className='text-[10px] text-slate-400'>PNG, JPG, or PDF · Max 10 MB</p>
-                                    <input type='file' accept='image/*,.pdf' onChange={handleFileChange} className='hidden' />
+                                    <Icon className="fa-solid fa-cloud-arrow-up text-2xl text-slate-400" />
+                                    <p className='text-sm font-medium text-slate-700'>Choose a file to upload</p>
+                                    <p className='text-[10px] text-slate-400'>PNG, JPG or PDF, up to 10 MB</p>
+                                    <input type='file' accept='image/*,.pdf' onChange={handleFileChange} className='sr-only' />
                                 </label>
                             ) : (
-                                <div className='flex items-center justify-between gap-3 px-4 py-3 border border-slate-200 rounded-lg bg-slate-50'>
+                                <div className='flex items-center justify-between gap-3 px-4 py-3 border border-slate-200/80 rounded-xl bg-white/70'>
                                     <div className='flex items-center gap-3 min-w-0'>
                                         <div className='w-9 h-9 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-200'>
-                                            <i className="fa-solid fa-file-lines text-slate-500 text-xs"></i>
+                                            <Icon className="fa-solid fa-file-lines text-slate-500 text-xs" />
                                         </div>
                                         <div className='min-w-0'>
                                             <p className='text-xs font-medium text-slate-800 truncate'>{formData.emailScreenshot.name}</p>
@@ -217,16 +219,16 @@ const Stage1AcceptanceForm = () => {
                                     <button
                                         type='button'
                                         onClick={() => setFormData((prev) => ({ ...prev, emailScreenshot: null }))}
-                                        className='w-8 h-8 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-500 transition cursor-pointer shrink-0'
+                                        aria-label='Remove file' className='press w-10 h-10 rounded-lg hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-slate-500 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'
                                     >
-                                        <i className="fa-solid fa-xmark text-xs"></i>
+                                        <Icon className="fa-solid fa-xmark text-xs" />
                                     </button>
                                 </div>
                             )}
 
                             {errors.emailScreenshot && (
                                 <p className='text-[11px] text-red-600 flex items-center gap-1 mt-1'>
-                                    <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                                    <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                                     {errors.emailScreenshot}
                                 </p>
                             )}
@@ -235,19 +237,19 @@ const Stage1AcceptanceForm = () => {
 
                 </div>
 
-                <div className='flex flex-col-reverse sm:flex-row justify-end gap-3 px-5 py-4 border-t border-slate-100 bg-slate-50'>
+                <div className='flex flex-col-reverse sm:flex-row justify-end gap-2.5 px-5 py-4 border-t border-slate-200/70 bg-white/50'>
                     <button
                         type='button'
                         onClick={handleCancel}
-                        className='w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer'
+                        className={`${secondaryButton} w-full sm:w-auto cursor-pointer`}
                     >
                         Cancel
                     </button>
                     <button
                         type='submit'
-                        className='w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'
+                        className={`${primaryButton} w-full sm:w-auto px-6 cursor-pointer`}
                     >
-                        Submit Stage 1
+                        Submit stage 1
                     </button>
                 </div>
 
@@ -258,20 +260,20 @@ const Stage1AcceptanceForm = () => {
 
 const LockScreen = ({ title, record, navigate }) => (
     <div className='w-full max-w-2xl mx-auto'>
-        <button onClick={() => navigate('/exit-process')} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-            <i className="fa-solid fa-arrow-left text-xs"></i>
-            Back to Exit Dashboard
+        <button onClick={() => navigate('/exit-process')} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+            <Icon className="fa-solid fa-arrow-left text-xs" />
+            Back to exit dashboard
         </button>
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center'>
-            <i className="fa-solid fa-lock text-4xl text-slate-300 mb-3"></i>
-            <h3 className='text-base font-bold text-slate-700 mb-1'>{title}</h3>
+        <div className='rise glass-panel rounded-2xl p-8 sm:p-12 text-center'>
+            <span aria-hidden='true' className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-[#E3EEF6] text-slate-500 ring-1 ring-inset ring-white'><Icon className="fa-solid fa-lock text-2xl" /></span>
+            <h3 className='text-base font-semibold text-[var(--ink)] mb-1'>{title}</h3>
             {record ? (
                 <>
                     <p className='text-sm text-slate-500'>This record is at stage: <span className='font-semibold'>{record.status}</span></p>
-                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className='mt-4 px-5 py-2.5 text-sm font-medium text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition cursor-pointer'>View Record</button>
+                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className={`${primaryButton} mt-5 cursor-pointer`}>View record</button>
                 </>
             ) : (
-                <p className='text-sm text-slate-500'>This resignation record does not exist.</p>
+                <p className='text-sm text-slate-500'>This resignation record does not exist. Go back to the exit dashboard to open another one.</p>
             )}
         </div>
     </div>

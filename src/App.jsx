@@ -1,47 +1,56 @@
-import React, { useEffect } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { fetchCurrentUser } from "./api/auth";
 import { removeAuth, updateAuth } from "./Store/Redux/Login/AuthSlice";
 
-import Home from "./Pages/Home";
-import Login from "./Pages/Login";
-import Workforce from "./Pages/Workforce";
-import Recruitment from "./Pages/Recruitment";
-import CandidateApplicationForm from "./Pages/CandidateApplication";
-import ExitProcess from "./Pages/ExitProcess";
-import Attendance from "./Pages/Attendance";
-import Master from "./Pages/Master";
-
-import {
-  AttendanceApprovalsPage,
-  AttendanceRequestsPage,
-} from "./Pages/AttendanceApplications";
-
-import EmployeeListView from "./Components/Pages/Workforce/EmployeeListView";
-import EmployeeFormView from "./Components/Pages/Workforce/EmployeeFormView";
-
-import VacancyListView from "./Components/Pages/recruitment/VacancyListView";
-import VacancyFormView from "./Components/Pages/recruitment/VacancyFormView";
-import RecruitmentTracker from "./Components/Pages/recruitment/RecruitmentTracker";
-import RecruitmentMis from "./Components/Pages/recruitment/RecruitmentMis";
-
-import ExitDashboardView from "./Components/Pages/ExitProcess/ExitDashboardView";
-import ExitFeedbackView from "./Components/Pages/ExitProcess/ExitFeedbackView";
-import AttritionView from "./Components/Pages/ExitProcess/AttritionView";
-import ResignationFormView from "./Components/Pages/ExitProcess/ResignationFormView";
-import ExitDetailView from "./Components/Pages/ExitProcess/ExitDetailView";
-import Stage1AcceptanceForm from "./Components/Pages/ExitProcess/Stages/Stage1AcceptanceForm";
-import Stage2DecisionForm from "./Components/Pages/ExitProcess/Stages/Stage2DecisionForm";
-import Stage3ExitInterviewForm from "./Components/Pages/ExitProcess/Stages/Stage3ExitInterviewForm";
-import Stage4NoDueForm from "./Components/Pages/ExitProcess/Stages/Stage4NoDueForm";
-import Stage5FNFClearanceForm from "./Components/Pages/ExitProcess/Stages/Stage5FNFClearanceForm";
-
 import Protection from "./Components/Common/Protection";
 import LoginAuth from "./Components/Common/LoginAuth";
 import PageLayout from "./Components/Common/PageLayout";
+import PageSkeleton from "./Components/Common/PageSkeleton";
 
 import { HeaderDataProvider } from "./Store/Context/Header";
+
+/*
+ * Every screen is its own chunk, loaded the first time it is opened, so the first page a person
+ * sees doesn't wait for the code of every other module (charts, recruitment, exit forms...).
+ */
+const named = (load, name) => lazy(() => load().then((module) => ({ default: module[name] })));
+
+const Home = lazy(() => import("./Pages/Home"));
+const Login = lazy(() => import("./Pages/Login"));
+const Workforce = lazy(() => import("./Pages/Workforce"));
+const Recruitment = lazy(() => import("./Pages/Recruitment"));
+const CandidateApplicationForm = lazy(() => import("./Pages/CandidateApplication"));
+const ExitProcess = lazy(() => import("./Pages/ExitProcess"));
+const Attendance = lazy(() => import("./Pages/Attendance"));
+const AttendanceHolidays = lazy(() => import("./Pages/AttendanceHolidays"));
+const AttendanceUpload = lazy(() => import("./Pages/AttendanceUpload"));
+const ComingSoon = lazy(() => import("./Pages/ComingSoon"));
+const Master = lazy(() => import("./Pages/Master"));
+
+const AttendanceApprovalsPage = named(() => import("./Pages/AttendanceApplications"), "AttendanceApprovalsPage");
+const AttendanceRequestsPage = named(() => import("./Pages/AttendanceApplications"), "AttendanceRequestsPage");
+
+const EmployeeListView = lazy(() => import("./Components/Pages/Workforce/EmployeeListView"));
+const EmployeeFormView = lazy(() => import("./Components/Pages/Workforce/EmployeeFormView"));
+const EmployeeDetailView = lazy(() => import("./Components/Pages/Workforce/EmployeeDetailView"));
+
+const VacancyListView = lazy(() => import("./Components/Pages/recruitment/VacancyListView"));
+const VacancyFormView = lazy(() => import("./Components/Pages/recruitment/VacancyFormView"));
+const RecruitmentTracker = lazy(() => import("./Components/Pages/recruitment/RecruitmentTracker"));
+const RecruitmentMis = lazy(() => import("./Components/Pages/recruitment/RecruitmentMis"));
+
+const ExitDashboardView = lazy(() => import("./Components/Pages/ExitProcess/ExitDashboardView"));
+const ExitFeedbackView = lazy(() => import("./Components/Pages/ExitProcess/ExitFeedbackView"));
+const AttritionView = lazy(() => import("./Components/Pages/ExitProcess/AttritionView"));
+const ResignationFormView = lazy(() => import("./Components/Pages/ExitProcess/ResignationFormView"));
+const ExitDetailView = lazy(() => import("./Components/Pages/ExitProcess/ExitDetailView"));
+const Stage1AcceptanceForm = lazy(() => import("./Components/Pages/ExitProcess/Stages/Stage1AcceptanceForm"));
+const Stage2DecisionForm = lazy(() => import("./Components/Pages/ExitProcess/Stages/Stage2DecisionForm"));
+const Stage3ExitInterviewForm = lazy(() => import("./Components/Pages/ExitProcess/Stages/Stage3ExitInterviewForm"));
+const Stage4NoDueForm = lazy(() => import("./Components/Pages/ExitProcess/Stages/Stage4NoDueForm"));
+const Stage5FNFClearanceForm = lazy(() => import("./Components/Pages/ExitProcess/Stages/Stage5FNFClearanceForm"));
 
 const App = () => {
   const dispatch = useDispatch();
@@ -54,6 +63,7 @@ const App = () => {
   }, [dispatch]);
 
   return (
+    <Suspense fallback={<PageSkeleton bare />}>
     <Routes>
       {/* ==============================
           LOGIN
@@ -112,6 +122,11 @@ const App = () => {
             path="edit/:empId"
             element={<EmployeeFormView mode="edit" />}
           />
+
+          {/* The MIS tab has no content of its own yet; reserve it so it is not read as an employee id */}
+          <Route path="mis" element={null} />
+
+          <Route path=":empId" element={<EmployeeDetailView />} />
         </Route>
 
         {/* ==============================
@@ -138,7 +153,23 @@ const App = () => {
 
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/attendance/approvals" element={<Navigate to="/attendance/applications" replace />} />
-        <Route path="/attendance/holidays" element={<Navigate to="/master/imports" replace />} />
+        <Route path="/attendance/holidays" element={<AttendanceHolidays />} />
+        <Route path="/attendance/upload" element={<AttendanceUpload />} />
+
+        <Route
+          path="/attendance/salary"
+          element={
+            <ComingSoon
+              title="Salary"
+              icon="fa-solid fa-indian-rupee-sign"
+              description="Salary worked out from attendance: payable days, deductions and payslips."
+              points={[
+                "Payable days come from the attendance report, once a month is locked for payroll.",
+                "Lock a month on the attendance report before its salary can be worked out.",
+              ]}
+            />
+          }
+        />
 
         <Route
           path="/attendance/requests"
@@ -148,6 +179,34 @@ const App = () => {
         <Route
           path="/attendance/applications"
           element={<AttendanceApprovalsPage />}
+        />
+
+        {/* ==============================
+            MODULES WITHOUT SCREENS YET
+        ============================== */}
+
+        <Route
+          path="/onboarding"
+          element={
+            <ComingSoon
+              title="Onboarding"
+              icon="fa-solid fa-user-check"
+              description="The joining process for new employees."
+              points={["New employees are added today under Employees.", "Recruitment holds candidates up to the point of hire."]}
+            />
+          }
+        />
+
+        <Route
+          path="/mis-reports"
+          element={
+            <ComingSoon
+              title="MIS Reports"
+              icon="fa-solid fa-chart-line"
+              description="Management reporting across the HRMS modules."
+              points={["Recruitment has its own MIS under Recruitment > MIS.", "Attendance totals are on the attendance report."]}
+            />
+          }
         />
 
         {/* ==============================
@@ -183,6 +242,7 @@ const App = () => {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 };
 

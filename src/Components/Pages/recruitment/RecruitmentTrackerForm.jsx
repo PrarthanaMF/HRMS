@@ -5,8 +5,11 @@ import SearchableSelect from '../../Common/SearchableSelect'
 import Section from '../../Common/FormSection'
 import { selectAllEmployees } from '../../../Store/Redux/Workforce/EmployeeSlice'
 import { todayISO } from '../../../Utils/formatDate'
+import { primaryButton, secondaryButton } from '../../Common/PageHeader'
+import { labelClass } from './ui'
 import { HR_NAMES, NEXT_DATE_STAGES, RECRUITMENT_STAGES, RECRUITMENT_SOURCES, RECRUITMENT_DIVISIONS, COMPANIES, FINAL_STATUSES, DECLINE_REASONS, JOINING_FORM_LINK, INTERVIEWERS } from '../../../Utils/mockRecruitment'
 
+import Icon from '../../Common/Icon'
 // ---------------------------------------------------------------------------
 // "New Recruitment" — in-app Recruitment Tracker Form
 // Rendered as pop-up content inside VacancyUpdateModal, styled to match the
@@ -30,8 +33,8 @@ const FIELD_ORDER = [
 ]
 
 const ErrorText = ({ children }) => children ? (
-    <p className='text-[11px] text-red-600 flex items-center gap-1'>
-        <i className='fa-solid fa-circle-exclamation text-[10px]'></i>{children}
+    <p className='text-[12px] text-red-600 flex items-center gap-1'>
+        <Icon className='fa-solid fa-circle-exclamation text-[11px]' />{children}
     </p>
 ) : null
 
@@ -71,17 +74,17 @@ const ReferralPicker = ({ employees, value, onSelect }) => {
 
     return (
         <div className='relative w-full sm:w-auto' ref={rootRef}>
-            <div className={`flex items-stretch rounded-lg border transition ${value ? 'border-[#062139] bg-slate-50' : 'border-slate-200 bg-white hover:bg-slate-100'}`}>
+            <div className={`flex h-10 items-stretch overflow-hidden rounded-xl border transition-colors ${value ? 'border-[#cfdce5] bg-[#f2f5f7]' : 'border-slate-200/80 bg-white/80 hover:border-[#cfdce5] hover:bg-white'}`}>
                 <button
                     type='button'
                     aria-haspopup='listbox'
                     aria-expanded={open}
                     onClick={() => setOpen((o) => !o)}
-                    className='flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 min-w-0'
+                    className='press flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 text-[13px] font-semibold text-[var(--brand-600)] min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2b6485]'
                 >
-                    <i className='fa-solid fa-user-group text-xs text-slate-400 shrink-0'></i>
-                    <span className='truncate max-w-[180px]'>{value ? `Reference: ${value.name}` : 'Reference By'}</span>
-                    <i className={`fa-solid fa-chevron-up text-[10px] text-slate-400 shrink-0 transition-transform ${open ? '' : 'rotate-180'}`}></i>
+                    <Icon className='fa-solid fa-user-group text-xs text-slate-400 shrink-0' />
+                    <span className='truncate max-w-[180px]'>{value ? `Reference: ${value.name}` : 'Reference by'}</span>
+                    <Icon className={`fa-solid fa-chevron-up text-[10px] text-slate-400 shrink-0 transition-transform ${open ? '' : 'rotate-180'}`} />
                 </button>
                 {value && (
                     <button
@@ -89,19 +92,19 @@ const ReferralPicker = ({ employees, value, onSelect }) => {
                         onClick={() => onSelect(null)}
                         title='Remove reference'
                         aria-label='Remove reference'
-                        className='px-2.5 text-slate-400 hover:text-red-500 border-l border-slate-200 transition'
+                        className='press w-10 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-red-50 border-l border-slate-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2b6485]'
                     >
-                        <i className='fa-solid fa-xmark text-xs'></i>
+                        <Icon className='fa-solid fa-xmark text-xs' />
                     </button>
                 )}
             </div>
 
             {open && (
-                <div className='absolute z-30 bottom-full mb-2 left-0 sm:left-auto sm:right-0 w-full sm:w-72 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden'>
+                <div className='glass-strong absolute z-30 bottom-full mb-2 left-0 sm:left-auto sm:right-0 w-full sm:w-72 rounded-xl shadow-[var(--shadow-pop)] overflow-hidden [animation:ui-pop_160ms_var(--ease-out)_backwards]'>
                     <div className='px-3 pt-3 pb-2'>
-                        <p className='text-[10px] uppercase font-semibold tracking-wide text-slate-400 mb-2'>Current Employee</p>
+                        <p className='text-xs font-medium text-slate-500 mb-2'>Current employee</p>
                         <div className='relative'>
-                            <i className='fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400'></i>
+                            <Icon className='fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400' />
                             <input
                                 ref={searchRef}
                                 type='text'
@@ -111,14 +114,15 @@ const ReferralPicker = ({ employees, value, onSelect }) => {
                                     if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) }
                                     if (e.key === 'Enter') { e.preventDefault(); if (filtered[0]) pick(filtered[0]) }
                                 }}
-                                placeholder='Search employee...'
-                                className='w-full pl-8 pr-2 py-1.5 text-sm border border-slate-200 rounded-md outline-none focus:border-[#062139]'
+                                placeholder='Search employee'
+                                aria-label='Search employee'
+                                className='h-9 w-full pl-8 pr-2 text-sm border border-slate-200/80 rounded-lg bg-white outline-none focus:ring-2 focus:ring-[#2b6485]'
                             />
                         </div>
                     </div>
                     <ul role='listbox' className='max-h-52 overflow-y-auto py-1 border-t border-slate-100'>
                         {filtered.length === 0 ? (
-                            <li className='px-3 py-3 text-xs text-slate-400 text-center'>No employees found</li>
+                            <li className='px-3 py-3 text-xs text-slate-500 text-center'>No employees found. Try another name.</li>
                         ) : (
                             filtered.map((emp) => (
                                 <li
@@ -126,10 +130,10 @@ const ReferralPicker = ({ employees, value, onSelect }) => {
                                     role='option'
                                     aria-selected={value?.empId === emp.empId}
                                     onClick={() => pick(emp)}
-                                    className={`px-3 py-2 cursor-pointer hover:bg-slate-100 ${value?.empId === emp.empId ? 'bg-slate-50' : ''}`}
+                                    className={`mx-1 rounded-lg px-2.5 py-2 cursor-pointer hover:bg-[#f2f5f7] ${value?.empId === emp.empId ? 'bg-[#f2f5f7]' : ''}`}
                                 >
                                     <p className='text-sm text-slate-800 font-medium truncate'>{emp.name}</p>
-                                    <p className='text-[11px] text-slate-400 truncate'>{[emp.designation, emp.branch].filter(Boolean).join(' · ')}</p>
+                                    <p className='flex min-w-0 gap-2 text-xs text-slate-500'>{emp.designation && <span className='truncate'>{emp.designation}</span>}{emp.branch && <span className='truncate'>{emp.branch}</span>}</p>
                                 </li>
                             ))
                         )}
@@ -301,52 +305,52 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
 
     return (
         <form onSubmit={handleSubmit} noValidate className='space-y-5'>
-            <p className='text-xs text-slate-500'>
+            <p className='text-[13px] text-slate-500'>
                 Log this candidate's progress through the hiring pipeline. Fields marked <span className='text-red-500'>*</span> are required.
             </p>
 
             {/* ---------- 1. Candidate Details ---------- */}
-            <Section step={1} icon='fa-user' title='Candidate Details' subtitle="Who the candidate is and how to reach them">
+            <Section step={1} icon='fa-user' title='Candidate details' subtitle="Who the candidate is and how to reach them">
                 <div id='q-name'>
-                    <FormField label='Candidate Name' name='name' value={data.name} error={errors.name} required {...fieldProps} />
+                    <FormField label='Candidate name' name='name' value={data.name} error={errors.name} required {...fieldProps} />
                 </div>
                 <div id='q-contact'>
-                    <FormField label='Contact Number' name='contact' type='tel' value={data.contact} error={errors.contact} required {...fieldProps} />
+                    <FormField label='Contact number' name='contact' type='tel' value={data.contact} error={errors.contact} required {...fieldProps} />
                 </div>
                 <div id='q-email'>
-                    <FormField label='Candidate Email' name='email' type='email' value={data.email} error={errors.email} required {...fieldProps} />
+                    <FormField label='Candidate email' name='email' type='email' value={data.email} error={errors.email} required {...fieldProps} />
                 </div>
                 <div id='q-salary'>
-                    <FormField label='Salary Expectation' name='salary' value={data.salary} error={errors.salary} required {...fieldProps} />
+                    <FormField label='Salary expectation' name='salary' value={data.salary} error={errors.salary} required {...fieldProps} />
                 </div>
 
                 {/* Resume upload — styled to match the site instead of the Google dropzone */}
                 <div id='q-resume' className='flex flex-col gap-1.5 md:col-span-2'>
-                    <label className='text-xs font-medium text-slate-700'>
-                        Upload Resume <span className='text-red-500'>*</span>
+                    <label className={labelClass}>
+                        Upload resume <span className='text-red-500'>*</span>
                     </label>
                     {!resumeFile ? (
-                        <label className={`flex items-center gap-3 border border-dashed rounded-lg bg-white px-3 py-2.5 cursor-pointer transition ${errors.resume ? 'border-red-300' : 'border-slate-300 hover:border-[#062139]'}`}>
-                            <i className='fa-solid fa-cloud-arrow-up text-slate-400'></i>
-                            <span className='text-sm text-slate-600'><b className='text-[#062139] font-medium'>Add file</b> (PDF/DOC, up to 10 MB)</span>
-                            <input type='file' className='hidden' accept='.pdf,.doc,.docx' onChange={handleFile} />
+                        <label className={`flex min-h-10 items-center gap-3 border border-dashed rounded-xl bg-white/80 px-3 py-2.5 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#2b6485] ${errors.resume ? 'border-red-300' : 'border-slate-300 hover:border-[#cfdce5] hover:bg-[#f2f5f7]/60'}`}>
+                            <Icon className='fa-solid fa-cloud-arrow-up text-slate-400' />
+                            <span className='text-sm text-slate-600'><b className='text-[var(--brand-600)] font-semibold'>Add file</b> (PDF/DOC, up to 10 MB)</span>
+                            <input type='file' className='sr-only' accept='.pdf,.doc,.docx' onChange={handleFile} />
                         </label>
                     ) : (
-                        <div className='flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm'>
-                            <span className='truncate text-slate-700'>{resumeFile.name} · {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB</span>
+                        <div className='flex min-h-10 items-center justify-between gap-3 bg-white/80 border border-slate-200/80 rounded-xl pl-3 pr-1 py-1 text-sm'>
+                            <span className='flex min-w-0 items-baseline gap-2'><span className='truncate text-slate-700'>{resumeFile.name}</span><span className='shrink-0 text-xs text-slate-500 tabular-nums'>{(resumeFile.size / (1024 * 1024)).toFixed(2)} MB</span></span>
                             <button
                                 type='button'
                                 onClick={() => setResumeFile(null)}
-                                className='text-slate-400 hover:text-slate-700 text-lg leading-none px-1'
+                                className='press inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'
                                 aria-label='Remove file'
                             >
-                                &times;
+                                <Icon className='fa-solid fa-xmark text-xs' />
                             </button>
                         </div>
                     )}
                     {errors.resume && (
-                        <p className='text-[11px] text-red-600 flex items-center gap-1'>
-                            <i className='fa-solid fa-circle-exclamation text-[10px]'></i>
+                        <p className='text-[12px] text-red-600 flex items-center gap-1'>
+                            <Icon className='fa-solid fa-circle-exclamation text-[11px]' />
                             {errors.resume}
                         </p>
                     )}
@@ -354,18 +358,18 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
             </Section>
 
             {/* ---------- 2. Recruitment Details ---------- */}
-            <Section step={2} icon='fa-briefcase' title='Recruitment Details' subtitle='Where the candidate is in the pipeline and who is handling them'>
+            <Section step={2} icon='fa-briefcase' title='Recruitment details' subtitle='Where the candidate is in the pipeline and who is handling them'>
                 <div id='q-stage'>
                     <SearchableSelect label='Stage' name='stage' value={data.stage} error={errors.stage} required options={RECRUITMENT_STAGES} {...fieldProps} />
                 </div>
                 <div id='q-source'>
-                    <SearchableSelect label='Recruitment Source' name='source' value={data.source} error={errors.source} required options={RECRUITMENT_SOURCES} {...fieldProps} />
+                    <SearchableSelect label='Recruitment source' name='source' value={data.source} error={errors.source} required options={RECRUITMENT_SOURCES} {...fieldProps} />
                 </div>
                 <div id='q-division'>
                     <SearchableSelect label='Division' name='division' value={data.division} error={errors.division} required options={RECRUITMENT_DIVISIONS} {...fieldProps} />
                 </div>
                 <div id='q-hrName'>
-                    <SearchableSelect label='HR Name' name='hrName' value={data.hrName} error={errors.hrName} required options={HR_NAMES} searchPlaceholder='Search HR name...' {...fieldProps} />
+                    <SearchableSelect label='HR name' name='hrName' value={data.hrName} error={errors.hrName} required options={HR_NAMES} searchPlaceholder='Search HR name' {...fieldProps} />
                 </div>
             </Section>
 
@@ -374,20 +378,20 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
                 which one shows. Same rules as the Recruitment Tracker's Update pop-up. */}
             {showInterview && (
                 <div className='!mt-2'>
-                <Section icon='fa-comments' title='Interview Update Section' subtitle=''>
+                <Section icon='fa-comments' title='Interview update' subtitle=''>
                     <div id='q-currentSalary'>
-                        <FormField label='Current Salary' name='currentSalary' value={data.currentSalary} error={errors.currentSalary} required {...fieldProps} />
+                        <FormField label='Current salary' name='currentSalary' value={data.currentSalary} error={errors.currentSalary} required {...fieldProps} />
                     </div>
 
                     <div id='q-negotiable' className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-medium text-slate-700'>
+                        <label className={labelClass}>
                             Negotiable <span className='text-red-500'>*</span>
                         </label>
-                        <div className='flex gap-4 pt-1'>
+                        <div className='flex gap-4'>
                             {['Yes', 'No'].map((opt) => (
-                                <label key={opt} className='inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer'>
+                                <label key={opt} className='inline-flex min-h-10 items-center gap-2 text-sm text-slate-700 cursor-pointer'>
                                     <input type='radio' name='negotiable' checked={data.negotiable === opt}
-                                        onChange={() => set('negotiable', opt)} className='accent-[#062139]' />
+                                        onChange={() => set('negotiable', opt)} className='h-4 w-4 accent-[#1f4e6b]' />
                                     {opt}
                                 </label>
                             ))}
@@ -396,11 +400,11 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
                     </div>
 
                     <div id='q-negotiableRemarks'>
-                        <FormField label='Negotiable Remarks' name='negotiableRemarks' value={data.negotiableRemarks} error={errors.negotiableRemarks} {...fieldProps} />
+                        <FormField label='Negotiable remarks' name='negotiableRemarks' value={data.negotiableRemarks} error={errors.negotiableRemarks} {...fieldProps} />
                     </div>
 
                     <div id='q-remarksOfCandidate'>
-                        <FormField label='Remarks Of Candidate' name='remarksOfCandidate' value={data.remarksOfCandidate} error={errors.remarksOfCandidate} required {...fieldProps} />
+                        <FormField label='Remarks of candidate' name='remarksOfCandidate' value={data.remarksOfCandidate} error={errors.remarksOfCandidate} required {...fieldProps} />
                     </div>
 
                     <div id='q-interviewer' className='md:col-span-2'>
@@ -412,9 +416,9 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
 
             {showOffer && (
                 <div className='!mt-2'>
-                <Section icon='fa-file-signature' title='Offer Details' subtitle='If we offered'>
+                <Section icon='fa-file-signature' title='Offer details' subtitle='If we offered'>
                     <div id='q-offerDate'>
-                        <FormField label='Offer Date' name='offerDate' type='date' value={data.offerDate} error={errors.offerDate} required {...fieldProps} />
+                        <FormField label='Offer date' name='offerDate' type='date' value={data.offerDate} error={errors.offerDate} required {...fieldProps} />
                     </div>
                     <div id='q-joiningDate'>
                         <FormField label='Expected date of joining' name='joiningDate' type='date' min={data.offerDate || undefined} value={data.joiningDate} error={errors.joiningDate} required {...fieldProps} />
@@ -428,16 +432,16 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
 
             {showJoin && (
                 <div className='!mt-2'>
-                <Section icon='fa-user-check' title='Joining Details' subtitle='If joined'>
+                <Section icon='fa-user-check' title='Joining details' subtitle='If joined'>
                     <div className='md:col-span-2 flex flex-col gap-1.5'>
-                        <label className='text-xs font-medium text-slate-700'>
-                            Final Status <span className='text-slate-400 text-[10px] ml-1 font-normal'>(optional)</span>
+                        <label className={labelClass}>
+                            Final status <span className='text-slate-500 text-xs ml-1 font-normal'>(optional)</span>
                         </label>
-                        <div className='flex flex-wrap gap-x-4 gap-y-2 pt-1'>
+                        <div className='flex flex-wrap gap-x-4'>
                             {FINAL_STATUSES.map((s) => (
-                                <label key={s} className='inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer'>
+                                <label key={s} className='inline-flex min-h-10 items-center gap-2 text-sm text-slate-700 cursor-pointer'>
                                     <input type='radio' name='finalStatus' checked={data.finalStatus === s}
-                                        onChange={() => set('finalStatus', s)} className='accent-[#062139]' />
+                                        onChange={() => set('finalStatus', s)} className='h-4 w-4 accent-[#1f4e6b]' />
                                     {s}
                                 </label>
                             ))}
@@ -445,59 +449,59 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
                     </div>
 
                     <div id='q-hiredCost'>
-                        <FormField label='Hired Cost' name='hiredCost' value={data.hiredCost} error={errors.hiredCost} required {...fieldProps} />
+                        <FormField label='Hired cost' name='hiredCost' value={data.hiredCost} error={errors.hiredCost} required {...fieldProps} />
                     </div>
 
                     <div id='q-employeeId'>
                         <FormField label='Employee ID' name='employeeId' value={data.employeeId} error={errors.employeeId} required {...fieldProps} />
-                        <p className='text-[11px] font-semibold text-amber-700 mt-1.5 flex items-center gap-1'>
-                            <i className='fa-solid fa-triangle-exclamation text-[10px]'></i>
+                        <p className='text-xs font-medium text-amber-700 mt-1.5 flex items-center gap-1'>
+                            <Icon className='fa-solid fa-triangle-exclamation text-[10px]' />
                             This is very critical, check twice before you submit.
                         </p>
                     </div>
 
                     <div id='q-joiningForm' className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-medium text-slate-700'>
-                            Upload Joining Form <span className='text-red-500'>*</span>
+                        <label className={labelClass}>
+                            Upload joining form <span className='text-red-500'>*</span>
                         </label>
                         {!joiningForm ? (
-                            <label className={`flex items-center gap-3 border border-dashed rounded-lg bg-white px-3 py-2.5 cursor-pointer transition ${errors.joiningForm ? 'border-red-300' : 'border-slate-300 hover:border-[#062139]'}`}>
-                                <i className='fa-solid fa-cloud-arrow-up text-slate-400'></i>
-                                <span className='text-sm text-slate-600'><b className='text-[#062139] font-medium'>Add file</b> (1 file, max 10 MB)</span>
-                                <input type='file' className='hidden' accept='.pdf,.doc,.docx,.jpg,.jpeg,.png' onChange={handleJoiningFormFile} />
+                            <label className={`flex min-h-10 items-center gap-3 border border-dashed rounded-xl bg-white/80 px-3 py-2.5 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#2b6485] ${errors.joiningForm ? 'border-red-300' : 'border-slate-300 hover:border-[#cfdce5] hover:bg-[#f2f5f7]/60'}`}>
+                                <Icon className='fa-solid fa-cloud-arrow-up text-slate-400' />
+                                <span className='text-sm text-slate-600'><b className='text-[var(--brand-600)] font-semibold'>Add file</b> (1 file, max 10 MB)</span>
+                                <input type='file' className='sr-only' accept='.pdf,.doc,.docx,.jpg,.jpeg,.png' onChange={handleJoiningFormFile} />
                             </label>
                         ) : (
-                            <div className='flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm'>
-                                <span className='truncate text-slate-700'>{joiningForm.name} · {(joiningForm.size / (1024 * 1024)).toFixed(2)} MB</span>
+                            <div className='flex min-h-10 items-center justify-between gap-3 bg-white/80 border border-slate-200/80 rounded-xl pl-3 pr-1 py-1 text-sm'>
+                                <span className='flex min-w-0 items-baseline gap-2'><span className='truncate text-slate-700'>{joiningForm.name}</span><span className='shrink-0 text-xs text-slate-500 tabular-nums'>{(joiningForm.size / (1024 * 1024)).toFixed(2)} MB</span></span>
                                 <button type='button' onClick={() => setJoiningForm(null)} aria-label='Remove file'
-                                    className='text-slate-400 hover:text-slate-700 text-lg leading-none px-1'>&times;</button>
+                                    className='press inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'><Icon className='fa-solid fa-xmark text-xs' /></button>
                             </div>
                         )}
                         <ErrorText>{errors.joiningForm}</ErrorText>
                     </div>
 
                     <div id='q-kybForm' className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-medium text-slate-700'>
-                            KYB Form <span className='text-slate-400 text-[10px] ml-1 font-normal'>(optional)</span>
+                        <label className={labelClass}>
+                            KYB form <span className='text-slate-500 text-xs ml-1 font-normal'>(optional)</span>
                         </label>
                         {!kybForm ? (
-                            <label className={`flex items-center gap-3 border border-dashed rounded-lg bg-white px-3 py-2.5 cursor-pointer transition ${errors.kybForm ? 'border-red-300' : 'border-slate-300 hover:border-[#062139]'}`}>
-                                <i className='fa-solid fa-cloud-arrow-up text-slate-400'></i>
-                                <span className='text-sm text-slate-600'><b className='text-[#062139] font-medium'>Add file</b> (1 file, max 10 MB)</span>
-                                <input type='file' className='hidden' accept='.pdf,.doc,.docx,.jpg,.jpeg,.png' onChange={handleKybFile} />
+                            <label className={`flex min-h-10 items-center gap-3 border border-dashed rounded-xl bg-white/80 px-3 py-2.5 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#2b6485] ${errors.kybForm ? 'border-red-300' : 'border-slate-300 hover:border-[#cfdce5] hover:bg-[#f2f5f7]/60'}`}>
+                                <Icon className='fa-solid fa-cloud-arrow-up text-slate-400' />
+                                <span className='text-sm text-slate-600'><b className='text-[var(--brand-600)] font-semibold'>Add file</b> (1 file, max 10 MB)</span>
+                                <input type='file' className='sr-only' accept='.pdf,.doc,.docx,.jpg,.jpeg,.png' onChange={handleKybFile} />
                             </label>
                         ) : (
-                            <div className='flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm'>
-                                <span className='truncate text-slate-700'>{kybForm.name} · {(kybForm.size / (1024 * 1024)).toFixed(2)} MB</span>
+                            <div className='flex min-h-10 items-center justify-between gap-3 bg-white/80 border border-slate-200/80 rounded-xl pl-3 pr-1 py-1 text-sm'>
+                                <span className='flex min-w-0 items-baseline gap-2'><span className='truncate text-slate-700'>{kybForm.name}</span><span className='shrink-0 text-xs text-slate-500 tabular-nums'>{(kybForm.size / (1024 * 1024)).toFixed(2)} MB</span></span>
                                 <button type='button' onClick={() => setKybForm(null)} aria-label='Remove file'
-                                    className='text-slate-400 hover:text-slate-700 text-lg leading-none px-1'>&times;</button>
+                                    className='press inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'><Icon className='fa-solid fa-xmark text-xs' /></button>
                             </div>
                         )}
                         <ErrorText>{errors.kybForm}</ErrorText>
                     </div>
 
-                    <div className='md:col-span-2 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5'>
-                        <i className='fa-solid fa-circle-info text-amber-500 text-xs mt-0.5'></i>
+                    <div className='md:col-span-2 flex items-start gap-2 bg-amber-50 ring-1 ring-inset ring-amber-200 rounded-xl px-3 py-2.5'>
+                        <Icon className='fa-solid fa-circle-info text-amber-500 text-xs mt-0.5' />
                         <p className='text-xs text-amber-800'>
                             Please submit the Employee Joining Form:{' '}
                             <a href={JOINING_FORM_LINK} target='_blank' rel='noreferrer' className='font-medium underline'>
@@ -511,20 +515,20 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
 
             {showReject && (
                 <div className='!mt-2'>
-                <Section icon='fa-user-xmark' title='Reason for Decline' subtitle=''>
+                <Section icon='fa-user-xmark' title='Reason for decline' subtitle=''>
                     <div id='q-declineReason' className='md:col-span-2'>
                         <SearchableSelect label='Decline reasons' name='declineReason' value={data.declineReason} error={errors.declineReason} required options={DECLINE_REASONS} placeholder='Choose' {...fieldProps} />
                     </div>
 
                     <div id='q-connectFuture' className='flex flex-col gap-1.5 md:col-span-2'>
-                        <label className='text-xs font-medium text-slate-700'>
-                            Whether to Connect This Candidate in Future <span className='text-red-500'>*</span>
+                        <label className={labelClass}>
+                            Whether to connect this candidate in future <span className='text-red-500'>*</span>
                         </label>
-                        <div className='flex gap-4 pt-1'>
+                        <div className='flex gap-4'>
                             {['Yes', 'No'].map((opt) => (
-                                <label key={opt} className='inline-flex items-center gap-2 text-sm text-slate-700 cursor-pointer'>
+                                <label key={opt} className='inline-flex min-h-10 items-center gap-2 text-sm text-slate-700 cursor-pointer'>
                                     <input type='radio' name='connectFuture' checked={data.connectFuture === opt}
-                                        onChange={() => set('connectFuture', opt)} className='accent-[#062139]' />
+                                        onChange={() => set('connectFuture', opt)} className='h-4 w-4 accent-[#1f4e6b]' />
                                     {opt}
                                 </label>
                             ))}
@@ -534,7 +538,7 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
 
                     {showNextConnect && (
                         <div id='q-nextConnectDate'>
-                            <FormField label='Next Connect Date' name='nextConnectDate' type='date' min={todayISO()} value={data.nextConnectDate} error={errors.nextConnectDate} required {...fieldProps} />
+                            <FormField label='Next connect date' name='nextConnectDate' type='date' min={todayISO()} value={data.nextConnectDate} error={errors.nextConnectDate} required {...fieldProps} />
                         </div>
                     )}
                 </Section>
@@ -542,43 +546,45 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
             )}
 
             {/* ---------- 3. Evaluation & Next Steps ---------- (kept last, after the stage-specific section) */}
-            <Section step={3} icon='fa-clipboard-check' title='Evaluation & Next Steps' subtitle='How the candidate did and what happens next'>
+            <Section step={3} icon='fa-clipboard-check' title='Evaluation and next steps' subtitle='How the candidate did and what happens next'>
                 {/* Rating — navy/slate scale instead of the purple radio row */}
                 <div id='q-rating' className='flex flex-col gap-1.5'>
-                    <label className='text-xs font-medium text-slate-700'>
+                    <label className={labelClass}>
                         Rating <span className='text-red-500'>*</span>
                     </label>
-                    <div className='flex items-center gap-2'>
-                        <span className='text-[11px] text-slate-400'>Low</span>
+                    <div className='flex flex-wrap items-center gap-1.5 sm:gap-2'>
+                        <span className='text-xs text-slate-500'>Low</span>
                         {[1, 2, 3, 4, 5].map((n) => (
                             <button
                                 type='button'
                                 key={n}
                                 onClick={() => setRating(n)}
-                                className={`w-8 h-8 rounded-lg border text-sm font-semibold transition ${String(data.rating) === String(n)
-                                    ? 'bg-[#062139] border-[#062139] text-white'
-                                    : 'border-slate-200 bg-white text-slate-600 hover:border-[#062139]'
+                                aria-pressed={String(data.rating) === String(n)}
+                                aria-label={`Rating ${n} of 5`}
+                                className={`press w-10 h-10 rounded-xl border text-sm font-semibold tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] focus-visible:ring-offset-1 ${String(data.rating) === String(n)
+                                    ? 'gradient-brand border-transparent text-white shadow-[0_8px_18px_-10px_rgb(8_26_46/0.9)]'
+                                    : 'border-slate-200/80 bg-white/80 text-slate-600 hover:border-[#cfdce5] hover:bg-white'
                                     }`}
                             >
                                 {n}
                             </button>
                         ))}
-                        <span className='text-[11px] text-slate-400'>Excellent</span>
+                        <span className='text-xs text-slate-500'>Excellent</span>
                     </div>
                     {errors.rating && (
-                        <p className='text-[11px] text-red-600 flex items-center gap-1'>
-                            <i className='fa-solid fa-circle-exclamation text-[10px]'></i>
+                        <p className='text-[12px] text-red-600 flex items-center gap-1'>
+                            <Icon className='fa-solid fa-circle-exclamation text-[11px]' />
                             {errors.rating}
                         </p>
                     )}
                 </div>
                 {NEXT_DATE_STAGES.includes(data.stage) && (
                     <div id='q-nextDate'>
-                        <FormField label='Next Schedule Date' name='nextDate' type='date' min={todayISO()} value={data.nextDate} error={errors.nextDate} required {...fieldProps} />
+                        <FormField label='Next schedule date' name='nextDate' type='date' min={todayISO()} value={data.nextDate} error={errors.nextDate} required {...fieldProps} />
                     </div>
                 )}
                 <div className='md:col-span-2' id='q-remarks'>
-                    <FormField label='Remarks/Reason/Conversation' name='remarks' value={data.remarks} error={errors.remarks} required textarea {...fieldProps} />
+                    <FormField label='Remarks / reason / conversation' name='remarks' value={data.remarks} error={errors.remarks} required textarea {...fieldProps} />
                 </div>
             </Section>
 
@@ -591,15 +597,15 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
                 <button
                     type='button'
                     onClick={onCancel}
-                    className='order-3 sm:order-2 w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition'
+                    className={`${secondaryButton} order-3 sm:order-2 w-full sm:w-auto`}
                 >
                     Cancel
                 </button>
                 <button
                     type='submit'
-                    className='order-2 sm:order-3 w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm'
+                    className={`${primaryButton} order-2 sm:order-3 w-full sm:w-auto`}
                 >
-                    <i className='fa-solid fa-paper-plane text-xs'></i>
+                    <Icon className='fa-solid fa-paper-plane text-xs' />
                     Submit
                 </button>
             </div>
@@ -607,4 +613,4 @@ const RecruitmentTrackerForm = ({ vacancy, hrName, requestId, onCancel, onSubmit
     )
 }
 
-export default RecruitmentTrackerForm
+export default RecruitmentTrackerForm

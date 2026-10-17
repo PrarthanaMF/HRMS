@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
+import Icon from './Icon'
 
 // A dropdown with a search box — drop-in replacement for FormField's <select>.
 // Calls onChange with a { target: { name, value } } object, so it works with the
@@ -6,12 +7,13 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 // Options are plain strings, or { value, label } when the stored value (e.g. an id) differs
 // from what is shown.
 const SearchableSelect = ({
-    label, name, value, onChange, options = [],
+    // `id` lets a parent's <label htmlFor> point at the trigger button
+    id, label, name, value, onChange, options = [],
     placeholder = 'Select...', searchPlaceholder = 'Search...',
     required = false, error = '',
     // `bare`: skip rendering our own label/error — used when a parent
     // (e.g. FormField) already renders them and just wants the control.
-    // `compact`: smaller filter-bar sizing (uppercase mini label, tighter padding).
+    // `compact`: filter-bar sizing (smaller label, 36px trigger).
     bare = false, compact = false,
 }) => {
     const labelId = useId()
@@ -93,22 +95,23 @@ const SearchableSelect = ({
         }
     }
 
-    const triggerClass = `w-full flex items-center justify-between gap-2 text-left border rounded-lg outline-none transition bg-white cursor-pointer ${compact ? 'px-2.5 py-2 text-xs' : 'px-3 py-2 text-sm'
-        } ${error
-            ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100'
-            : 'border-slate-200 focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
+    const triggerClass = `press flex w-full cursor-pointer items-center justify-between gap-2 rounded-xl border bg-white/80 text-left outline-none focus:bg-white focus:ring-2 ${compact ? 'h-9 px-3 text-[13px]' : 'h-10 px-3 text-sm'
+        } ${open ? 'border-[#2b6485] ring-2 ring-[#2b6485]/25 bg-white' : ''} ${error
+            ? 'border-red-300 focus:border-red-400 focus:ring-red-200'
+            : 'border-slate-200/80 hover:border-slate-300 focus:border-[#2b6485] focus:ring-[#2b6485]/25'
         }`
 
     return (
         <div className='flex flex-col gap-1.5' ref={rootRef}>
             {!bare && label && (
-                <label id={labelId} className={compact ? 'text-[10px] font-semibold uppercase text-slate-400 tracking-wide' : 'text-xs font-medium text-slate-700'}>
+                <label id={labelId} className={compact ? 'text-[12px] font-medium text-slate-500' : 'text-[13px] font-medium text-slate-700'}>
                     {label} {required && <span className='text-red-500'>*</span>}
                 </label>
             )}
 
             <div className='relative'>
                 <button
+                    id={id}
                     type='button'
                     aria-haspopup='listbox'
                     aria-expanded={open}
@@ -123,14 +126,14 @@ const SearchableSelect = ({
                     }}
                     className={triggerClass}
                 >
-                    <span className={`truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>{(value && selectedLabel) || placeholder}</span>
-                    <i className={`fa-solid fa-chevron-down text-[10px] text-slate-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}></i>
+                    <span className={`min-w-0 truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>{(value && selectedLabel) || placeholder}</span>
+                    <Icon className={`fa-solid fa-chevron-down shrink-0 text-[11px] text-slate-400 transition-transform duration-200 ${open ? 'rotate-180 text-[#2b6485]' : ''}`} />
                 </button>
 
                 {open && (
-                    <div className={`absolute z-30 left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden ${dropUp ? 'bottom-full mb-1' : 'top-full mt-1'}`}>
+                    <div className={`popover absolute left-0 right-0 z-30 overflow-hidden rounded-xl shadow-[var(--shadow-pop)] [animation:ui-pop_160ms_var(--ease-out)_backwards] ${dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5'}`}>
                         <div className='relative p-2 border-b border-slate-100'>
-                            <i className='fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[11px] text-slate-400'></i>
+                            <Icon className='fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[11px] text-slate-400' />
                             <input
                                 ref={searchRef}
                                 type='text'
@@ -138,7 +141,7 @@ const SearchableSelect = ({
                                 onChange={(e) => { setQuery(e.target.value); setActive(0) }}
                                 onKeyDown={handleSearchKey}
                                 placeholder={searchPlaceholder}
-                                className='w-full pl-8 pr-2 py-1.5 text-sm border border-slate-200 rounded-md outline-none focus:border-[#062139]'
+                                className='h-9 w-full rounded-lg border border-slate-200/80 bg-white pl-8 pr-2 text-sm outline-none focus:border-[#2b6485] focus:ring-2 focus:ring-[#2b6485]/20'
                             />
                         </div>
 
@@ -153,10 +156,10 @@ const SearchableSelect = ({
                                         aria-selected={opt.value === value}
                                         onMouseEnter={() => setActive(i)}
                                         onClick={() => choose(opt)}
-                                        className={`px-3 py-2 text-sm cursor-pointer flex items-center justify-between gap-2 ${i === active ? 'bg-slate-100' : ''} ${opt.value === value ? 'font-semibold text-[#062139]' : 'text-slate-700'}`}
+                                        className={`mx-1 flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-sm ${i === active ? 'bg-[#f2f5f7]' : ''} ${opt.value === value ? 'font-semibold text-[#1f4e6b]' : 'text-slate-700'}`}
                                     >
                                         <span className='truncate'>{opt.label}</span>
-                                        {opt.value === value && <i className='fa-solid fa-check text-[10px] text-[#062139]'></i>}
+                                        {opt.value === value && <Icon className='fa-solid fa-check text-[12px] text-[#1f4e6b]' />}
                                     </li>
                                 ))
                             )}
@@ -166,8 +169,8 @@ const SearchableSelect = ({
             </div>
 
             {!bare && error && (
-                <p className='text-[11px] text-red-600 flex items-center gap-1'>
-                    <i className='fa-solid fa-circle-exclamation text-[10px]'></i>
+                <p className='flex items-center gap-1 text-[12px] text-red-600'>
+                    <Icon className='fa-solid fa-circle-exclamation text-[11px]' />
                     {error}
                 </p>
             )}

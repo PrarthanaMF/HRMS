@@ -5,6 +5,8 @@ import { updateStage2, selectExitById } from '../../../../Store/Redux/ExitProces
 import FormField from '../../../Common/FormField'
 import SuccessScreen, { PreviewRow, PreviewSection } from '../../../Common/SuccessScreen'
 
+import Icon from '../../../Common/Icon'
+import { primaryButton, secondaryButton } from '../../../Common/PageHeader'
 const Stage2DecisionForm = () => {
     const { id } = useParams()
     const navigate = useNavigate()
@@ -20,9 +22,9 @@ const Stage2DecisionForm = () => {
     const [errors, setErrors] = useState({})
     const [submitted, setSubmitted] = useState(null)
 
-    if (!record) return <LockScreen title='Record Not Found' navigate={navigate} />
+    if (!record) return <LockScreen title='Record not found' navigate={navigate} />
     if (record.status !== 'HR Reviewing' && !submitted) {
-        return <LockScreen title='Stage 2 Not Available' record={record} navigate={navigate} />
+        return <LockScreen title='Stage 2 not available' record={record} navigate={navigate} />
     }
 
     const handleChange = (e) => {
@@ -74,15 +76,15 @@ const Stage2DecisionForm = () => {
     if (submitted) {
         return (
             <SuccessScreen
-                title='Stage 2 Submitted'
-                subtitle='Decision of Resignation has been recorded'
+                title='Stage 2 submitted'
+                subtitle='The decision on this resignation has been recorded'
                 recordId={record._id}
             >
-                <PreviewSection title='Decision Details' icon='fa-gavel'>
+                <PreviewSection title='Decision details' icon='fa-gavel'>
                     <PreviewRow label='Send F&F' value={submitted.sendFNF} />
-                    <PreviewRow label='Last Working Date' value={submitted.lastWorkingDate} />
+                    <PreviewRow label='Last working date' value={submitted.lastWorkingDate} />
                     <PreviewRow label='Date of F&F' value={submitted.dateOfFNF} />
-                    <PreviewRow label='Feedback About Employee' value={submitted.feedbackAboutEmployee} full />
+                    <PreviewRow label='Feedback about the employee' value={submitted.feedbackAboutEmployee} full />
                 </PreviewSection>
             </SuccessScreen>
         )
@@ -90,52 +92,52 @@ const Stage2DecisionForm = () => {
 
     return (
         <div className='w-full max-w-2xl mx-auto'>
-            <button onClick={handleCancel} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-                <i className="fa-solid fa-arrow-left text-xs"></i>
-                Back to Record
+            <button onClick={handleCancel} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+                <Icon className="fa-solid fa-arrow-left text-xs" />
+                Back to record
             </button>
 
-            <form onSubmit={handleSubmit} className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
+            <form onSubmit={handleSubmit} className='rise glass-strong rounded-2xl overflow-hidden'>
 
-                <div className='flex items-center gap-3 px-5 py-4 border-b border-slate-100'>
-                    <div className='w-10 h-10 rounded-lg bg-[#062139] flex items-center justify-center shrink-0'>
-                        <i className="fa-solid fa-gavel text-white text-sm"></i>
+                <div className='flex items-center gap-3.5 px-5 py-4 border-b border-slate-200/70'>
+                    <div aria-hidden='true' className='gradient-brand w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white shadow-[0_10px_24px_-12px_rgb(8_26_46/0.9)] ring-1 ring-white/20'>
+                        <Icon className="fa-solid fa-gavel text-base" />
                     </div>
                     <div className='min-w-0'>
-                        <h2 className='text-base font-bold text-slate-800'>Stage 2 — Decision of Resignation</h2>
-                        <p className='text-[11px] text-slate-500'>Final decision details for {record.name}</p>
+                        <h2 className='text-base font-semibold leading-tight text-[var(--ink)] sm:text-[17px]'>Stage 2: Decision of resignation</h2>
+                        <p className='mt-0.5 text-[13px] text-slate-500'>Final decision details for {record.name}</p>
                     </div>
                 </div>
 
                 <div className='p-5 space-y-5'>
                     <div>
                         <label className='block text-xs font-medium text-slate-700 mb-2'>
-                            Whether to Send F&F <span className='text-red-500'>*</span>
+                            Whether to send F&F <span className='text-red-500'>*</span>
                         </label>
                         <div className='flex flex-col sm:flex-row gap-2'>
                             {['Yes', 'No'].map((option) => (
-                                <label key={option} className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition ${
+                                <label key={option} className={`flex-1 flex items-center gap-3 px-4 py-3 min-h-11 rounded-xl border cursor-pointer transition-colors ${
                                     formData.sendFNF === option
-                                        ? 'border-[#062139] bg-slate-50 ring-2 ring-slate-100'
-                                        : 'border-slate-200 hover:bg-slate-50'
+                                        ? 'border-[#2b6485] bg-[#f2f5f7] ring-2 ring-[#2b6485]/20'
+                                        : 'border-slate-200/80 bg-white/70 hover:border-[#cfdce5] hover:bg-white'
                                 }`}>
                                     <input type='radio' name='sendFNF' value={option}
                                         checked={formData.sendFNF === option} onChange={handleChange}
-                                        className='w-4 h-4 accent-[#062139]' />
+                                        className='w-4 h-4 accent-[#1f4e6b]' />
                                     <span className='text-sm font-medium text-slate-700'>{option}</span>
                                 </label>
                             ))}
                         </div>
                         {errors.sendFNF && (
                             <p className='text-[11px] text-red-600 flex items-center gap-1 mt-2'>
-                                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                                <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                                 {errors.sendFNF}
                             </p>
                         )}
                     </div>
 
                     <FormField
-                        label='Your Feedback About Employee'
+                        label='Your feedback about the employee'
                         name='feedbackAboutEmployee'
                         value={formData.feedbackAboutEmployee}
                         onChange={handleChange}
@@ -146,7 +148,7 @@ const Stage2DecisionForm = () => {
                     />
 
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                        <FormField label='Last Working Date' name='lastWorkingDate' type='date'
+                        <FormField label='Last working date' name='lastWorkingDate' type='date'
                             value={formData.lastWorkingDate} onChange={handleChange}
                             required error={errors.lastWorkingDate} />
                         <FormField label='Date of F&F' name='dateOfFNF' type='date'
@@ -155,14 +157,14 @@ const Stage2DecisionForm = () => {
                     </div>
                 </div>
 
-                <div className='flex flex-col-reverse sm:flex-row justify-end gap-3 px-5 py-4 border-t border-slate-100 bg-slate-50'>
+                <div className='flex flex-col-reverse sm:flex-row justify-end gap-2.5 px-5 py-4 border-t border-slate-200/70 bg-white/50'>
                     <button type='button' onClick={handleCancel}
-                        className='w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer'>
+                        className={`${secondaryButton} w-full sm:w-auto cursor-pointer`}>
                         Cancel
                     </button>
                     <button type='submit'
-                        className='w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'>
-                        Submit Stage 2
+                        className={`${primaryButton} w-full sm:w-auto px-6 cursor-pointer`}>
+                        Submit stage 2
                     </button>
                 </div>
 
@@ -173,20 +175,20 @@ const Stage2DecisionForm = () => {
 
 const LockScreen = ({ title, record, navigate }) => (
     <div className='w-full max-w-2xl mx-auto'>
-        <button onClick={() => navigate('/exit-process')} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-            <i className="fa-solid fa-arrow-left text-xs"></i>
-            Back to Exit Dashboard
+        <button onClick={() => navigate('/exit-process')} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+            <Icon className="fa-solid fa-arrow-left text-xs" />
+            Back to exit dashboard
         </button>
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center'>
-            <i className="fa-solid fa-lock text-4xl text-slate-300 mb-3"></i>
-            <h3 className='text-base font-bold text-slate-700 mb-1'>{title}</h3>
+        <div className='rise glass-panel rounded-2xl p-8 sm:p-12 text-center'>
+            <span aria-hidden='true' className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-[#E3EEF6] text-slate-500 ring-1 ring-inset ring-white'><Icon className="fa-solid fa-lock text-2xl" /></span>
+            <h3 className='text-base font-semibold text-[var(--ink)] mb-1'>{title}</h3>
             {record ? (
                 <>
                     <p className='text-sm text-slate-500'>This record is at stage: <span className='font-semibold'>{record.status}</span></p>
-                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className='mt-4 px-5 py-2.5 text-sm font-medium text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition cursor-pointer'>View Record</button>
+                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className={`${primaryButton} mt-5 cursor-pointer`}>View record</button>
                 </>
             ) : (
-                <p className='text-sm text-slate-500'>This resignation record does not exist.</p>
+                <p className='text-sm text-slate-500'>This resignation record does not exist. Go back to the exit dashboard to open another one.</p>
             )}
         </div>
     </div>

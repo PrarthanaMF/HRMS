@@ -1,13 +1,19 @@
 import React, { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import VacancyStatusBadge from './VacancyStatusBadge'
-import { STAGE_STYLES } from '../../../Utils/mockRecruitment'
 import { formatTimestamp } from '../../../Utils/formatDate'
+import { stageBadgeClass, inputClass, modalPanel, modalHeader, modalTitle, modalClose, metaLabel } from './ui'
 
+import Icon from '../../Common/Icon'
 const Field = ({ label, children, className = '' }) => (
     <div className={`min-w-0 ${className}`}>
-        <p className='text-[10px] uppercase text-slate-400 font-semibold tracking-wide'>{label}</p>
+        <p className={metaLabel}>{label}</p>
         <p className='text-[13px] text-slate-700 break-words mt-0.5'>{children || '—'}</p>
     </div>
+)
+
+const SectionTitle = ({ children }) => (
+    <p className='text-[13px] font-semibold text-[var(--ink)] mb-2'>{children}</p>
 )
 
 const initials = (name = '') =>
@@ -16,54 +22,54 @@ const initials = (name = '') =>
 const Stars = ({ value }) => (
     <span className='inline-flex items-center gap-0.5' title={`${value}/5`}>
         {[1, 2, 3, 4, 5].map((n) => (
-            <i key={n} className={`fa-solid fa-star text-[11px] ${n <= Number(value) ? 'text-amber-400' : 'text-slate-200'}`}></i>
+            <Icon key={n} className={`fa-solid fa-star text-[11px] ${n <= Number(value) ? 'text-amber-400' : 'text-slate-200'}`} />
         ))}
     </span>
 )
 
 export const CandidateCard = ({ c, position, location }) => (
-    <div className='bg-white border border-slate-200 rounded-xl p-4 shadow-sm'>
+    <div className='glass-panel rounded-2xl p-4'>
         <div className='flex items-start gap-3'>
-            <div className='w-10 h-10 shrink-0 rounded-full bg-[#062139] text-white text-sm font-semibold flex items-center justify-center'>
+            <div aria-hidden='true' className='gradient-brand w-10 h-10 shrink-0 rounded-xl text-white text-sm font-semibold flex items-center justify-center'>
                 {initials(c.name)}
             </div>
             <div className='min-w-0 flex-1'>
                 <div className='flex items-center justify-between gap-2 flex-wrap'>
-                    <p className='text-[15px] font-bold text-slate-800 truncate'>{c.name}</p>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${STAGE_STYLES[c.stage] || 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                    <p className='text-[15px] font-semibold text-[var(--ink)] truncate'>{c.name}</p>
+                    <span className={`${stageBadgeClass(c.stage)} shrink-0`}>
                         {c.stage || '—'}
                     </span>
                 </div>
                 <div className='flex items-center gap-2 mt-1'>
                     <Stars value={c.rating} />
-                    <span className='text-[11px] text-slate-400'>{c.rating ? `${c.rating}/5` : 'Not rated'}</span>
+                    <span className='text-xs text-slate-500 tabular-nums'>{c.rating ? `${c.rating}/5` : 'Not rated'}</span>
                 </div>
             </div>
         </div>
 
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mt-4 pt-4 border-t border-slate-100'>
-            <Field label='Contact Number'>{c.contact}</Field>
+            <Field label='Contact number'>{c.contact}</Field>
             <Field label='Email'>{c.email}</Field>
-            <Field label='Salary Expectation'>{c.salaryExpectation}</Field>
-            <Field label='Position Applied For'>{c.position || position}</Field>
+            <Field label='Salary expectation'>{c.salaryExpectation}</Field>
+            <Field label='Position applied for'>{c.position || position}</Field>
             <Field label='Location'>{c.location || location}</Field>
-            <Field label='HR Name'>{c.hrName}</Field>
-            <Field label='Recruitment Source'>{c.recruitmentSource}</Field>
+            <Field label='HR name'>{c.hrName}</Field>
+            <Field label='Recruitment source'>{c.recruitmentSource}</Field>
             <Field label='Division'>{c.division}</Field>
-            <Field label='Next Schedule Date'>{formatTimestamp(c.nextScheduleDate)}</Field>
-            <Field label='Logged On'>{formatTimestamp(c.loggedOn)}</Field>
-            {c.referredBy && <Field label='Reference By'>{c.referredBy}</Field>}
+            <Field label='Next schedule date'>{formatTimestamp(c.nextScheduleDate)}</Field>
+            <Field label='Logged on'>{formatTimestamp(c.loggedOn)}</Field>
+            {c.referredBy && <Field label='Reference by'>{c.referredBy}</Field>}
             <Field label='Resume'>
                 {c.resumeFileName && (
                     <span className='inline-flex items-center gap-1.5'>
-                        <i className='fa-solid fa-file-lines text-slate-400 text-xs'></i>{c.resumeFileName}
+                        <Icon className='fa-solid fa-file-lines text-slate-400 text-xs' />{c.resumeFileName}
                     </span>
                 )}
             </Field>
         </div>
 
         <div className='mt-3 pt-3 border-t border-slate-100'>
-            <Field label='Remarks / Reason / Conversation'>
+            <Field label='Remarks / reason / conversation'>
                 <span className='whitespace-pre-line'>{c.remarks}</span>
             </Field>
         </div>
@@ -71,10 +77,10 @@ export const CandidateCard = ({ c, position, location }) => (
         {/* Filled in from Update -> Stage when the candidate reaches Offer / Join */}
         {(c.offerDate || c.expectedJoiningDate || c.company) && (
             <div className='mt-3 pt-3 border-t border-slate-100'>
-                <p className='text-[11px] font-semibold text-slate-500 mb-2'>Offer Details</p>
+                <SectionTitle>Offer details</SectionTitle>
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-3'>
-                    <Field label='Offer Date'>{formatTimestamp(c.offerDate)}</Field>
-                    <Field label='Expected Date of Joining'>{formatTimestamp(c.expectedJoiningDate)}</Field>
+                    <Field label='Offer date'>{formatTimestamp(c.offerDate)}</Field>
+                    <Field label='Expected date of joining'>{formatTimestamp(c.expectedJoiningDate)}</Field>
                     <Field label='Company'>{c.company}</Field>
                 </div>
             </div>
@@ -82,15 +88,15 @@ export const CandidateCard = ({ c, position, location }) => (
 
         {(c.employeeId || c.hiredCost) && (
             <div className='mt-3 pt-3 border-t border-slate-100'>
-                <p className='text-[11px] font-semibold text-slate-500 mb-2'>Joining Details</p>
+                <SectionTitle>Joining details</SectionTitle>
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3'>
-                    <Field label='Hired Cost'>{c.hiredCost}</Field>
-                    <Field label='Final Status'>{c.finalStatus}</Field>
+                    <Field label='Hired cost'>{c.hiredCost}</Field>
+                    <Field label='Final status'>{c.finalStatus}</Field>
                     <Field label='Employee ID'>{c.employeeId}</Field>
-                    <Field label='Joining Form'>
+                    <Field label='Joining form'>
                         {c.joiningFormFileName && (
                             <span className='inline-flex items-center gap-1.5'>
-                                <i className='fa-solid fa-file-lines text-slate-400 text-xs'></i>{c.joiningFormFileName}
+                                <Icon className='fa-solid fa-file-lines text-slate-400 text-xs' />{c.joiningFormFileName}
                             </span>
                         )}
                     </Field>
@@ -100,29 +106,29 @@ export const CandidateCard = ({ c, position, location }) => (
 
         {(c.declineReason || c.connectFuture) && (
             <div className='mt-3 pt-3 border-t border-slate-100'>
-                <p className='text-[11px] font-semibold text-slate-500 mb-2'>Reason for Decline</p>
+                <SectionTitle>Reason for decline</SectionTitle>
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-3'>
-                    <Field label='Decline Reason'>{c.declineReason}</Field>
-                    <Field label='Connect in Future'>{c.connectFuture}</Field>
-                    {c.connectFuture === 'Yes' && <Field label='Next Connect Date'>{formatTimestamp(c.nextConnectDate)}</Field>}
+                    <Field label='Decline reason'>{c.declineReason}</Field>
+                    <Field label='Connect in future'>{c.connectFuture}</Field>
+                    {c.connectFuture === 'Yes' && <Field label='Next connect date'>{formatTimestamp(c.nextConnectDate)}</Field>}
                 </div>
             </div>
         )}
 
         {c.history?.length > 0 && (
             <div className='mt-3 pt-3 border-t border-slate-100'>
-                <p className='text-[11px] font-semibold text-slate-500 mb-2'>Update History</p>
+                <SectionTitle>Update history</SectionTitle>
                 <ul className='space-y-2'>
                     {[...c.history].reverse().map((h) => (
-                        <li key={h.id} className='text-[12px] text-slate-600 flex flex-col sm:flex-row sm:gap-3'>
-                            <span className='text-slate-400 sm:w-40 shrink-0'>{formatTimestamp(h.at)}</span>
+                        <li key={h.id} className='text-[13px] text-slate-600 flex flex-col sm:flex-row sm:gap-3'>
+                            <span className='text-xs text-slate-500 sm:w-40 shrink-0 tabular-nums sm:pt-px'>{formatTimestamp(h.at)}</span>
                             <span className='min-w-0 break-words'>
                                 <span className='font-medium text-slate-700'>
                                     {h.type === 'stage' && `Stage: ${h.stage}`}
                                     {h.type === 'remarks' && 'Remark added'}
                                     {h.type === 'schedule' && `Rescheduled to ${formatTimestamp(h.nextScheduleDate)}`}
                                 </span>
-                                {h.type === 'stage' && h.nextScheduleDate ? ` · next on ${formatTimestamp(h.nextScheduleDate)}` : ''}
+                                {h.type === 'stage' && h.nextScheduleDate ? `, next on ${formatTimestamp(h.nextScheduleDate)}` : ''}
                                 {h.remarks ? ` — ${h.remarks}` : ''}
                             </span>
                         </li>
@@ -152,55 +158,63 @@ const CandidateDetailsModal = ({ vacancy, onClose }) => {
     if (!vacancy) return null
     const total = (vacancy.candidates || []).length
 
-    return (
-        <div className='fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center p-4' onClick={onClose}>
+    return createPortal(
+        <div className='fixed inset-0 bg-slate-950/40 backdrop-blur-[6px] z-[1000] flex items-center justify-center p-4 [animation:ui-fade_160ms_ease-out_backwards]' onClick={onClose}>
             <div
-                className='bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col'
+                role='dialog'
+                aria-modal='true'
+                aria-labelledby='candidate-list-title'
+                className={`${modalPanel} max-w-3xl`}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Banner */}
-                <div className='relative bg-gradient-to-r from-[#062139] to-[#0a3f6e] rounded-t-2xl px-6 py-5 shrink-0'>
-                    <button
-                        onClick={onClose}
-                        className='absolute top-4 right-4 text-white/70 hover:text-white w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition'
-                        aria-label='Close'
-                    >
-                        <i className='fa-solid fa-xmark'></i>
-                    </button>
-                    <p className='font-mono text-xs text-slate-300 mb-1'>S.No {vacancy.jobId} · {vacancy.branch}</p>
-                    <h2 className='text-lg font-bold text-white pr-10'>Candidates — {vacancy.designation}</h2>
-                    <div className='mt-2 flex items-center gap-2'>
-                        <VacancyStatusBadge status={vacancy.status} />
-                        <span className='text-xs text-slate-300'>{total} candidate{total === 1 ? '' : 's'}</span>
+                <div className={modalHeader}>
+                    <div className='min-w-0'>
+                        <p className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-medium text-slate-500'>
+                            <span className='tabular-nums'>S.No {vacancy.jobId}</span>
+                            <span className='inline-flex items-center gap-1'>
+                                <Icon className='fa-solid fa-location-dot text-[10px] text-slate-400' />{vacancy.branch}
+                            </span>
+                        </p>
+                        <h2 id='candidate-list-title' className={`${modalTitle} mt-0.5 text-lg`}>Candidates — {vacancy.designation}</h2>
+                        <div className='mt-2 flex items-center gap-2'>
+                            <VacancyStatusBadge status={vacancy.status} />
+                            <span className='text-xs text-slate-500 tabular-nums'>{total} candidate{total === 1 ? '' : 's'}</span>
+                        </div>
                     </div>
+                    <button onClick={onClose} className={modalClose} aria-label='Close'>
+                        <Icon className='fa-solid fa-xmark' />
+                    </button>
                 </div>
 
                 {/* Search (only worth showing once there's a handful) */}
                 {total > 2 && (
-                    <div className='px-6 pt-4 shrink-0'>
+                    <div className='px-5 pt-4 shrink-0'>
                         <div className='relative'>
-                            <i className='fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400'></i>
+                            <Icon className='fa-solid fa-magnifying-glass pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400' />
                             <input
                                 type='text'
+                                aria-label='Search candidates'
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                placeholder='Search by name, email, contact or stage...'
-                                className='w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
+                                placeholder='Search by name, email, contact or stage'
+                                className={`${inputClass} pl-9`}
                             />
                         </div>
                     </div>
                 )}
 
                 {/* Candidate cards */}
-                <div className='p-6 overflow-y-auto space-y-4'>
+                <div className='p-4 sm:p-5 overflow-y-auto space-y-4'>
                     {total === 0 ? (
                         <div className='text-center py-10'>
-                            <i className='fa-solid fa-users text-4xl text-slate-300 mb-3'></i>
-                            <p className='text-sm text-slate-500'>No candidates have been logged for this position yet.</p>
-                            <p className='text-xs text-slate-400 mt-1'>Use Update → New Recruitment to add one.</p>
+                            <span aria-hidden='true' className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f2f5f7] text-[var(--brand-600)] ring-1 ring-inset ring-[#cfdce5]/60'>
+                                <Icon className='fa-solid fa-users text-xl' />
+                            </span>
+                            <p className='text-sm font-medium text-[var(--ink)]'>No candidates have been logged for this position yet.</p>
+                            <p className='text-[13px] text-slate-500 mt-1'>Use Update, then New recruitment, to add one.</p>
                         </div>
                     ) : candidates.length === 0 ? (
-                        <p className='text-sm text-slate-400 text-center py-8'>No candidates match “{query}”.</p>
+                        <p className='text-sm text-slate-500 text-center py-8'>No candidates match “{query}”.</p>
                     ) : (
                         candidates.map((c) => (
                             <CandidateCard key={c.id} c={c} position={vacancy.designation} location={vacancy.branch} />
@@ -209,7 +223,7 @@ const CandidateDetailsModal = ({ vacancy, onClose }) => {
                 </div>
             </div>
         </div>
-    )
+    , document.body)
 }
 
 export default CandidateDetailsModal

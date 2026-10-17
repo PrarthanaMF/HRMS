@@ -10,6 +10,7 @@ import {
 import AnimatedGradientText from "../../MagicUI/AnimatedGradientText";
 import BorderBeam from "../../MagicUI/BorderBeam";
 import { cn } from "./AttendanceUI";
+import Icon from "../../Common/Icon";
 import { useAttendanceAccess, useAttendanceDay } from "../../../Hooks/useAttendance";
 // ============================================================
 
@@ -29,6 +30,12 @@ export const RequestModal = ({
   onClose,
 
   children,
+
+  // "dark": navy header bar, used by every form. "light" keeps the older pale header.
+  tone = "dark",
+
+  // Optional wider panel for forms with more to show
+  size = "md",
 }) => {
   const titleId = useId();
 
@@ -203,7 +210,7 @@ export const RequestModal = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/45 p-3 backdrop-blur-[4px] sm:p-5"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/40 p-3 backdrop-blur-[6px] sm:p-5 [animation:ui-fade_160ms_ease-out_backwards]"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onCloseRef.current?.();
@@ -216,13 +223,35 @@ export const RequestModal = ({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="att-request-dialog relative flex max-h-[92dvh] w-full max-w-[600px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,.28)] outline-none"
+        className={`att-request-dialog glass-strong relative flex max-h-[92dvh] w-full ${size === "lg" ? "max-w-[640px]" : "max-w-[600px]"} flex-col overflow-hidden rounded-2xl shadow-[var(--shadow-pop)] outline-none [animation:ui-pop_220ms_var(--ease-out)_backwards]`}
       >
-        <BorderBeam />
-        <header className="relative shrink-0 overflow-hidden border-b border-[#D8E7F2]/60 bg-gradient-to-r from-[#F0F6FA]/80 to-[#F0F6FA]/60 px-3 py-3 sm:px-5 sm:py-4">
+        {tone !== "dark" && <BorderBeam />}
+        {tone === "dark" ? (
+          <header className="relative shrink-0 overflow-hidden bg-gradient-to-r from-[#0e2a47] via-[#163a58] to-[#1f4e6b] px-4 py-3.5 sm:px-5">
+            <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-[#9fb8c9]/20 blur-3xl" />
+            <div className="relative flex min-w-0 items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 id={titleId} className="flex items-center gap-2 text-[17px] font-semibold leading-6 text-white">
+                  <Icon className={`${icon} text-[18px] text-[#cfdce5]`} />
+                  <span className="min-w-0 break-words">{title}</span>
+                </h2>
+                {subtitle && <p className="mt-0.5 text-[12px] leading-4 text-slate-300">{subtitle}</p>}
+              </div>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => onCloseRef.current?.()}
+                className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20", focusRing)}
+              >
+                <Icon className="fa-solid fa-xmark text-[16px]" />
+              </button>
+            </div>
+          </header>
+        ) : (
+        <header className="relative shrink-0 overflow-hidden border-b border-[#dce6ed]/60 bg-gradient-to-r from-[#f2f5f7]/80 to-[#f2f5f7]/60 px-3 py-3 sm:px-5 sm:py-4">
           <div className="grid min-w-0 grid-cols-[40px_minmax(0,1fr)_44px] items-start gap-2 sm:gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1B4A7B] to-[#1B4A7B] text-white shadow-sm ">
-              <i className={`${icon} text-sm`} />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1f4e6b] to-[#1f4e6b] text-white shadow-sm ">
+              <Icon className={`${icon} text-sm`} />
             </span>
 
             <div className="min-w-0">
@@ -232,8 +261,8 @@ export const RequestModal = ({
               >
                 <AnimatedGradientText
                   className="max-w-full whitespace-normal break-words"
-                  colorFrom="#1B4A7B"
-                  colorTo="#3A7DC0"
+                  colorFrom="#1f4e6b"
+                  colorTo="#2b6485"
                   speed={8}
                 >
                   {title}
@@ -262,6 +291,7 @@ export const RequestModal = ({
             </button>
           </div>
         </header>
+        )}
 
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </section>
@@ -278,51 +308,18 @@ export const RequestModal = ({
 // ============================================================
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] focus-visible:ring-offset-2";
 
-const labelClass = "mb-1.5 block text-xs font-semibold text-slate-600";
+const labelClass = "mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500";
 
-const textareaClass = `
+const textareaClass =
+  "w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[14px] text-slate-800 outline-none transition-[border-color,box-shadow] placeholder:text-slate-400 hover:border-slate-300 focus:border-[#2b6485] focus:ring-2 focus:ring-[#2b6485]/25";
 
-  w-full resize-none rounded-xl
+const cancelButtonClass =
+  "press h-11 rounded-xl border border-slate-200 bg-white px-5 text-[14px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50";
 
-  border border-slate-200
-
-  bg-white
-
-  p-3 text-xs font-medium text-slate-700
-
-  outline-none transition-all
-
-  placeholder:text-slate-300
-
-  hover:border-slate-200
-
-  focus:border-slate-400 focus:bg-white
-
-  
-
-`;
-
-const cancelButtonClass = `
-
-  h-10 rounded-xl border border-slate-200 bg-white
-
-  px-4 text-xs font-semibold text-slate-600
-
-  transition hover:bg-slate-50 sm:min-w-[90px]
-
-`;
-
-const submitButtonClass = `
-
-  att-button-primary bg-[linear-gradient(120deg,#2A5F98,#1B4A7B_55%,#0C3453)] hover:brightness-105 disabled:bg-none disabled:shadow-none inline-flex h-10 items-center justify-center gap-2
-
-  rounded-xl px-5 text-xs font-bold text-white
-
-  transition active:scale-[.98] sm:min-w-[150px]
-
-`;
+const submitButtonClass =
+  "press gradient-brand inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-[14px] font-semibold text-white shadow-[0_10px_22px_-12px_rgb(8_26_46/0.95)] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
 
 const ErrorMessage = ({ message }) => {
   if (!message) return null;
@@ -330,490 +327,12 @@ const ErrorMessage = ({ message }) => {
   return (
     <div
       role="alert"
-      className="mb-4 flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-semibold text-rose-600"
+      className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-[13px] text-red-700"
     >
-      <i className="fa-solid fa-circle-exclamation text-xs" />
+      <Icon className="fa-solid fa-circle-exclamation text-xs" />
 
       <span>{message}</span>
     </div>
-  );
-};
-
-// ============================================================
-
-// MODERN SELECT
-
-// ============================================================
-
-const ModernSelect = ({
-  value,
-
-  options,
-
-  onChange,
-
-  icon = "fa-regular fa-circle-check",
-}) => {
-  const ref = useRef(null);
-
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const close = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", close);
-
-    return () => {
-      document.removeEventListener("mousedown", close);
-    };
-  }, [open]);
-
-  const selected =
-    options.find((option) => option.value === value) || options[0];
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-        className={cn(
-          "group flex h-11 w-full items-center rounded-xl border border-slate-200/90 bg-white px-2.5 text-left transition-all duration-200 hover:border-slate-200 hover:bg-white hover:shadow-[0_3px_12px_rgba(15,23,42,.05)]",
-
-          focusRing,
-        )}
-      >
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-600 transition group-hover:bg-slate-100">
-          <i className={`${icon} text-xs`} />
-        </span>
-
-        <div className="min-w-0 flex-1 px-2.5">
-          <p className="truncate text-xs font-semibold text-slate-700">
-            {selected?.label}
-          </p>
-        </div>
-
-        <span
-          className={cn(
-            "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 shadow-sm transition",
-
-            open && "border-slate-200 bg-slate-50 text-slate-600",
-          )}
-        >
-          <i
-            className={cn(
-              "fa-solid fa-chevron-down text-xs transition-transform duration-200",
-
-              open && "rotate-180",
-            )}
-          />
-        </span>
-      </button>
-
-      {open && (
-        <div
-          role="listbox"
-          className="absolute left-0 right-0 top-[calc(100%+7px)] z-[120] overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_18px_50px_rgba(15,23,42,.16)]"
-        >
-          {options.map((option) => {
-            const active = option.value === value;
-
-            return (
-              <button
-                key={option.value}
-                type="button"
-                role="option"
-                aria-selected={active}
-                onClick={() => {
-                  onChange(option.value);
-
-                  setOpen(false);
-                }}
-                className={cn(
-                  "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition",
-
-                  active
-                    ? "bg-slate-50 text-slate-700"
-                    : "text-slate-600 hover:bg-slate-50",
-
-                  focusRing,
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg",
-
-                    active
-                      ? "bg-slate-100 text-slate-600"
-                      : "bg-slate-100 text-slate-400",
-                  )}
-                >
-                  <i className={`${option.icon || icon} text-xs`} />
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold">{option.label}</p>
-
-                  {option.description && (
-                    <p className="mt-0.5 text-xs font-medium text-slate-400">
-                      {option.description}
-                    </p>
-                  )}
-                </div>
-
-                {active && (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-white">
-                    <i className="fa-solid fa-check text-xs" />
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ============================================================
-
-// LEAVE
-
-// ============================================================
-
-export const ApplyLeaveModal = ({ open, initialDate, onClose, onSubmit, isSubmitting = false }) => {
-  /*
-
-    Keep dates as local YYYY-MM-DD.
-
-    Do not use toISOString().slice(0, 10).
-
-  */
-
-  const { formOptions = {}, serverToday } = useAttendanceAccess();
-  const todayKey = serverToday || "";
-
-  const getInitialLeaveDate = () =>
-    initialDate && initialDate >= (formOptions.leaveMinDate || "") ? initialDate : todayKey;
-
-  const createInitialForm = () => {
-    const date = getInitialLeaveDate();
-
-    return {
-      leaveType: formOptions.leaveTypes?.[0]?.value || "",
-
-      from: date,
-
-      to: date,
-
-      duration: formOptions.durations?.[0]?.value || "FULL_DAY",
-
-      reason: "",
-    };
-  };
-
-  const [form, setForm] = useState(createInitialForm);
-
-  // Earliest date depends on the leave type (HR decides whether it can be backdated)
-  const leaveMinDate =
-    (formOptions.leaveTypes || []).find((type) => type.value === form.leaveType)?.minDate ||
-    formOptions.leaveMinDate;
-
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-
-    setForm(createInitialForm());
-
-    setError("");
-  }, [open, initialDate, todayKey]);
-
-  const update = (key, value) => {
-    setForm((current) => ({
-      ...current,
-
-      [key]: value,
-    }));
-  };
-
-  const updateFromDate = (value) => {
-    setForm((current) => {
-      const nextTo = !current.to || current.to < value ? value : current.to;
-
-      /*
-
-        Half-day leave is single-day only.
-
-        If the user changes From while a half-day
-
-        duration is selected, keep To synced.
-
-      */
-
-      return {
-        ...current,
-
-        from: value,
-
-        to: formOptions.halfDaySingleDate && current.duration !== "FULL_DAY" ? value : nextTo,
-      };
-    });
-  };
-
-  const updateToDate = (value) => {
-    setForm((current) => ({
-      ...current,
-
-      to: value,
-    }));
-  };
-
-  const updateDuration = (value) => {
-    setForm((current) => ({
-      ...current,
-
-      duration: value,
-
-      /*
-
-        FIRST_HALF and SECOND_HALF are only
-
-        supported for a single attendance date.
-
-      */
-
-      to: !formOptions.halfDaySingleDate || value === "FULL_DAY" ? current.to : current.from,
-    }));
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    setError("");
-
-    if (
-      !form.from ||
-      !form.to ||
-      !form.leaveType ||
-      !form.duration ||
-      !form.reason.trim()
-    ) {
-      setError("Please complete all required fields.");
-
-      return;
-    }
-
-    if (form.to < form.from) {
-      setError("End date cannot be before the start date.");
-
-      return;
-    }
-
-    const reason = form.reason.trim();
-
-    if (reason.length < formOptions.reasonMin) {
-      setError(
-        `Reason must contain at least ${formOptions.reasonMin} characters.`,
-      );
-
-      return;
-    }
-
-    if (reason.length > formOptions.reasonMax) {
-      setError(
-        `Reason cannot exceed ${formOptions.reasonMax} characters.`,
-      );
-
-      return;
-    }
-
-    const result = await onSubmit({
-      ...form,
-
-      reason,
-    });
-
-    if (!result?.ok) {
-      setError(result?.message || "Unable to submit request.");
-
-      return;
-    }
-
-    onClose();
-  };
-
-  return (
-    <RequestModal
-      open={open}
-      title="Apply Leave"
-      icon="fa-regular fa-calendar-plus"
-      subtitle="Your request will be sent to your reporting manager for approval."
-      onClose={onClose}
-    >
-      <form onSubmit={handleSubmit} className="p-4 sm:p-5">
-        <div
-          role="note"
-          className="mb-4 flex items-start gap-2.5 rounded-xl border border-[#A4C8E1] bg-[#F0F6FA] px-3 py-2.5"
-        >
-          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#D8E7F2] text-[#1B4A7B]">
-            <i className="fa-solid fa-route text-xs" />
-          </span>
-
-          <div>
-            <p className="text-xs font-bold text-[#133F66]">
-              Approval workflow
-            </p>
-
-            <p className="mt-0.5 text-xs leading-4 text-[#1B4A7B]">
-              The request remains pending until an authorized approver processes
-              it.
-            </p>
-          </div>
-        </div>
-
-        <ErrorMessage message={error} />
-
-        <div className="space-y-4">
-          <div>
-            <span className={labelClass}>Leave Type *</span>
-
-            <ModernSelect
-              value={form.leaveType}
-              options={(formOptions.leaveTypes || [])}
-              onChange={(value) => update("leaveType", value)}
-              icon="fa-regular fa-calendar-check"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <span className={labelClass}>From *</span>
-
-              <DatePicker
-                value={form.from}
-                min={leaveMinDate}
-                onChange={updateFromDate}
-                placeholder="Select from date"
-              />
-            </div>
-
-            <div>
-              <span className={labelClass}>To *</span>
-
-              <DatePicker
-                value={form.to}
-                min={form.from || leaveMinDate}
-                onChange={updateToDate}
-                placeholder="Select to date"
-              />
-            </div>
-          </div>
-
-          <div>
-            <span className={labelClass}>Duration</span>
-
-            <div className="grid grid-cols-3 gap-2">
-              {(formOptions.durations || []).map((item) => {
-                const active = form.duration === item.value;
-
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => updateDuration(item.value)}
-                    className={cn(
-                      "flex min-h-[58px] flex-col items-center justify-center gap-1.5 rounded-xl border px-2 text-center transition-all duration-200",
-
-                      focusRing,
-
-                      active
-                        ? "border-[#7FBBD8] bg-[#F0F6FA] text-[#1B4A7B]"
-                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-100 hover:bg-slate-50",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex h-6 w-6 items-center justify-center rounded-lg",
-
-                        active
-                          ? "bg-[#2A5F98] text-white"
-                          : "bg-slate-100 text-slate-400",
-                      )}
-                    >
-                      <i className={`${item.icon} text-xs`} />
-                    </span>
-
-                    <span className="text-xs font-bold sm:text-xs">
-                      {item.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {formOptions.halfDaySingleDate && form.duration !== "FULL_DAY" && (
-              <p className="mt-2 text-xs font-medium text-slate-600">
-                Half-day leave applies to one date only.
-              </p>
-            )}
-          </div>
-
-          <label className="block">
-            <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">
-                Reason *
-              </span>
-
-              <span className="text-xs font-semibold text-slate-400">
-                {form.reason.length}/{formOptions.reasonMax}
-              </span>
-            </div>
-
-            <textarea
-              rows={3}
-              maxLength={formOptions.reasonMax}
-              value={form.reason}
-              onChange={(event) => update("reason", event.target.value)}
-              placeholder="Briefly explain the reason for leave"
-              className={cn(textareaClass, focusRing)}
-            />
-          </label>
-        </div>
-
-        <div className="mt-5 flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className={cn(cancelButtonClass, focusRing)}
-          >
-            Cancel
-          </button>
-
-          <button
-            disabled={isSubmitting}
-            type="submit"
-            className={cn(
-              submitButtonClass,
-
-              "bg-[#2A5F98] shadow-[0_4px_12px_rgba(79,70,229,.18)] hover:bg-[#1B4A7B]",
-
-              focusRing,
-            )}
-          >
-            <i className="fa-regular fa-paper-plane text-xs" />
-            Submit Request
-          </button>
-        </div>
-      </form>
-    </RequestModal>
   );
 };
 
@@ -917,23 +436,6 @@ export const WorkFromHomeModal = ({ open, initialDate, onClose, onSubmit, isSubm
       onClose={onClose}
     >
       <form onSubmit={handleSubmit} className="p-4 sm:p-5">
-        <div
-          role="note"
-          className="mb-4 flex items-start gap-2.5 rounded-xl border border-[#A4C8E1] bg-[#F0F6FA] px-3 py-2.5"
-        >
-          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#D8E7F2] text-[#1B4A7B]">
-            <i className="fa-solid fa-house-laptop text-xs" />
-          </span>
-
-          <div>
-            <p className="text-xs font-bold text-[#133F66]">WFH payable rule</p>
-
-            <p className="mt-0.5 text-xs leading-4 text-[#1B4A7B]">
-              {formOptions.wfhDescription || "Payable values are supplied by the attendance backend."}
-            </p>
-          </div>
-        </div>
-
         <ErrorMessage message={error} />
 
         <div className="space-y-4">
@@ -997,11 +499,10 @@ export const WorkFromHomeModal = ({ open, initialDate, onClose, onSubmit, isSubm
             type="submit"
             className={cn(
               submitButtonClass,
-              "bg-[#2A5F98] shadow-[0_4px_12px_rgba(79,70,229,.18)] hover:bg-[#1B4A7B]",
               focusRing,
             )}
           >
-            <i className="fa-regular fa-paper-plane text-xs" />
+            <Icon className="fa-regular fa-paper-plane text-xs" />
             Submit WFH Request
           </button>
         </div>
@@ -1134,12 +635,12 @@ export const MissedPunchModal = ({
       <form onSubmit={handleSubmit} className="space-y-4 p-4 sm:p-5">
         <ErrorMessage message={error || day.error?.message} />
         {confirming ? (
-          <div className="overflow-hidden rounded-xl border border-[#A4C8E1] bg-[#F0F6FA]">
-            <div className="border-b border-[#D8E7F2] bg-white/80 px-4 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#2A5F98]">
+          <div className="overflow-hidden rounded-xl border border-[#cfdce5] bg-[#f2f5f7]">
+            <div className="border-b border-[#dce6ed] bg-white/80 px-4 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#2b6485]">
                 Attendance confirmation
               </p>
-              <p className="mt-1 text-sm font-semibold text-[#081F34]">
+              <p className="mt-1 text-sm font-semibold text-[#081a2e]">
                 {confirming === "PUNCH_OUT"
                   ? "Record Punch Out"
                   : "Record Punch In"}
@@ -1148,7 +649,7 @@ export const MissedPunchModal = ({
             <dl className="grid grid-cols-2 gap-x-4 gap-y-3 px-4 py-4 text-sm">
               <div className="col-span-2">
                 <dt className="text-xs text-slate-500">Employee</dt>
-                <dd className="mt-0.5 font-semibold text-[#133F66]">
+                <dd className="mt-0.5 font-semibold text-[#163a58]">
                   {employee?.name || user?.name || "--"}{" "}
                   <span className="font-normal text-slate-500">
                     ({employee?.empId || user?.empId || "--"})
@@ -1157,7 +658,7 @@ export const MissedPunchModal = ({
               </div>
               <div className="col-span-2">
                 <dt className="text-xs text-slate-500">Attendance date</dt>
-                <dd className="mt-0.5 font-semibold text-[#133F66]">
+                <dd className="mt-0.5 font-semibold text-[#163a58]">
                   {new Date(`${form.date}T12:00:00`).toLocaleDateString(
                     undefined,
                     {
@@ -1171,22 +672,22 @@ export const MissedPunchModal = ({
               </div>
               <div>
                 <dt className="text-xs text-slate-500">Recorded Punch In</dt>
-                <dd className="mt-0.5 font-semibold text-[#133F66]">
+                <dd className="mt-0.5 font-semibold text-[#163a58]">
                   {record.punchIn || "--"}
                 </dd>
               </div>
               <div>
                 <dt className="text-xs text-slate-500">Recorded Punch Out</dt>
-                <dd className="mt-0.5 font-semibold text-[#133F66]">
+                <dd className="mt-0.5 font-semibold text-[#163a58]">
                   {record.punchOut || "--"}
                 </dd>
               </div>
             </dl>
-            <div className="border-t border-[#D8E7F2] px-4 py-3 text-center">
+            <div className="border-t border-[#dce6ed] px-4 py-3 text-center">
               <p className="text-xs text-slate-600">
                 Current time · final time captured when you confirm
               </p>
-              <p className="mt-1 text-2xl font-bold text-[#1B4A7B]">
+              <p className="mt-1 text-2xl font-bold text-[#1f4e6b]">
                 {clock.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -1220,7 +721,7 @@ export const MissedPunchModal = ({
                 className="mt-1"
               />
             </label>
-            <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 text-xs">
+            <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-200/80 bg-white p-3 text-xs">
               <div>
                 <p className="text-slate-500">Recorded Punch In</p>
                 <strong>{record.punchIn || "--"}</strong>
@@ -1235,12 +736,12 @@ export const MissedPunchModal = ({
                 className={cn(
                   "rounded-xl border p-4 text-center",
                   confirming
-                    ? "border-[#7FBBD8] bg-[#F0F6FA]"
-                    : "border-slate-100 bg-slate-50",
+                    ? "border-[#9fb8c9] bg-[#f2f5f7]"
+                    : "border-slate-200/80 bg-white",
                 )}
               >
                 {confirming && (
-                  <p className="mb-2 text-sm font-bold text-[#1B4A7B]">
+                  <p className="mb-2 text-sm font-bold text-[#1f4e6b]">
                     Confirm{" "}
                     {confirming === "PUNCH_OUT" ? "Punch Out" : "Punch In"}
                   </p>
@@ -1250,7 +751,7 @@ export const MissedPunchModal = ({
                     ? "The current time will be saved when you confirm."
                     : "Current time · captured automatically when confirmed"}
                 </p>
-                <p className="mt-1 text-2xl font-bold text-[#133F66]">
+                <p className="mt-1 text-2xl font-bold text-[#163a58]">
                   {clock.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -1338,7 +839,6 @@ export const MissedPunchModal = ({
             disabled={isSubmitting || day.isLoading || day.isError || (live ? !web.ok : !type)}
             className={cn(
               submitButtonClass,
-              "bg-[#2A5F98] shadow-sm hover:bg-[#1B4A7B] disabled:cursor-not-allowed disabled:bg-slate-300",
               focusRing,
             )}
           >

@@ -6,9 +6,9 @@ const Step3Contact = ({ form, errors, onChange, requiredFields = REQUIRED_FIELDS
     const isReq = (f) => requiredFields.includes(f)
 
     return (
-        <div>
-            <h3 className='text-sm font-bold text-slate-800 mb-1'>Emergency Contact Details</h3>
-            <p className='text-xs text-slate-500 mb-5'>Who to contact in case of an emergency</p>
+        <div className='glass-panel rounded-2xl p-4 md:p-5'>
+            <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Emergency contact</h3>
+            <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Who to contact in case of an emergency</p>
 
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <FormField label='Contact Name' name='emergencyContactName' value={form.emergencyContactName} onChange={onChange} required={isReq('emergencyContactName')} error={errors.emergencyContactName} placeholder='Full name' />

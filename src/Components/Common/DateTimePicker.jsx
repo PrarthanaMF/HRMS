@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { createPortal } from "react-dom";
 
+import Icon from "./Icon";
 // ============================================================
 // HELPERS
 // ============================================================
@@ -9,7 +10,7 @@ import { createPortal } from "react-dom";
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3A7DC0] focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] focus-visible:ring-offset-2";
 
 const pad2 = (value) => String(value).padStart(2, "0");
 
@@ -223,6 +224,7 @@ const usePopoverPosition = (
     top: 0,
     left: 0,
     width: preferredWidth,
+    maxHeight: estimatedHeight,
   });
 
   useEffect(() => {
@@ -255,22 +257,28 @@ const usePopoverPosition = (
 
       const spaceAbove = rect.top;
 
-      const openAbove = spaceBelow < estimatedHeight && spaceAbove > spaceBelow;
+      // The popup may be taller than the window (a short laptop screen, a phone in landscape):
+      // then it gets the window's height and scrolls inside
+      const maxHeight = Math.min(estimatedHeight, viewportHeight - 24);
+
+      const openAbove = spaceBelow < maxHeight + 8 && spaceAbove > spaceBelow;
 
       let top;
 
       if (openAbove) {
-        top = rect.top - estimatedHeight - 8;
-
-        top = Math.max(12, top);
+        top = rect.top - maxHeight - 8;
       } else {
         top = rect.bottom + 8;
       }
+
+      // Whatever side it opens on, keep the whole popup inside the window
+      top = Math.max(12, Math.min(top, viewportHeight - maxHeight - 12));
 
       setPosition({
         top,
         left,
         width,
+        maxHeight,
       });
     };
 
@@ -295,6 +303,7 @@ const usePopoverPosition = (
 // ============================================================
 
 const PickerButton = ({
+  id,
   open,
   disabled,
   value,
@@ -307,10 +316,11 @@ const PickerButton = ({
   const toneClass =
     tone === "amber"
       ? "bg-amber-50 text-amber-700"
-      : "bg-[#F0F6FA] text-[#2A5F98]";
+      : "bg-[#f2f5f7] text-[#2b6485]";
 
   return (
     <button
+      id={id}
       type="button"
       disabled={disabled}
       aria-expanded={open}
@@ -332,9 +342,9 @@ const PickerButton = ({
           transition-all
           duration-200
 
-          hover:border-[#A4C8E1]
+          hover:border-[#cfdce5]
           hover:bg-white
-          hover:shadow-[0_3px_12px_rgba(15,23,42,.05)]
+          hover:shadow-[0_3px_12px_rgba(8,26,46,.05)]
 
           disabled:cursor-not-allowed
           disabled:bg-slate-50
@@ -355,7 +365,7 @@ const PickerButton = ({
           toneClass,
         )}
       >
-        <i className={`${icon} text-[9px]`} />
+        <Icon className={`${icon} text-[9px]`} />
       </span>
 
       <span
@@ -390,10 +400,10 @@ const PickerButton = ({
             shadow-sm
             transition
           `,
-          open && "border-[#A4C8E1] bg-[#F0F6FA] text-[#2A5F98]",
+          open && "border-[#cfdce5] bg-[#f2f5f7] text-[#2b6485]",
         )}
       >
-        <i
+        <Icon
           className={cn(
             `
               fa-solid
@@ -403,8 +413,7 @@ const PickerButton = ({
               duration-200
             `,
             open && "rotate-180",
-          )}
-        />
+          )} />
       </span>
     </button>
   );
@@ -425,6 +434,7 @@ const PickerButton = ({
 // ============================================================
 
 export const DatePicker = ({
+  id,
   value = "",
   onChange,
   placeholder = "Select date",
@@ -541,6 +551,7 @@ export const DatePicker = ({
     <div className={cn("relative", className)}>
       <div ref={triggerRef}>
         <PickerButton
+          id={id}
           open={open}
           disabled={disabled}
           value={value}
@@ -564,7 +575,7 @@ export const DatePicker = ({
               border-slate-200/80
               bg-white
               p-3
-              shadow-[0_22px_70px_rgba(15,23,42,.22)]
+              shadow-[0_22px_70px_rgba(8,26,46,.22)]
             "
             style={{
               top: position.top,
@@ -572,6 +583,10 @@ export const DatePicker = ({
               left: position.left,
 
               width: position.width,
+
+              maxHeight: position.maxHeight,
+
+              overflowY: "auto",
             }}
           >
             {/* HEADER */}
@@ -588,6 +603,7 @@ export const DatePicker = ({
 
               <div className="flex shrink-0 gap-1">
                 <button
+                  aria-label="Previous month"
                   type="button"
                   disabled={!canGoPrevious}
                   onClick={() => shiftMonth(-1)}
@@ -604,9 +620,9 @@ export const DatePicker = ({
                       text-slate-500
                       transition
 
-                      hover:border-[#A4C8E1]
-                      hover:bg-[#F0F6FA]
-                      hover:text-[#2A5F98]
+                      hover:border-[#cfdce5]
+                      hover:bg-[#f2f5f7]
+                      hover:text-[#2b6485]
 
                       disabled:cursor-not-allowed
                       disabled:opacity-30
@@ -617,10 +633,11 @@ export const DatePicker = ({
                     focusRing,
                   )}
                 >
-                  <i className="fa-solid fa-chevron-left text-[8px]" />
+                  <Icon className="fa-solid fa-chevron-left text-[8px]" />
                 </button>
 
                 <button
+                  aria-label="Next month"
                   type="button"
                   disabled={!canGoNext}
                   onClick={() => shiftMonth(1)}
@@ -637,9 +654,9 @@ export const DatePicker = ({
                       text-slate-500
                       transition
 
-                      hover:border-[#A4C8E1]
-                      hover:bg-[#F0F6FA]
-                      hover:text-[#2A5F98]
+                      hover:border-[#cfdce5]
+                      hover:bg-[#f2f5f7]
+                      hover:text-[#2b6485]
 
                       disabled:cursor-not-allowed
                       disabled:opacity-30
@@ -650,7 +667,7 @@ export const DatePicker = ({
                     focusRing,
                   )}
                 >
-                  <i className="fa-solid fa-chevron-right text-[8px]" />
+                  <Icon className="fa-solid fa-chevron-right text-[8px]" />
                 </button>
               </div>
             </div>
@@ -694,6 +711,7 @@ export const DatePicker = ({
                     type="button"
                     disabled={dateDisabled}
                     onClick={() => selectDate(date)}
+                    aria-label={formatDateDisplay(dateToValue(date))}
                     className={cn(
                       `
                           relative
@@ -720,8 +738,8 @@ export const DatePicker = ({
                         `
                             bg-slate-50/60
                             text-slate-500
-                            hover:bg-[#F0F6FA]
-                            hover:text-[#1B4A7B]
+                            hover:bg-[#f2f5f7]
+                            hover:text-[#1f4e6b]
                           `,
 
                       !outside &&
@@ -729,15 +747,15 @@ export const DatePicker = ({
                         !dateDisabled &&
                         `
                             text-slate-600
-                            hover:bg-[#F0F6FA]
-                            hover:text-[#1B4A7B]
+                            hover:bg-[#f2f5f7]
+                            hover:text-[#1f4e6b]
                           `,
 
                       selected &&
                         `
-                            bg-[#2A5F98]
+                            bg-[#2b6485]
                             text-white
-                            shadow-[0_4px_12px_rgba(37,99,235,.24)]
+                            shadow-[0_4px_12px_rgba(31,78,107,.24)]
                           `,
 
                       focusRing,
@@ -746,7 +764,7 @@ export const DatePicker = ({
                     {date.getDate()}
 
                     {isToday && !selected && !dateDisabled && (
-                      <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[#3A7DC0]" />
+                      <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[#2b6485]" />
                     )}
                   </button>
                 );
@@ -790,16 +808,16 @@ export const DatePicker = ({
                 onClick={() => selectDate(today)}
                 className="
                   rounded-lg
-                  bg-[#F0F6FA]
+                  bg-[#f2f5f7]
                   px-2.5 py-1.5
 
                   text-[9px]
                   font-bold
-                  text-[#2A5F98]
+                  text-[#2b6485]
 
                   transition
 
-                  hover:bg-[#D8E7F2]
+                  hover:bg-[#dce6ed]
 
                   disabled:cursor-not-allowed
                   disabled:opacity-40
@@ -926,7 +944,7 @@ export const TimePicker = ({
 
               bg-white
 
-              shadow-[0_22px_70px_rgba(15,23,42,.22)]
+              shadow-[0_22px_70px_rgba(8,26,46,.22)]
             "
             style={{
               top: position.top,
@@ -934,6 +952,10 @@ export const TimePicker = ({
               left: position.left,
 
               width: position.width,
+
+              maxHeight: position.maxHeight,
+
+              overflowY: "auto",
             }}
           >
             <div className="border-b border-slate-100 px-3 py-2.5">
@@ -976,7 +998,7 @@ export const TimePicker = ({
                           `,
 
                         draft.hour === hour
-                          ? "bg-[#2A5F98] text-white"
+                          ? "bg-[#2b6485] text-white"
                           : "text-slate-500 hover:bg-slate-50",
                       )}
                     >
@@ -1015,7 +1037,7 @@ export const TimePicker = ({
                           `,
 
                         draft.minute === minute
-                          ? "bg-[#2A5F98] text-white"
+                          ? "bg-[#2b6485] text-white"
                           : "text-slate-500 hover:bg-slate-50",
                       )}
                     >
@@ -1101,7 +1123,7 @@ export const TimePicker = ({
                   focusRing,
                 )}
               >
-                <i className="fa-solid fa-check mr-2 text-[8px]" />
+                <Icon className="fa-solid fa-check mr-2 text-[8px]" />
                 Set Time
               </button>
             </div>

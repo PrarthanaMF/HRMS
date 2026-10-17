@@ -124,18 +124,37 @@ Object.assign(ATTENDANCE_STATUS, {
   IP: { label: "In Progress", shortLabel: "IP", dotClass: "bg-blue-400", cellClass: "border-blue-200 bg-blue-50 text-blue-700" },
   LC: { label: "Late Entry", shortLabel: "LC", markerClass: "bg-orange-600", dotClass: "bg-orange-600", cellClass: "border-orange-200 bg-orange-50 text-orange-700" },
   EL: { label: "Early Leaving", shortLabel: "EL", markerClass: "bg-sky-600", dotClass: "bg-sky-600", cellClass: "border-sky-200 bg-sky-50 text-sky-700" },
-  LE: { label: "Late Entry & Early Leaving", shortLabel: "LE", markerClass: "bg-violet-600", dotClass: "bg-violet-600", cellClass: "border-violet-200 bg-violet-50 text-violet-700" },
 });
 ATTENDANCE_STATUS.WO.label = "Week Off";
 ATTENDANCE_STATUS.WOP.label = "Present On Week Off";
 
 export const LEGEND_GROUPS = [
-  { title: "Discipline", items: [["LC", "Late Entry"], ["EL", "Early Leaving"], ["LE", "Late Entry & Early Leaving"]] },
+  { title: "Discipline", items: [["LC", "Late Entry"], ["EL", "Early Leaving"]] },
   { title: "Present", items: [["P", "Present"], ["HD", "Half Day"], ["WOP", "Present On Week Off"], ["HOP", "Present On Holiday"], ["WFH", "Work From Home"], ["IP", "In Progress (today)"]] },
   { title: "Off Days", items: [["H", "Holiday"], ["WO", "Week Off"]] },
   { title: "Leave", items: [["AL", "Approved Leave"], ["CO", "Comp Off"], ["UL", "Unapproved Leave"]] },
 ];
 export const LEGEND_ITEMS = [...new Map(LEGEND_GROUPS.flatMap(group => group.items)).entries()];
+
+/*
+ * Which calendar days a summary row stands for, so picking a row can highlight just those days.
+ * Most rows are one day status; Approved Leave also covers comp-off and legacy leave codes, and
+ * the discipline rows are flags on a day rather than its status.
+ */
+const STATUS_ALIASES = {
+  AL: ["AL", "CO", "L", "CL", "SL"],
+  HOP: ["HOP", "HP"],
+};
+
+export const matchesSummaryCode = (code, record) => {
+  if (!code || !record) return false;
+  const late = record.isLate === true || record.lateMinutes > 0 || record.displayStatusCode === "LC";
+  const early = record.isEarlyLeaving === true;
+  if (code === "LC") return late;
+  if (code === "EL") return early;
+  const status = record.displayStatusCode ?? record.statusCode;
+  return (STATUS_ALIASES[code] || [code]).includes(status);
+};
 
 const pad = (value) => String(value).padStart(2, "0");
 

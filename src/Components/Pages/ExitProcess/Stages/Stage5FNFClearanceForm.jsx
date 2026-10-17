@@ -5,6 +5,8 @@ import { updateStage5, selectExitById } from '../../../../Store/Redux/ExitProces
 import FormField from '../../../Common/FormField'
 import SuccessScreen, { PreviewRow, PreviewSection } from '../../../Common/SuccessScreen'
 
+import Icon from '../../../Common/Icon'
+import { primaryButton, secondaryButton } from '../../../Common/PageHeader'
 // ---- File Upload Field ----
 const FileUploadField = ({ label, file, onChange, onRemove, error, required = true }) => (
     <div>
@@ -13,25 +15,25 @@ const FileUploadField = ({ label, file, onChange, onRemove, error, required = tr
         </label>
 
         {!file ? (
-            <label className={`flex items-center gap-3 w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition ${
+            <label className={`flex items-center gap-3 w-full px-4 py-3 border-2 border-dashed rounded-xl cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#2b6485] ${
                 error
                     ? 'border-red-300 bg-red-50/40 hover:bg-red-50'
-                    : 'border-slate-300 hover:border-[#062139] hover:bg-slate-50'
+                    : 'border-slate-300 bg-white/50 hover:border-[#2b6485] hover:bg-[#f2f5f7]/70'
             }`}>
-                <div className='w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0'>
-                    <i className="fa-solid fa-cloud-arrow-up text-slate-500 text-sm"></i>
+                <div aria-hidden='true' className='w-9 h-9 rounded-lg bg-gradient-to-br from-[#E3EEF6] to-[#CFE2F0] text-[var(--brand-600)] flex items-center justify-center shrink-0'>
+                    <Icon className="fa-solid fa-cloud-arrow-up text-sm" />
                 </div>
                 <div className='min-w-0 flex-1'>
-                    <p className='text-xs font-medium text-slate-700'>Click to upload PDF</p>
-                    <p className='text-[10px] text-slate-400'>PDF only · Max 10 MB</p>
+                    <p className='text-xs font-medium text-slate-700'>Choose a file to upload PDF</p>
+                    <p className='text-[10px] text-slate-400'>PDF only, up to 10 MB</p>
                 </div>
-                <input type='file' accept='application/pdf,.pdf' onChange={onChange} className='hidden' />
+                <input type='file' accept='application/pdf,.pdf' onChange={onChange} className='sr-only' />
             </label>
         ) : (
-            <div className='flex items-center justify-between gap-3 px-3 py-2.5 border border-slate-200 rounded-lg bg-slate-50'>
+            <div className='flex items-center justify-between gap-3 px-3 py-2.5 border border-slate-200/80 rounded-xl bg-white/70'>
                 <div className='flex items-center gap-3 min-w-0'>
                     <div className='w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 border border-slate-200'>
-                        <i className="fa-solid fa-file-pdf text-red-500 text-xs"></i>
+                        <Icon className="fa-solid fa-file-pdf text-red-500 text-xs" />
                     </div>
                     <div className='min-w-0'>
                         <p className='text-xs font-medium text-slate-800 truncate'>{file.name}</p>
@@ -39,15 +41,15 @@ const FileUploadField = ({ label, file, onChange, onRemove, error, required = tr
                     </div>
                 </div>
                 <button type='button' onClick={onRemove}
-                    className='w-7 h-7 rounded-lg hover:bg-slate-200 flex items-center justify-center text-slate-500 transition cursor-pointer shrink-0'>
-                    <i className="fa-solid fa-xmark text-xs"></i>
+                    aria-label='Remove file' className='press w-10 h-10 rounded-lg hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-slate-500 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+                    <Icon className="fa-solid fa-xmark text-xs" />
                 </button>
             </div>
         )}
 
         {error && (
             <p className='text-[11px] text-red-600 flex items-center gap-1 mt-1'>
-                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                 {error}
             </p>
         )}
@@ -62,21 +64,21 @@ const YesNoRadio = ({ label, name, value, onChange, error }) => (
         </label>
         <div className='flex flex-col sm:flex-row gap-2'>
             {['Yes', 'No'].map((option) => (
-                <label key={option} className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition ${
+                <label key={option} className={`flex-1 flex items-center gap-3 px-4 py-3 min-h-11 rounded-xl border cursor-pointer transition-colors ${
                     value === option
-                        ? 'border-[#062139] bg-slate-50 ring-2 ring-slate-100'
-                        : 'border-slate-200 hover:bg-slate-50'
+                        ? 'border-[#2b6485] bg-[#f2f5f7] ring-2 ring-[#2b6485]/20'
+                        : 'border-slate-200/80 bg-white/70 hover:border-[#cfdce5] hover:bg-white'
                 }`}>
                     <input type='radio' name={name} value={option}
                         checked={value === option} onChange={onChange}
-                        className='w-4 h-4 accent-[#062139]' />
+                        className='w-4 h-4 accent-[#1f4e6b]' />
                     <span className='text-sm font-medium text-slate-700'>{option}</span>
                 </label>
             ))}
         </div>
         {error && (
             <p className='text-[11px] text-red-600 flex items-center gap-1 mt-2'>
-                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                 {error}
             </p>
         )}
@@ -100,11 +102,11 @@ const Stage5FNFClearanceForm = () => {
     const [errors, setErrors] = useState({})
     const [submitted, setSubmitted] = useState(null)
 
-    if (!record) return <LockScreen title='Record Not Found' navigate={navigate} />
+    if (!record) return <LockScreen title='Record not found' navigate={navigate} />
 
     const validStatuses = ['No Due Cleared', 'No Due Pending']
     if (!validStatuses.includes(record.status) && !submitted) {
-        return <LockScreen title='Stage 5 Not Available' record={record} navigate={navigate} />
+        return <LockScreen title='Stage 5 not available' record={record} navigate={navigate} />
     }
 
     const handleChange = (e) => {
@@ -190,11 +192,11 @@ const Stage5FNFClearanceForm = () => {
     if (submitted) {
         return (
             <SuccessScreen
-                title='Stage 5 Submitted'
-                subtitle='F&F Clearance recorded — employee marked as Exited'
+                title='Stage 5 submitted'
+                subtitle='F&F clearance recorded and the employee is marked as exited'
                 recordId={record._id}
             >
-                <PreviewSection title='F&F Decision' icon='fa-money-check-dollar'>
+                <PreviewSection title='F&F decision' icon='fa-money-check-dollar'>
                     <PreviewRow label='Generate F&F' value={submitted.generateFNF} />
                     {submitted.generateFNF === 'Yes' && submitted.remarks && (
                         <PreviewRow label='Remarks' value={submitted.remarks} full />
@@ -203,19 +205,19 @@ const Stage5FNFClearanceForm = () => {
 
                 {submitted.generateFNF === 'Yes' && (
                     <>
-                        <PreviewSection title='Clearance Steps' icon='fa-list-check'>
-                            <PreviewRow label='Generate Letters' value={submitted.generateLetters} />
+                        <PreviewSection title='Clearance steps' icon='fa-list-check'>
+                            <PreviewRow label='Generate letters' value={submitted.generateLetters} />
                         </PreviewSection>
 
-                        <PreviewSection title='Payslips Attached' icon='fa-file-pdf'>
+                        <PreviewSection title='Payslips attached' icon='fa-file-pdf'>
                             {submitted.lastMonthPayslip && (
-                                <PreviewRow label='Last Month Payslip' value={`${submitted.lastMonthPayslip.name} (${(submitted.lastMonthPayslip.size / 1024).toFixed(0)} KB)`} full />
+                                <PreviewRow label='Last month payslip' value={`${submitted.lastMonthPayslip.name} (${(submitted.lastMonthPayslip.size / 1024).toFixed(0)} KB)`} full />
                             )}
                             {submitted.secondLastMonthPayslip && (
-                                <PreviewRow label='2nd Last Month Payslip' value={`${submitted.secondLastMonthPayslip.name} (${(submitted.secondLastMonthPayslip.size / 1024).toFixed(0)} KB)`} full />
+                                <PreviewRow label='2nd last month payslip' value={`${submitted.secondLastMonthPayslip.name} (${(submitted.secondLastMonthPayslip.size / 1024).toFixed(0)} KB)`} full />
                             )}
                             {submitted.thirdLastMonthPayslip && (
-                                <PreviewRow label='3rd Last Month Payslip' value={`${submitted.thirdLastMonthPayslip.name} (${(submitted.thirdLastMonthPayslip.size / 1024).toFixed(0)} KB)`} full />
+                                <PreviewRow label='3rd last month payslip' value={`${submitted.thirdLastMonthPayslip.name} (${(submitted.thirdLastMonthPayslip.size / 1024).toFixed(0)} KB)`} full />
                             )}
                         </PreviewSection>
                     </>
@@ -227,27 +229,27 @@ const Stage5FNFClearanceForm = () => {
     // ---- FORM ----
     return (
         <div className='w-full max-w-2xl mx-auto'>
-            <button onClick={handleCancel} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-                <i className="fa-solid fa-arrow-left text-xs"></i>
-                Back to Record
+            <button onClick={handleCancel} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+                <Icon className="fa-solid fa-arrow-left text-xs" />
+                Back to record
             </button>
 
-            <form onSubmit={handleSubmit} className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
+            <form onSubmit={handleSubmit} className='rise glass-strong rounded-2xl overflow-hidden'>
 
-                <div className='flex items-center gap-3 px-5 py-4 border-b border-slate-100'>
-                    <div className='w-10 h-10 rounded-lg bg-[#062139] flex items-center justify-center shrink-0'>
-                        <i className="fa-solid fa-money-check-dollar text-white text-sm"></i>
+                <div className='flex items-center gap-3.5 px-5 py-4 border-b border-slate-200/70'>
+                    <div aria-hidden='true' className='gradient-brand w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white shadow-[0_10px_24px_-12px_rgb(8_26_46/0.9)] ring-1 ring-white/20'>
+                        <Icon className="fa-solid fa-money-check-dollar text-base" />
                     </div>
                     <div className='min-w-0'>
-                        <h2 className='text-base font-bold text-slate-800'>Stage 5 — F&F Clearance</h2>
-                        <p className='text-[11px] text-slate-500'>Final clearance for {record.name}</p>
+                        <h2 className='text-base font-semibold leading-tight text-[var(--ink)] sm:text-[17px]'>Stage 5: F&F clearance</h2>
+                        <p className='mt-0.5 text-[13px] text-slate-500'>Final clearance for {record.name}</p>
                     </div>
                 </div>
 
                 <div className='p-5 space-y-5'>
 
                     <YesNoRadio
-                        label='Whether F&F to be Generated'
+                        label='Whether F&F is to be generated'
                         name='generateFNF'
                         value={formData.generateFNF}
                         onChange={handleChange}
@@ -271,13 +273,13 @@ const Stage5FNFClearanceForm = () => {
                             <div className='pt-2'>
                                 <div className='flex items-center gap-3'>
                                     <div className='h-px flex-1 bg-slate-200'></div>
-                                    <span className='text-[10px] uppercase font-bold text-slate-500 tracking-widest'>Clearance Steps</span>
+                                    <span className='text-xs font-semibold text-slate-500'>Clearance steps</span>
                                     <div className='h-px flex-1 bg-slate-200'></div>
                                 </div>
                             </div>
 
                             <YesNoRadio
-                                label='Whether Experience Letter & Relieving Letter to Be Generated'
+                                label='Whether experience and relieving letters are to be generated'
                                 name='generateLetters'
                                 value={formData.generateLetters}
                                 onChange={handleChange}
@@ -285,7 +287,7 @@ const Stage5FNFClearanceForm = () => {
                             />
 
                             <FileUploadField
-                                label='Last Month Payslip'
+                                label='Last month payslip'
                                 file={formData.lastMonthPayslip}
                                 onChange={handleFileChange('lastMonthPayslip')}
                                 onRemove={removeFile('lastMonthPayslip')}
@@ -293,7 +295,7 @@ const Stage5FNFClearanceForm = () => {
                             />
 
                             <FileUploadField
-                                label='2nd Last Month Salary'
+                                label='2nd last month salary'
                                 file={formData.secondLastMonthPayslip}
                                 onChange={handleFileChange('secondLastMonthPayslip')}
                                 onRemove={removeFile('secondLastMonthPayslip')}
@@ -301,7 +303,7 @@ const Stage5FNFClearanceForm = () => {
                             />
 
                             <FileUploadField
-                                label='3rd Last Month Salary'
+                                label='3rd last month salary'
                                 file={formData.thirdLastMonthPayslip}
                                 onChange={handleFileChange('thirdLastMonthPayslip')}
                                 onRemove={removeFile('thirdLastMonthPayslip')}
@@ -311,8 +313,8 @@ const Stage5FNFClearanceForm = () => {
                     )}
 
                     {formData.generateFNF === 'No' && (
-                        <div className='flex items-start gap-2 bg-slate-50 border border-slate-100 rounded-lg px-4 py-3'>
-                            <i className="fa-solid fa-circle-info text-slate-400 text-xs mt-0.5"></i>
+                        <div className='flex items-start gap-2 bg-[#f2f5f7]/70 border border-[#cfdce5]/50 rounded-xl px-4 py-3'>
+                            <Icon className="fa-solid fa-circle-info text-slate-400 text-xs mt-0.5" />
                             <p className='text-[11px] text-slate-600'>
                                 Submitting this form will mark the employee as <strong>Exited</strong> and end the workflow.
                             </p>
@@ -321,14 +323,14 @@ const Stage5FNFClearanceForm = () => {
 
                 </div>
 
-                <div className='flex flex-col-reverse sm:flex-row justify-end gap-3 px-5 py-4 border-t border-slate-100 bg-slate-50'>
+                <div className='flex flex-col-reverse sm:flex-row justify-end gap-2.5 px-5 py-4 border-t border-slate-200/70 bg-white/50'>
                     <button type='button' onClick={handleCancel}
-                        className='w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer'>
+                        className={`${secondaryButton} w-full sm:w-auto cursor-pointer`}>
                         Cancel
                     </button>
                     <button type='submit'
-                        className='w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'>
-                        Submit Stage 5
+                        className={`${primaryButton} w-full sm:w-auto px-6 cursor-pointer`}>
+                        Submit stage 5
                     </button>
                 </div>
 
@@ -339,20 +341,20 @@ const Stage5FNFClearanceForm = () => {
 
 const LockScreen = ({ title, record, navigate }) => (
     <div className='w-full max-w-2xl mx-auto'>
-        <button onClick={() => navigate('/exit-process')} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-            <i className="fa-solid fa-arrow-left text-xs"></i>
-            Back to Exit Dashboard
+        <button onClick={() => navigate('/exit-process')} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+            <Icon className="fa-solid fa-arrow-left text-xs" />
+            Back to exit dashboard
         </button>
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center'>
-            <i className="fa-solid fa-lock text-4xl text-slate-300 mb-3"></i>
-            <h3 className='text-base font-bold text-slate-700 mb-1'>{title}</h3>
+        <div className='rise glass-panel rounded-2xl p-8 sm:p-12 text-center'>
+            <span aria-hidden='true' className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-[#E3EEF6] text-slate-500 ring-1 ring-inset ring-white'><Icon className="fa-solid fa-lock text-2xl" /></span>
+            <h3 className='text-base font-semibold text-[var(--ink)] mb-1'>{title}</h3>
             {record ? (
                 <>
                     <p className='text-sm text-slate-500'>This record is at stage: <span className='font-semibold'>{record.status}</span></p>
-                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className='mt-4 px-5 py-2.5 text-sm font-medium text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition cursor-pointer'>View Record</button>
+                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className={`${primaryButton} mt-5 cursor-pointer`}>View record</button>
                 </>
             ) : (
-                <p className='text-sm text-slate-500'>This resignation record does not exist.</p>
+                <p className='text-sm text-slate-500'>This resignation record does not exist. Go back to the exit dashboard to open another one.</p>
             )}
         </div>
     </div>

@@ -41,4 +41,4 @@ const VacancyListView = () => {
     )
 }
 
-export default VacancyListView
+export default VacancyListView

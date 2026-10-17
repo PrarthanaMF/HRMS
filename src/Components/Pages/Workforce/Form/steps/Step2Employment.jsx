@@ -10,10 +10,10 @@ const Step2Employment = ({ form, errors, onChange, requiredFields = REQUIRED_FIE
     const values = options?.values || {}
 
     return (
-        <div className='space-y-8'>
-            <div>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Employment Information</h3>
-                <p className='text-xs text-slate-500 mb-5'>Job role, reporting structure and joining details</p>
+        <div className='space-y-4'>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Employment information</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Job role, reporting structure and joining details</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Company' name='company' value={form.company} onChange={onChange} required={isReq('company')} error={errors.company} options={merged(DROPDOWN_OPTIONS.company, values.company)} />
@@ -30,9 +30,9 @@ const Step2Employment = ({ form, errors, onChange, requiredFields = REQUIRED_FIE
             </div>
 
             {/* What attendance needs to work out each day */}
-            <div className='pt-6 border-t border-slate-100'>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Attendance Set-up</h3>
-                <p className='text-xs text-slate-500 mb-5'>Biometric code, shift and week offs used to calculate attendance</p>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Attendance set-up</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Biometric code, shift and week offs used to calculate attendance</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Biometric Code' name='biometricCode' value={form.biometricCode} onChange={onChange} error={errors.biometricCode} placeholder='Code on the attendance device, e.g. 1004' />

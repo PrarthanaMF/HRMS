@@ -4,6 +4,8 @@ import { setFilter, resetFilters, selectFilters } from '../../../Store/Redux/Wor
 import { useEmployeeOptions } from '../../../Hooks/useEmployees'
 import SearchableSelect from '../../Common/SearchableSelect'
 
+import Icon from '../../Common/Icon'
+import { secondaryButton } from '../../Common/PageHeader'
 const FilterSelect = ({ label, value, options, onChange }) => (
     <SearchableSelect
         label={label}
@@ -30,39 +32,41 @@ const WorkforceFilters = ({ onChange }) => {
     }
 
     return (
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-3.5 md:p-4 mb-3 md:mb-4'>
+        <section aria-label='Employee filters' className='rise glass-panel mb-4 rounded-2xl p-3.5 md:p-4' style={{ '--i': 1 }}>
 
             {/* Search + Reset */}
-            <div className='flex flex-col sm:flex-row gap-2.5 md:gap-3 mb-3 md:mb-4'>
-                <div className='relative flex-1'>
-                    <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <div className='mb-3 flex flex-col gap-2.5 sm:flex-row'>
+                <div className='relative min-w-0 flex-1'>
+                    <Icon aria-hidden='true' className="fa-solid fa-magnifying-glass pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400" />
                     <input
-                        type="text"
+                        type="search"
+                        aria-label='Search employees'
                         value={filters.search}
                         onChange={(e) => update('search', e.target.value)}
-                        placeholder='Search by name, Employee ID, biometric code, phone or email...'
-                        className='w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
+                        placeholder='Search by name, employee ID, biometric code, phone or email'
+                        className='h-10 w-full rounded-xl border border-slate-200/80 bg-white/80 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2b6485]'
                     />
                 </div>
                 <button
+                    type='button'
                     onClick={() => { dispatch(resetFilters()); onChange?.() }}
-                    className='flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer'
+                    className={secondaryButton}
                 >
-                    <i className="fa-solid fa-rotate-left text-xs"></i>
-                    Reset
+                    <Icon aria-hidden='true' className="fa-solid fa-rotate-left text-sm" />
+                    Reset filters
                 </button>
             </div>
 
             {/* Filter dropdowns */}
-            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 md:gap-3'>
+            <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6'>
                 <FilterSelect label='Branch'            value={filters.branchId}           options={[ALL, ...(options?.branches || [])]}  onChange={(v) => update('branchId', v)} />
                 <FilterSelect label='Status'            value={filters.status}             options={['Active', 'Inactive']}               onChange={(v) => update('status', v)} />
                 <FilterSelect label='Department'        value={filters.department}         options={withAll(options?.values.department)}   onChange={(v) => update('department', v)} />
                 <FilterSelect label='Designation'       value={filters.designation}        options={withAll(options?.values.designation)}  onChange={(v) => update('designation', v)} />
                 <FilterSelect label='Company'           value={filters.company}            options={withAll(options?.values.company)}      onChange={(v) => update('company', v)} />
-                <FilterSelect label='Reporting Manager' value={filters.reportingManagerId} options={[ALL, ...(options?.managers || [])]}  onChange={(v) => update('reportingManagerId', v)} />
+                <FilterSelect label='Reporting manager' value={filters.reportingManagerId} options={[ALL, ...(options?.managers || [])]}  onChange={(v) => update('reportingManagerId', v)} />
             </div>
-        </div>
+        </section>
     )
 }
 

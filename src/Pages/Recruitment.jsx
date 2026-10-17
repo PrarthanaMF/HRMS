@@ -1,10 +1,13 @@
 import React from 'react'
 import { Outlet, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
+import Icon from '../Components/Common/Icon'
+import PageHeader, { segClass, segItemClass, primaryButton } from '../Components/Common/PageHeader'
+
 const TABS = [
-    { key: 'vacancies', label: 'Current Vacancy', shortLabel: 'Vacancy', icon: 'fa-briefcase', path: '/recruitment/vacancy' },
-    { key: 'tracker', label: 'Recruitment Tracker', shortLabel: 'Tracker', icon: 'fa-diagram-project', path: '/recruitment/tracker' },
-    { key: 'mis', label: 'MIS Reports', shortLabel: 'MIS', icon: 'fa-chart-pie', path: '/recruitment/mis' },
+    { key: 'vacancies', label: 'Current vacancy', shortLabel: 'Vacancy', icon: 'fa-briefcase', path: '/recruitment/vacancy' },
+    { key: 'tracker', label: 'Recruitment tracker', shortLabel: 'Tracker', icon: 'fa-diagram-project', path: '/recruitment/tracker' },
+    { key: 'mis', label: 'MIS reports', shortLabel: 'MIS', icon: 'fa-chart-pie', path: '/recruitment/mis' },
 ]
 
 // Recruitment Tracker's own Active / History toggle. Lives here (not inside the
@@ -35,22 +38,35 @@ const Recruitment = () => {
     }
 
     return (
-        <div className='w-full px-4 md:px-6 py-6'>
+        <div className='w-full'>
 
-            {/* Tabs + Hiring Request button */}
-            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5'>
+            {/* Hiring Request is available from every tab (Current Vacancy, Tracker, MIS Reports) —
+                only hidden while the Hiring Request form itself is open. */}
+            <PageHeader
+                icon='fa-solid fa-people-pulling'
+                title='Recruitment'
+                description='Raise hiring requests, track candidates through each interview stage and review hiring reports.'
+                actions={!isForm && (
+                    <button onClick={() => navigate('/recruitment/add')} className={primaryButton}>
+                        <Icon className="fa-solid fa-user-plus text-xs" />
+                        Hiring request
+                    </button>
+                )}
+            />
 
-                <div className='flex items-center gap-1 bg-white rounded-lg p-1 border border-slate-200 shadow-sm w-full sm:w-fit'>
+            {/* Tabs + the Tracker's Active / History toggle */}
+            <div className='rise mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between' style={{ '--i': 1 }}>
+                <div aria-label='Recruitment sections' className={segClass}>
                     {TABS.map((tab) => {
                         const active = tab.key === 'mis' ? isMis : tab.key === 'tracker' ? isTracker : isVacancies
                         return (
                             <button
                                 key={tab.key}
+                                aria-current={active ? 'page' : undefined}
                                 onClick={() => navigate(tab.path)}
-                                className={`flex-1 sm:flex-initial px-2 sm:px-4 py-2 rounded-md text-[12px] sm:text-sm font-medium transition whitespace-nowrap ${active ? 'bg-[#062139] text-white' : 'text-slate-600 hover:bg-slate-50'
-                                    }`}
+                                className={segItemClass(active)}
                             >
-                                <i className={`fa-solid ${tab.icon} mr-1 sm:mr-2 text-xs`}></i>
+                                <Icon className={`fa-solid ${tab.icon} text-xs`} />
                                 <span className='sm:hidden'>{tab.shortLabel}</span>
                                 <span className='hidden sm:inline'>{tab.label}</span>
                             </button>
@@ -58,38 +74,23 @@ const Recruitment = () => {
                     })}
                 </div>
 
-                <div className='flex items-center gap-3 w-full sm:w-auto'>
-                    {/* Active / History — Recruitment Tracker only. Active = every stage still in
-                        progress; History = candidates who have reached Join or Reject. */}
-                    {isTracker && (
-                        <div className='flex items-center gap-1 bg-white rounded-lg p-1 border border-slate-200 shadow-sm'>
-                            {TRACKER_VIEWS.map((v) => (
-                                <button
-                                    key={v.key}
-                                    onClick={() => setTrackerView(v.key)}
-                                    className={`px-3 py-2 rounded-md text-[12px] sm:text-sm font-medium transition whitespace-nowrap ${trackerView === v.key ? 'bg-[#062139] text-white' : 'text-slate-600 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    <i className={`fa-solid ${v.icon} mr-1.5 text-xs`}></i>
-                                    {v.label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Hiring Request is available from every tab (Current Vacancy, Tracker, MIS Reports) —
-                        only hidden while the Hiring Request form itself is open. Same simple standalone
-                        button style as "Add Employee" on the Workforce page — no extra frame. */}
-                    {!isForm && (
-                        <button
-                            onClick={() => navigate('/recruitment/add')}
-                            className='flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-[#062139] hover:bg-[#0a2f52] text-white px-4 py-[13px] rounded-lg text-[12px] sm:text-sm font-semibold transition shadow-sm hover:shadow-md'
-                        >
-                            <i className="fa-solid fa-user-plus text-xs"></i>
-                            Hiring Request
-                        </button>
-                    )}
-                </div>
+                {/* Active / History — Recruitment Tracker only. Active = every stage still in
+                    progress; History = candidates who have reached Join or Reject. */}
+                {isTracker && (
+                    <div role='group' aria-label='Candidate view' className={segClass}>
+                        {TRACKER_VIEWS.map((v) => (
+                            <button
+                                key={v.key}
+                                aria-pressed={trackerView === v.key}
+                                onClick={() => setTrackerView(v.key)}
+                                className={segItemClass(trackerView === v.key)}
+                            >
+                                <Icon className={`fa-solid ${v.icon} text-xs`} />
+                                {v.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Child route renders here */}

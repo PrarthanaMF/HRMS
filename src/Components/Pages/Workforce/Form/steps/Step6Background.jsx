@@ -9,12 +9,12 @@ const Step6Background = ({ form, errors, onChange, requiredFields = REQUIRED_FIE
     const isReq = (f) => requiredFields.includes(f)
 
     return (
-        <div className='space-y-8'>
+        <div className='space-y-4'>
 
             {/* Previous Employment */}
-            <div>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Previous Employment Details</h3>
-                <p className='text-xs text-slate-500 mb-5'>Previous company information and documents</p>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Previous employment</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Previous company information and documents</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Previous Company Name' name='previousCompanyName' value={form.previousCompanyName} onChange={onChange} error={errors.previousCompanyName} />
@@ -31,9 +31,9 @@ const Step6Background = ({ form, errors, onChange, requiredFields = REQUIRED_FIE
             </div>
 
             {/* Recruitment */}
-            <div className='pt-6 border-t border-slate-100'>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Recruitment / Joining Documents</h3>
-                <p className='text-xs text-slate-500 mb-5'>Resume and offer letters</p>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Joining documents</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Resume and offer letters</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Resume' name='resume' value={form.resume} onChange={onChange} error={errors.resume} type='file' accept={DOCUMENT_ACCEPT} hint={fileHint('resume')} />
@@ -43,9 +43,9 @@ const Step6Background = ({ form, errors, onChange, requiredFields = REQUIRED_FIE
             </div>
 
             {/* Company Contact */}
-            <div className='pt-6 border-t border-slate-100'>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Company Contact Details</h3>
-                <p className='text-xs text-slate-500 mb-5'>Official email and company-provided number</p>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Company contact</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Official email and company-provided number</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Official Email' name='officialEmail' value={form.officialEmail} onChange={onChange} required={isReq('officialEmail')} error={errors.officialEmail} type='email' placeholder='name@marutiflex.com' />

@@ -16,6 +16,7 @@ import {
 
 import { RequestModal } from "../Components/Pages/Attendance/AttendanceForms";
 
+import Icon from "../Components/Common/Icon";
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 const formatDateTime = (value) => {
@@ -110,7 +111,7 @@ const StatusBadge = ({ status }) => {
         tone.border,
       )}
     >
-      <i className={`${tone.icon} text-xs`} />
+      <Icon className={`${tone.icon} text-xs`} />
       {status}
     </span>
   );
@@ -119,7 +120,7 @@ const StatusBadge = ({ status }) => {
 const MetaItem = ({ icon, label, value, valueClassName = "" }) => (
   <div className="min-w-0">
     <p className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.08em] text-slate-400">
-      {icon && <i className={`${icon} text-xs`} />}
+      {icon && <Icon className={`${icon} text-xs`} />}
       {label}
     </p>
 
@@ -240,7 +241,7 @@ const RequestDetails = ({ request, attendanceRecord }) => {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.08em] text-slate-400">
-              <i className="fa-solid fa-database text-xs" />
+              <Icon className="fa-solid fa-database text-xs" />
               Current Attendance
             </p>
 
@@ -263,7 +264,7 @@ const RequestDetails = ({ request, attendanceRecord }) => {
 
           <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-3">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-[.08em] text-blue-500">
-              <i className="fa-solid fa-pen-to-square text-xs" />
+              <Icon className="fa-solid fa-pen-to-square text-xs" />
               Requested Change
             </p>
 
@@ -322,7 +323,7 @@ const RequestCard = ({
   const isPending = request.status === REQUEST_STATUS.PENDING;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_28px_rgba(15,23,42,.05)]">
+    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_28px_rgba(8,26,46,.05)]">
       <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50/80 via-white to-white px-4 py-3.5 sm:px-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -407,7 +408,7 @@ const RequestCard = ({
               onClick={() => onReject(request)}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 text-xs font-bold text-rose-700 transition hover:bg-rose-100"
             >
-              <i className="fa-solid fa-xmark text-xs" />
+              <Icon className="fa-solid fa-xmark text-xs" />
               Reject
             </button>
 
@@ -416,7 +417,7 @@ const RequestCard = ({
               onClick={() => onApprove(request)}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white shadow-[0_5px_14px_rgba(5,150,105,.18)] transition hover:bg-emerald-700"
             >
-              <i className="fa-solid fa-check text-xs" />
+              <Icon className="fa-solid fa-check text-xs" />
               Approve
             </button>
           </div>
@@ -429,7 +430,7 @@ const RequestCard = ({
 const EmptyState = ({ icon, title, message }) => (
   <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 text-center">
     <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm">
-      <i className={`${icon} text-[16px]`} />
+      <Icon className={`${icon} text-[16px]`} />
     </span>
 
     <h3 className="text-sm font-extrabold text-slate-800">{title}</h3>
@@ -444,7 +445,7 @@ const PageHeader = ({ title, subtitle, icon, onBack }) => (
   <div className="mb-5 flex justify-between gap-3">
     <div className="flex min-w-0 items-start gap-3">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0b2a4a] text-white">
-        <i className={`${icon} text-xs`} />
+        <Icon className={`${icon} text-xs`} />
       </span>
 
       <div>
@@ -462,7 +463,7 @@ const PageHeader = ({ title, subtitle, icon, onBack }) => (
         onClick={onBack}
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#0b2a4a79] bg-white text-[#0b2a4a] transition hover:bg-slate-50 hover:text-slate-800"
       >
-        <i className="fa-solid fa-arrow-left text-xs" />
+        <Icon className="fa-solid fa-arrow-left text-xs" />
       </button>
     )}
   </div>
@@ -471,7 +472,7 @@ const PageHeader = ({ title, subtitle, icon, onBack }) => (
 const SectionTitle = ({ title, count, icon }) => (
   <div className="mb-3 flex items-center gap-2">
     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-      <i className={`${icon} text-xs`} />
+      <Icon className={`${icon} text-xs`} />
     </span>
 
     <h2 className="text-xs font-extrabold text-slate-800">{title}</h2>
@@ -492,7 +493,7 @@ export const AttendanceRequestsPage = () => {
   const { myRequests, isLoading, error } = useAttendanceRequests();
 
   return (
-    <main className="min-h-full bg-slate-50/60 px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
+    <div className="min-h-full bg-slate-50/60 px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
       <div className="mx-auto max-w-[1200px]">
         <PageHeader
           title="My Attendance Requests"
@@ -515,7 +516,7 @@ export const AttendanceRequestsPage = () => {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 };
 
@@ -610,7 +611,7 @@ export const AttendanceApprovalsPage = () => {
   );
 
   return (
-    <main className="min-h-full bg-slate-50/60 px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
+    <div className="min-h-full bg-slate-50/60 px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
       <div className="mx-auto max-w-[1200px]">
         <PageHeader
           title="Attendance Approvals"
@@ -709,7 +710,7 @@ export const AttendanceApprovalsPage = () => {
               role="alert"
               className="mb-4 flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-semibold text-rose-600"
             >
-              <i className="fa-solid fa-circle-exclamation text-xs" />
+              <Icon className="fa-solid fa-circle-exclamation text-xs" />
               {error}
             </div>
           )}
@@ -760,13 +761,12 @@ export const AttendanceApprovalsPage = () => {
                   : "bg-rose-600 hover:bg-rose-700",
               )}
             >
-              <i
+              <Icon
                 className={
                   decision?.status === REQUEST_STATUS.APPROVED
                     ? "fa-solid fa-check text-xs"
                     : "fa-solid fa-xmark text-xs"
-                }
-              />
+                } />
 
               {decision?.status === REQUEST_STATUS.APPROVED
                 ? "Confirm Approval"
@@ -775,7 +775,7 @@ export const AttendanceApprovalsPage = () => {
           </div>
         </div>
       </RequestModal>
-    </main>
+    </div>
   );
 };
 

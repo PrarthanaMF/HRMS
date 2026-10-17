@@ -15,6 +15,8 @@ import Step4Financial from './Form/steps/Step4Financial'
 import Step5Identity from './Form/steps/Step5Identity'
 import Step6Background from './Form/steps/Step6Background'
 
+import Icon from '../../Common/Icon';
+import PageHeader, { primaryButton, secondaryButton } from '../../Common/PageHeader'
 const EMPTY_FORM = {
     name: '', gender: '', personalNumber: '', personalEmail: '',
     dateOfBirth: '', dateOfAnniversary: '', bloodGroup: '', photo: null,
@@ -168,96 +170,124 @@ const EmployeeFormView = ({ mode = 'add' }) => {
 
     if (loadError) {
         return (
-            <div role='alert' className='bg-red-50 rounded-xl border border-red-200 p-6 text-sm text-red-800'>
-                {loadError}
-                <button type='button' onClick={() => navigate('/workforce')} className='ml-3 underline'>Back to list</button>
+            <div role='alert' className='glass-panel flex flex-col items-start gap-3 rounded-2xl border-red-200/80 p-5 text-sm text-red-800 sm:flex-row sm:items-center sm:justify-between'>
+                <p className='flex items-start gap-2'>
+                    <Icon aria-hidden='true' className='fa-solid fa-circle-exclamation mt-0.5 shrink-0 text-red-600' />
+                    {loadError}
+                </p>
+                <button type='button' onClick={() => navigate('/workforce')} className={secondaryButton}>
+                    <Icon aria-hidden='true' className='fa-solid fa-arrow-left text-xs' />
+                    Back to list
+                </button>
             </div>
         )
     }
 
     if (isEdit && !existing) {
-        return <div role='status' className='bg-white rounded-xl border border-slate-100 p-12 text-center text-sm text-slate-500'>Loading employee…</div>
-    }
-
-    return (
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
-
-            <div className='flex items-center justify-between px-4 md:px-6 py-4 border-b border-slate-100'>
-                <div className='flex items-center gap-3 min-w-0'>
-                    <button
-                        onClick={() => navigate('/workforce')}
-                        className='w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition shrink-0'
-                        title='Back to list'
-                    >
-                        <i className="fa-solid fa-arrow-left text-sm"></i>
-                    </button>
-                    <div className='min-w-0'>
-                        <h2 className='text-base md:text-lg font-bold text-slate-800 truncate'>
-                            {isEdit ? `Edit Employee — ${formData.name}` : 'Add New Employee'}
-                        </h2>
-                        <p className='text-[11px] md:text-xs text-slate-500 truncate'>
-                            {isEdit ? `Employee ID: ${formData.empId}` : 'Fill in the details and click submit at the end. The Employee ID is assigned automatically.'}
-                        </p>
+        return (
+            <div role='status' aria-label='Loading employee' className='space-y-4'>
+                <div className='flex items-start gap-3.5'>
+                    <div className='skeleton h-11 w-11 shrink-0 rounded-2xl' />
+                    <div className='flex-1 space-y-2 pt-1'>
+                        <div className='skeleton h-5 w-48 max-w-full' />
+                        <div className='skeleton h-3 w-72 max-w-full' />
+                    </div>
+                </div>
+                <div className='skeleton h-14 w-full rounded-2xl' />
+                <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                    <div className='skeleton mb-5 h-4 w-40' />
+                    <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                        {Array.from({ length: 6 }, (_, index) => (
+                            <div key={index} className='space-y-2'>
+                                <div className='skeleton h-3 w-24' />
+                                <div className='skeleton h-10 w-full rounded-xl' />
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
+        )
+    }
 
-            <ProgressStepper
-                steps={FORM_STEPS}
-                activeStep={activeStep}
-                completedSteps={completedSteps}
-                onStepClick={setActiveStep}
+    const isLast = activeStep === FORM_STEPS.length - 1
+
+    return (
+        <div>
+            <PageHeader
+                icon={isEdit ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-user-plus'}
+                title={isEdit ? `Edit ${formData.name || 'employee'}` : 'Add employee'}
+                description={isEdit
+                    ? `Employee ID ${formData.empId}. Review each step, then save your changes on the last one.`
+                    : 'Fill in each step, then create the employee on the last one. The employee ID is assigned automatically.'}
+                actions={(
+                    <button type='button' onClick={() => navigate('/workforce')} className={secondaryButton}>
+                        <Icon aria-hidden='true' className='fa-solid fa-arrow-left text-xs' />
+                        Back to list
+                    </button>
+                )}
             />
 
-            {saveError && (
-                <div role='alert' className='mx-4 md:mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800'>
-                    {saveError}
-                </div>
-            )}
+            <div className='rise space-y-4' style={{ '--i': 1 }}>
+                <ProgressStepper
+                    steps={FORM_STEPS}
+                    activeStep={activeStep}
+                    completedSteps={completedSteps}
+                    onStepClick={setActiveStep}
+                />
 
-            <div className='p-4 md:p-6'>
+                {saveError && (
+                    <div role='alert' className='flex items-start gap-2 rounded-xl border border-red-200 bg-red-50/90 p-3 text-[13px] text-red-800'>
+                        <Icon aria-hidden='true' className='fa-solid fa-circle-exclamation mt-0.5 shrink-0 text-red-600' />
+                        {saveError}
+                    </div>
+                )}
+
                 {renderStep()}
             </div>
 
-            <div className='flex flex-col-reverse sm:flex-row justify-between items-center gap-3 px-4 md:px-6 py-4 border-t border-slate-100 bg-slate-50'>
-
+            {/* Sticky action bar: stays in reach on long steps and on phones */}
+            <div className='glass-strong sticky bottom-3 z-10 mt-4 flex flex-wrap items-center gap-2 rounded-2xl p-2.5 shadow-[var(--shadow-lift)] sm:p-3'>
                 <button
                     type='button'
                     onClick={handleBack}
                     disabled={activeStep === 0}
-                    className='w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed'
+                    className={secondaryButton}
                 >
-                    <i className="fa-solid fa-arrow-left text-xs"></i>
+                    <Icon aria-hidden='true' className='fa-solid fa-arrow-left text-xs' />
                     Back
                 </button>
 
-                <div className='w-full sm:w-auto flex flex-col-reverse sm:flex-row gap-2 sm:gap-3'>
+                <p className='hidden flex-1 text-center text-xs tabular-nums text-slate-500 sm:block'>
+                    Step {activeStep + 1} of {FORM_STEPS.length}
+                </p>
+
+                <div className='ml-auto flex items-center gap-2 sm:ml-0'>
                     <button
                         type='button'
                         onClick={() => navigate('/workforce')}
-                        className='w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition'
+                        className={secondaryButton}
                     >
                         Cancel
                     </button>
 
-                    {activeStep === FORM_STEPS.length - 1 ? (
+                    {isLast ? (
                         <button
                             type='button'
                             onClick={handleSubmit}
                             disabled={saving}
-                            className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 rounded-lg transition shadow-sm'
+                            className={primaryButton}
                         >
-                            <i className="fa-solid fa-check text-xs"></i>
-                            {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Employee'}
+                            <Icon aria-hidden='true' className='fa-solid fa-check text-xs' />
+                            {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create employee'}
                         </button>
                     ) : (
                         <button
                             type='button'
                             onClick={handleNext}
-                            className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm'
+                            className={primaryButton}
                         >
                             Next
-                            <i className="fa-solid fa-arrow-right text-xs"></i>
+                            <Icon aria-hidden='true' className='fa-solid fa-arrow-right text-xs' />
                         </button>
                     )}
                 </div>

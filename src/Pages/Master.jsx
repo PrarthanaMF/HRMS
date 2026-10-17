@@ -7,16 +7,16 @@ import BranchesTab from '../Components/Pages/Master/BranchesTab'
 import LeaveTypesTab from '../Components/Pages/Master/LeaveTypesTab'
 import LeaveBalancesTab from '../Components/Pages/Master/LeaveBalancesTab'
 import WeekOffTab from '../Components/Pages/Master/WeekOffTab'
-import ImportsTab from '../Components/Pages/Master/ImportsTab'
 
+import Icon from '../Components/Common/Icon'
+import PageHeader, { segClass, segItemClass } from '../Components/Common/PageHeader'
 // HR set-up screens. Each tab is shown only to the roles the backend lets use it.
 const TABS = [
     { key: 'users', label: 'Users', icon: 'fa-user-shield', roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.HR_MANAGER], Component: UsersTab },
     { key: 'branches', label: 'Branches', icon: 'fa-building', roles: HR_ROLES, Component: BranchesTab },
-    { key: 'leave-types', label: 'Leave Types', icon: 'fa-calendar-check', roles: HR_ROLES, Component: LeaveTypesTab },
-    { key: 'leave-balances', label: 'Leave Balances', icon: 'fa-scale-balanced', roles: HR_ROLES, Component: LeaveBalancesTab },
-    { key: 'week-offs', label: 'Week Offs', icon: 'fa-calendar-week', roles: HR_ROLES, Component: WeekOffTab },
-    { key: 'imports', label: 'Imports', icon: 'fa-file-import', roles: HR_ROLES, Component: ImportsTab },
+    { key: 'leave-types', label: 'Leave types', icon: 'fa-calendar-check', roles: HR_ROLES, Component: LeaveTypesTab },
+    { key: 'leave-balances', label: 'Leave balances', icon: 'fa-scale-balanced', roles: HR_ROLES, Component: LeaveBalancesTab },
+    { key: 'week-offs', label: 'Week offs', icon: 'fa-calendar-week', roles: HR_ROLES, Component: WeekOffTab },
 ]
 
 const Master = () => {
@@ -27,19 +27,28 @@ const Master = () => {
     const active = tabs.find((item) => item.key === tab)
 
     if (!tabs.length) {
-        return <div className='p-6 text-sm text-slate-600'>You do not have access to HR set-up.</div>
+        return (
+            <div className='w-full'>
+                <PageHeader icon='fa-solid fa-gear' title='HR set-up' />
+                <div className='glass-panel flex flex-col items-center rounded-2xl px-6 py-10 text-center'>
+                    <span aria-hidden='true' className='mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f2f5f7] text-[var(--brand-600)] ring-1 ring-inset ring-[#cfdce5]/70'><Icon className='fa-solid fa-lock text-lg' /></span>
+                    <p className='text-[13px] text-slate-600'>You do not have access to HR set-up. Ask an admin if you need to change users, branches or leave rules.</p>
+                </div>
+            </div>
+        )
     }
     if (!active) return <Navigate to={`/master/${tabs[0].key}`} replace />
 
     const { Component } = active
 
     return (
-        <div className='w-full max-w-7xl mx-auto px-4 md:px-6 py-6'>
-            <div className='mb-5'>
-                <h1 className='text-xl font-bold text-slate-800'>HR Set-up</h1>
-                <p className='text-xs text-slate-500'>Users, branches, leave, week offs and bulk imports</p>
-            </div>
-            <div role='tablist' className='mb-4 flex flex-wrap gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm w-fit'>
+        <div className='w-full'>
+            <PageHeader
+                icon='fa-solid fa-gear'
+                title='HR set-up'
+                description='Logins, branches, leave types and balances, and week-off policies used across attendance and approvals.'
+            />
+            <div role='tablist' aria-label='HR set-up sections' className={`${segClass} mb-4`}>
                 {tabs.map((item) => (
                     <button
                         key={item.key}
@@ -47,14 +56,16 @@ const Master = () => {
                         role='tab'
                         aria-selected={item.key === active.key}
                         onClick={() => navigate(`/master/${item.key}`)}
-                        className={`px-3 py-2 rounded-md text-sm font-medium transition cursor-pointer ${item.key === active.key ? 'bg-[#062139] text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                        className={segItemClass(item.key === active.key)}
                     >
-                        <i className={`fa-solid ${item.icon} mr-2 text-xs`}></i>
+                        <Icon aria-hidden='true' className={`fa-solid ${item.icon} text-sm`} />
                         {item.label}
                     </button>
                 ))}
             </div>
-            <Component />
+            <div key={active.key} className='rise' style={{ '--i': 1 }}>
+                <Component />
+            </div>
         </div>
     )
 }

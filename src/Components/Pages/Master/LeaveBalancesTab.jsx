@@ -5,7 +5,7 @@ import { api } from '../../../api/client'
 import { RequestModal } from '../Attendance/AttendanceForms'
 import SearchableSelect from '../../Common/SearchableSelect'
 import { useEmployeeOptions } from '../../../Hooks/useEmployees'
-import { Button, ErrorBanner, Field, LoadState, Notice, Table, inputClass, useAction, useLoad } from './ui'
+import { Button, Card, EmptyState, ErrorBanner, Field, LoadState, Notice, Table, inputClass, useAction, useLoad } from './ui'
 
 const OPENING_SOURCE = { SET_BY_HR: 'set by HR', CARRIED_FORWARD: 'carried forward', NONE: '' }
 
@@ -43,8 +43,8 @@ function BalanceChange({ mode, employee, year, row, onSaved, onClose }) {
                     <Field label='Reason (kept with the balance)'><input required maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} className={inputClass} /></Field>
                 </>}
                 <div className='flex justify-end gap-2 border-t border-slate-100 pt-3'>
-                    <Button onClick={onClose} disabled={busy}>Cancel</Button>
-                    <Button type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
+                    <Button size='md' onClick={onClose} disabled={busy}>Cancel</Button>
+                    <Button size='md' type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
                 </div>
             </form>
         </RequestModal>
@@ -70,12 +70,12 @@ export default function LeaveBalancesTab() {
                 <Field label='Year'><input type='number' min={2000} max={2100} value={year} onChange={(e) => setYear(Number(e.target.value))} className={inputClass} /></Field>
             </div>
             <Notice message={notice} />
-            {!employee ? <p className='p-6 text-sm text-slate-500'>Choose an employee to see their leave balances.</p>
+            {!employee ? <Card><EmptyState icon='fa-scale-balanced'>No employee chosen yet. Pick one above to see and adjust their leave balances.</EmptyState></Card>
                 : balances.loading || balances.error ? <LoadState {...balances} /> : (
                 <Table
                     rows={balances.data.balances}
                     rowKey={(row) => row.leaveType._id}
-                    empty='No active leave types. Add them on the Leave Types tab.'
+                    empty='No active leave types. Add them on the Leave types tab.'
                     columns={[
                         { key: 'type', label: 'Leave type', render: (r) => <>{r.leaveType.name} <span className='font-mono text-xs text-slate-400'>{r.leaveType.code}</span>{r.notAvailableReason && <p className='text-[11px] text-amber-700'>{r.notAvailableReason}</p>}</> },
                         { key: 'opening', label: 'Opening', render: (r) => <>{r.opening}{OPENING_SOURCE[r.openingSource] && <p className='text-[11px] text-slate-400'>{OPENING_SOURCE[r.openingSource]}</p>}</> },

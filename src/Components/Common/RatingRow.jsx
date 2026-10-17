@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import Icon from './Icon'
 const LABELS = {
     1: { text: 'Very Poor', color: 'text-red-600' },
     2: { text: 'Poor',      color: 'text-orange-600' },
@@ -86,7 +87,7 @@ const RatingRow = ({ label, value, onChange, error, readOnly = false }) => {
 
             {error && !readOnly && (
                 <p className='text-[11px] text-red-600 flex items-center gap-1 mt-1'>
-                    <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                    <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                     {error}
                 </p>
             )}

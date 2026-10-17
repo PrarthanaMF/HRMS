@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import RatingRow from './RatingRow'
 
+import Icon from './Icon'
 // ============================================================
 // Main SuccessScreen
 // ============================================================
@@ -10,15 +11,15 @@ const SuccessScreen = ({ title, subtitle, recordId, children }) => {
 
     return (
         <div className='w-full max-w-2xl mx-auto'>
-            <div className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
+            <div className='glass-strong rise overflow-hidden rounded-2xl'>
 
                 {/* Success header */}
-                <div className='flex flex-col items-center text-center px-6 py-8 bg-emerald-50 border-b border-emerald-100'>
-                    <div className='w-14 h-14 rounded-full bg-emerald-500 flex items-center justify-center mb-3 shadow-sm'>
-                        <i className="fa-solid fa-check text-white text-2xl"></i>
+                <div role='status' className='flex flex-col items-center border-b border-emerald-100 bg-gradient-to-b from-emerald-50 to-white/60 px-6 py-8 text-center'>
+                    <div aria-hidden='true' className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_10px_24px_-10px_rgb(5_150_105/0.8)] [animation:ui-pop_320ms_var(--ease-spring)_backwards]'>
+                        <Icon className="fa-solid fa-check text-white text-2xl" />
                     </div>
-                    <h2 className='text-lg font-bold text-slate-800'>{title}</h2>
-                    {subtitle && <p className='text-xs text-slate-500 mt-1'>{subtitle}</p>}
+                    <h2 className='text-[20px] font-semibold text-[var(--ink)]'>{title}</h2>
+                    {subtitle && <p className='mt-1 text-[13px] text-slate-500'>{subtitle}</p>}
                 </div>
 
                 {/* Read-only data preview */}
@@ -27,10 +28,10 @@ const SuccessScreen = ({ title, subtitle, recordId, children }) => {
                 </div>
 
                 {/* Footer */}
-                <div className='flex flex-col-reverse sm:flex-row justify-end gap-3 px-5 py-4 border-t border-slate-100 bg-slate-50'>
+                <div className='flex flex-col-reverse justify-end gap-3 border-t border-slate-100 bg-white/50 px-5 py-4 sm:flex-row'>
                     <button
                         onClick={() => navigate(`/exit-process/records/${recordId}`)}
-                        className='w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'
+                        className='press gradient-brand w-full sm:w-auto px-5 h-10 text-[13px] font-semibold text-white rounded-xl shadow-[0_10px_22px_-12px_rgb(8_26_46/0.95)] hover:brightness-110 cursor-pointer'
                     >
                         Back to Record
                     </button>
@@ -46,7 +47,7 @@ const SuccessScreen = ({ title, subtitle, recordId, children }) => {
 
 export const PreviewRow = ({ label, value, full = false }) => (
     <div className={full ? 'sm:col-span-2' : ''}>
-        <p className='text-[10px] uppercase text-slate-400 font-semibold tracking-wide mb-1'>{label}</p>
+        <p className='mb-1 text-[12px] font-medium text-slate-500'>{label}</p>
         <p className='text-sm text-slate-700 break-words'>{value || '—'}</p>
     </div>
 )
@@ -54,10 +55,10 @@ export const PreviewRow = ({ label, value, full = false }) => (
 export const PreviewSection = ({ title, icon, children }) => (
     <div className='pt-4 border-t border-slate-100 first:pt-0 first:border-t-0'>
         <div className='flex items-center gap-2 mb-3'>
-            <div className='w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center shrink-0'>
-                <i className={`fa-solid ${icon} text-slate-500 text-[10px]`}></i>
+            <div aria-hidden='true' className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#f2f5f7] ring-1 ring-[#dce6ed]'>
+                <Icon className={`fa-solid ${icon} text-[#1f4e6b] text-[14px]`} />
             </div>
-            <h4 className='text-xs font-bold text-slate-800'>{title}</h4>
+            <h4 className='text-[14px] font-semibold text-[var(--ink)]'>{title}</h4>
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-3'>
             {children}

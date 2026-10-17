@@ -6,12 +6,12 @@ const Step1Personal = ({ form, errors, onChange, requiredFields = REQUIRED_FIELD
     const isReq = (f) => requiredFields.includes(f)
 
     return (
-        <div className='space-y-8'>
+        <div className='space-y-4'>
 
             {/* Personal Information */}
-            <div>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Personal Information</h3>
-                <p className='text-xs text-slate-500 mb-5'>Basic details and photo</p>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Personal information</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Basic details and photo</p>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     <FormField label='Employee Name' name='name' value={form.name} onChange={onChange} required={isReq('name')} error={errors.name} placeholder='e.g. Rahul Mehta' />
@@ -26,9 +26,9 @@ const Step1Personal = ({ form, errors, onChange, requiredFields = REQUIRED_FIELD
             </div>
 
             {/* Address Details */}
-            <div className='pt-6 border-t border-slate-100'>
-                <h3 className='text-sm font-bold text-slate-800 mb-1'>Address Details</h3>
-                <p className='text-xs text-slate-500 mb-5'>Present and permanent address</p>
+            <div className='glass-panel rounded-2xl p-4 md:p-5'>
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>Address details</h3>
+                <p className='mt-0.5 mb-4 text-[13px] text-slate-500'>Present and permanent address</p>
 
                 <div className='grid grid-cols-1 gap-4'>
                     <FormField label='Present Address' name='presentAddress' value={form.presentAddress} onChange={onChange} required={isReq('presentAddress')} error={errors.presentAddress} textarea placeholder='House no, street, city, state, pincode' />

@@ -3,7 +3,7 @@ import React from "react";
 export const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 export const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] focus-visible:ring-offset-2";
 
 export const IconButton = ({
   children,
