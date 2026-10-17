@@ -1,10 +1,14 @@
 import React from 'react'
+import { createPortal } from 'react-dom'
 import VacancyStatusBadge from './VacancyStatusBadge'
 import { formatTimestamp } from '../../../Utils/formatDate'
+import { primaryButton } from '../../Common/PageHeader'
+import { modalPanel, modalHeader, modalTitle, modalClose, metaLabel } from './ui'
 
+import Icon from '../../Common/Icon'
 const InfoRow = ({ label, value }) => (
-    <div className='flex flex-col py-2.5 border-b border-slate-100 last:border-0'>
-        <p className='text-[10px] uppercase text-slate-400 font-semibold tracking-wide'>{label}</p>
+    <div className='flex flex-col gap-0.5 py-2.5 border-b border-slate-100 last:border-0'>
+        <p className={metaLabel}>{label}</p>
         <p className='text-sm text-slate-700 break-words whitespace-pre-line'>{value || '—'}</p>
     </div>
 )
@@ -12,39 +16,40 @@ const InfoRow = ({ label, value }) => (
 const VacancyDetailModal = ({ vacancy, onClose, onUpdate }) => {
     if (!vacancy) return null
 
-    return (
-        <div className='fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center p-4' onClick={onClose}>
+    return createPortal(
+        <div className='fixed inset-0 bg-slate-950/40 backdrop-blur-[6px] z-[1000] flex items-center justify-center p-4 [animation:ui-fade_160ms_ease-out_backwards]' onClick={onClose}>
             <div
-                className='bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto'
+                role='dialog'
+                aria-modal='true'
+                aria-labelledby='vacancy-detail-title'
+                className={`${modalPanel} max-w-2xl`}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Banner */}
-                <div className='relative bg-gradient-to-r from-[#062139] to-[#0a3f6e] rounded-t-2xl px-6 py-6'>
-                    <button
-                        onClick={onClose}
-                        className='absolute top-4 right-4 text-white/70 hover:text-white w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition'
-                    >
-                        <i className="fa-solid fa-xmark"></i>
+                <div className={modalHeader}>
+                    <div className='min-w-0'>
+                        <p className='text-xs font-medium text-slate-500 tabular-nums'>S.No {vacancy.jobId}</p>
+                        <h2 id='vacancy-detail-title' className={`${modalTitle} mt-0.5 text-lg`}>{vacancy.designation}</h2>
+                        <div className='mt-2'><VacancyStatusBadge status={vacancy.status} /></div>
+                    </div>
+                    <button onClick={onClose} className={modalClose} aria-label='Close'>
+                        <Icon className="fa-solid fa-xmark" />
                     </button>
-                    <p className='font-mono text-xs text-slate-300 mb-1'>S.No {vacancy.jobId}</p>
-                    <h2 className='text-xl font-bold text-white pr-10'>{vacancy.designation}</h2>
-                    <div className='mt-2'><VacancyStatusBadge status={vacancy.status} /></div>
                 </div>
 
-                <div className='px-6 pb-6 pt-4'>
+                <div className='px-5 pb-5 pt-3 overflow-y-auto'>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-6'>
-                        <InfoRow label='Requestor Name' value={vacancy.requestorName} />
+                        <InfoRow label='Requestor name' value={vacancy.requestorName} />
                         <InfoRow label='Branch' value={vacancy.branch} />
                         <InfoRow label='Designation' value={vacancy.designation} />
-                        <InfoRow label='Salary Range' value={vacancy.salaryRange} />
-                        <InfoRow label='No. of Vacancies' value={vacancy.openings} />
-                        <InfoRow label='Experience Required' value={vacancy.experienceRequired} />
-                        <InfoRow label='Target Date' value={vacancy.targetDate} />
-                        <InfoRow label='Requested On' value={formatTimestamp(vacancy.requestedOn)} />
+                        <InfoRow label='Salary range' value={vacancy.salaryRange} />
+                        <InfoRow label='No. of vacancies' value={vacancy.openings} />
+                        <InfoRow label='Experience required' value={vacancy.experienceRequired} />
+                        <InfoRow label='Target date' value={vacancy.targetDate} />
+                        <InfoRow label='Requested on' value={formatTimestamp(vacancy.requestedOn)} />
                     </div>
 
                     <div className='mt-3'>
-                        <InfoRow label='Job Description' value={vacancy.jobDescription} />
+                        <InfoRow label='Job description' value={vacancy.jobDescription} />
                     </div>
 
                     {/* Disabled (not hidden) once the hiring request is closed */}
@@ -53,15 +58,15 @@ const VacancyDetailModal = ({ vacancy, onClose, onUpdate }) => {
                             onClick={() => onUpdate(vacancy)}
                             disabled={vacancy.status === 'Closed'}
                             title={vacancy.status === 'Closed' ? 'This hiring request is closed' : undefined}
-                            className='flex items-center gap-2 bg-[#062139] hover:bg-[#0a2f52] text-white px-4 py-2 rounded-lg text-sm font-medium transition disabled:bg-slate-200 disabled:text-slate-400 disabled:hover:bg-slate-200 disabled:cursor-not-allowed'
+                            className={primaryButton}
                         >
-                            Update Request
+                            Update request
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    , document.body)
 }
 
 export default VacancyDetailModal

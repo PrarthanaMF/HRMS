@@ -73,6 +73,13 @@ const leaveTypeOptions = ({ types, balances, compOff, today }) => {
       icon: LEAVE_ICON,
       minDate: type.allowPastDates ? backdated : today,
       allowHalfDay: type.allowHalfDay,
+      // Structured, for the leave form: what's left, and the type's own limits
+      available: balance?.limited ? balance.available : null,
+      limited: Boolean(balance?.limited),
+      allowNegativeBalance: Boolean(type.allowNegativeBalance),
+      unavailableReason: balance?.notAvailableReason || "",
+      maxConsecutiveDays: type.maxConsecutiveDays ?? null,
+      minNoticeDays: type.minNoticeDays || 0,
     };
   });
 
@@ -88,6 +95,12 @@ const leaveTypeOptions = ({ types, balances, compOff, today }) => {
     icon: "fa-solid fa-arrow-rotate-left",
     minDate: backdated,
     allowHalfDay: false,
+    available: compOff,
+    limited: compOff !== null,
+    allowNegativeBalance: false,
+    unavailableReason: "",
+    maxConsecutiveDays: null,
+    minNoticeDays: 0,
   });
 
   return options;
@@ -257,6 +270,7 @@ const toRecord = (day, { empId, self, today, pendingDates }) => {
     isEarlyLeaving: Boolean(day.isEarlyLeaving),
     earlyLeavingMinutes: day.earlyLeavingMinutes || 0,
     application: pendingDates.has(day.date) ? "Pending" : day.request ? "Approved" : "--",
+    applicationId: pendingDates.get(day.date) || day.request?._id || null,
     holiday: day.holiday,
     sandwich: day.sandwich,
     missingPunch: day.missingPunch,
@@ -269,8 +283,12 @@ const toRecord = (day, { empId, self, today, pendingDates }) => {
 const summarise = (days) => {
   const count = (codes) => days.filter((day) => codes.includes(day.code)).length;
   const pay = (codes) => days.filter((day) => codes.includes(day.code)).reduce((sum, day) => sum + (day.payable || 0), 0);
-  const decided = days.filter((day) => !day.provisional);
-  const decidedPay = decided.reduce((sum, day) => sum + (day.payable || 0), 0);
+  // Attendance % covers one calendar month (the latest one in the range) and only the days that
+  // are over: decided, not today or the future, as the backend's own percentage does
+  const decided = days.filter((day) => day.status && !day.provisional);
+  const month = (decided.at(-1) ?? days.at(-1))?.date?.slice(0, 7);
+  const monthDecided = decided.filter((day) => day.date?.startsWith(month));
+  const monthPay = monthDecided.reduce((sum, day) => sum + (day.payable || 0), 0);
   const late = days.filter((day) => day.isLateEntry);
   const early = days.filter((day) => day.isEarlyLeaving);
 
@@ -286,11 +304,11 @@ const summarise = (days) => {
     unapprovedLeave: count(["UL"]), unapprovedLeavePayable: pay(["UL"]),
     lateIn: late.length, lateInPayable: 0, lateInMinutes: late.reduce((sum, day) => sum + day.lateEntryMinutes, 0),
     earlyLeaving: early.length, earlyLeavingPayable: 0,
-    lateAndEarly: late.filter((day) => day.isEarlyLeaving).length, lateAndEarlyPayable: 0,
     missingPunch: days.filter((day) => day.missingPunch).length,
     recordedDays: days.filter((day) => day.hasRecord).length,
     totalPayable: days.reduce((sum, day) => sum + (day.payable || 0), 0),
-    attendancePercentage: decided.length ? Math.round((decidedPay / decided.length) * 1000) / 10 : 0,
+    attendancePercentage: monthDecided.length ? Math.round((monthPay / monthDecided.length) * 1000) / 10 : 0,
+    attendancePercentageMonth: month || null,
   };
 };
 
@@ -307,14 +325,21 @@ const fetchDays = async ({ employee, from, to }, signal) => {
   return days;
 };
 
-// Dates with a request of the signed-in employee still waiting for approval
+// Dates with a request of the signed-in employee still waiting for approval -> that request's id
 const pendingDatesOf = async (signal) => {
   const { requests } = await api.get("/attendance/requests/mine", { status: "PENDING", limit: REQUEST_PAGE }, { signal });
-  const dates = new Set();
+  const dates = new Map();
   for (const request of requests) {
-    for (let date = dateOnly(request.fromDate); date <= dateOnly(request.toDate); date = addDays(date, 1)) dates.add(date);
+    for (let date = dateOnly(request.fromDate); date <= dateOnly(request.toDate); date = addDays(date, 1)) dates.set(date, request._id);
   }
   return dates;
+};
+
+// Each day in a date range with its status code (H = holiday, WO = week off, …), for the
+// leave form's breakdown: the backend doesn't count holidays and week offs as leave days
+export const leaveDays = async ({ employeeId, from, to }, signal) => {
+  const days = await fetchDays({ employee: employeeId, from, to }, signal);
+  return days.map((day) => ({ date: day.date, code: day.code }));
 };
 
 export const report = async ({ viewer, employeeId, from, to }, signal) => {
@@ -325,7 +350,7 @@ export const report = async ({ viewer, employeeId, from, to }, signal) => {
   try {
     const [days, pendingDates] = await Promise.all([
       fetchDays({ employee: employeeId, from, to }, signal),
-      self ? pendingDatesOf(signal) : new Set(),
+      self ? pendingDatesOf(signal) : new Map(),
     ]);
     return {
       isAuthorized: true,
@@ -423,6 +448,52 @@ const waitingWith = (request) => {
   return names.filter(Boolean).map(personName).filter((name, index, all) => all.indexOf(name) === index).join(" or ");
 };
 
+/*
+ * Level 1 (reporting manager) and Level 2 (branch manager) of the backend's approval path,
+ * each as { status, by, at, note }. status is a decision from the history (APPROVED, REJECTED,
+ * SKIPPED, AUTO_APPROVED) or: PENDING (waiting on this level now), WAITING (an earlier level
+ * goes first), NOT_REACHED (decided before this level), CANCELLED, or NA (no such level).
+ * See the backend's docs/API.md, "How approval works".
+ */
+const TWO_LEVEL_TYPES = ["LEAVE", "WFH", "COMP_OFF"];
+const NO_LEVEL = { status: "NA" };
+
+const levelsOf = (request) => {
+  const rm = request.reportingManagerApprover;
+  const bm = request.branchManagerApprover;
+  const approvers = [rm, bm].filter(Boolean);
+  const nameOf = (employeeId) => personName(approvers.find((person) => String(person._id) === String(employeeId)));
+  const steps = request.approvals || [];
+  const stepAt = (stage) => [...steps].reverse().find((step) => step.stage === stage);
+  const open = request.status === "PENDING";
+
+  const level = (stage, approver) => {
+    const step = stepAt(stage);
+    if (step) return { status: step.decision, by: nameOf(step.byEmployee) || personName(approver), at: step.at, note: step.note || "" };
+    if (open) return { status: request.stage === stage ? "PENDING" : "WAITING", by: personName(approver) };
+    if (request.status === "CANCELLED") return { status: "CANCELLED", by: personName(approver) };
+    return { status: "NOT_REACHED", by: personName(approver) };
+  };
+
+  // Nobody to approve: HR decides, as a single level
+  if (request.hrFallback) return { l1: { ...level("HR"), by: "HR" }, l2: NO_LEVEL };
+
+  // A branch manager's own leave / WFH / comp-off is approved on creation
+  const auto = steps.find((step) => step.decision === "AUTO_APPROVED");
+  if (auto) return { l1: NO_LEVEL, l2: { status: "AUTO_APPROVED", by: personName(bm) || personName(request.employee), at: auto.at, note: auto.note || "" } };
+
+  const twoLevel = TWO_LEVEL_TYPES.includes(request.type);
+  if (twoLevel && rm && bm && String(rm._id) !== String(bm._id)) {
+    return { l1: level("REPORTING_MANAGER", rm), l2: level("BRANCH_MANAGER", bm) };
+  }
+  // No reporting manager: the branch manager is the only (second) level
+  if (twoLevel && !rm && bm) return { l1: NO_LEVEL, l2: level("BRANCH_MANAGER", bm) };
+
+  // One approver: one-level types, or the reporting manager is also the branch manager
+  const stage = steps.find((step) => step.decision !== "SKIPPED")?.stage || request.stage || "REPORTING_MANAGER";
+  return { l1: level(stage, rm || bm), l2: NO_LEVEL };
+};
+
 // Own requests the backend would still let the employee withdraw
 const cancellable = (request, today) => {
   if (request.status === "PENDING") return request.type !== "COMP_OFF_CLAIM" || !request.consumedBy;
@@ -440,6 +511,7 @@ const toItem = (request, { canDecide = false, today = "" } = {}) => ({
   submittedAt: request.createdAt,
   payload: payloadOf(request),
   history: history(request),
+  levels: levelsOf(request),
   currentStage: request.status === "PENDING" ? STAGE_LABEL[request.stage] || "Awaiting review" : "",
   pendingWith: waitingWith(request),
   canDecide,
@@ -544,6 +616,13 @@ const punch = async () => {
 const REQUESTS = "/attendance/requests";
 
 const leave = (payload) => {
+  // Half first / last days on a range: the backend has no field for them yet and would store
+  // every day as a full day, so refuse rather than save it wrongly. When the backend adds
+  // support, send payload.fromSession / payload.toSession here.
+  const halfEndsOnRange = payload.from !== payload.to && (payload.fromSession === 2 || payload.toSession === 1);
+  if (halfEndsOnRange) {
+    return Promise.reject(new Error("Half days at the start or end of a longer leave can't be saved yet. Apply for the half day as its own single-day request."));
+  }
   if (payload.leaveType === "COMP_OFF") {
     return api.post(REQUESTS, { type: "COMP_OFF", from: payload.from, to: payload.to, reason: payload.reason });
   }

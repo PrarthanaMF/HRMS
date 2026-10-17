@@ -19,3 +19,12 @@ export const ROLE_LABELS = {
 }
 
 export const HR_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.HR_MANAGER, ROLES.HR_EXECUTIVE]
+
+// Who may list, create and edit logins (/api/users)
+export const USER_MANAGER_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN, ROLES.HR_MANAGER]
+
+// Rank order the backend uses: a caller can only manage roles below their own
+export const RANK = { EMPLOYEE: 0, HR_EXECUTIVE: 1, HR_MANAGER: 2, MANAGEMENT: 2, ADMIN: 3, SUPER_ADMIN: 4 }
+export const manageableRoles = (role) => Object.keys(RANK).filter((target) => role === ROLES.SUPER_ADMIN || RANK[target] < RANK[role])
+
+export const PASSWORD_RULE = '12–128 characters with an upper-case letter, a lower-case letter, a digit and a symbol'

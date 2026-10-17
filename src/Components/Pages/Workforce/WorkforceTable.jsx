@@ -1,97 +1,127 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
+
+import Icon from '../../Common/Icon'
+
+const cn = (...values) => values.filter(Boolean).join(' ')
 
 const StatusBadge = ({ status }) => (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${status === 'Active'
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            : 'bg-slate-100 text-slate-600 border-slate-200'
-        }`}>
-        <span className={`w-1.5 h-1.5 rounded-full ${status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+    <span className={cn(
+        'inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset',
+        status === 'Active' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-100 text-slate-600 ring-slate-200',
+    )}>
+        <span aria-hidden='true' className={`h-1.5 w-1.5 rounded-full ${status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
         {status}
     </span>
 )
 
-const Initials = ({ name, size = 'md' }) => {
+const Initials = ({ name }) => {
     const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-    const cls = size === 'sm'
-        ? 'w-9 h-9 text-[10px]'
-        : 'w-8 h-8 text-[10px]'
     return (
-        <div className={`${cls} rounded-full bg-gradient-to-br from-[#062139] to-[#0a3f6e] flex items-center justify-center font-bold text-white shrink-0`}>
+        <div aria-hidden='true' className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1f4e6b] to-[#2b6485] text-[11px] font-semibold text-white shadow-[0_6px_14px_-8px_rgb(8_26_46/0.9)] ring-1 ring-white/30'>
             {initials}
         </div>
     )
 }
 
-const WorkforceTable = ({ employees, pagination, loading, error, page, onPage, onMoreInfo }) => {
+const headerRow = 'bg-[#edf1f4] border-b border-[var(--line)]'
+const th = 'px-4 py-3 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500'
+const pagerButton = 'press inline-flex h-8 min-w-8 pointer-coarse:h-10 pointer-coarse:min-w-10 items-center justify-center rounded-lg border border-slate-200/80 bg-white/80 px-2 text-xs font-semibold text-slate-600 hover:border-[#cfdce5] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] disabled:cursor-not-allowed disabled:opacity-40'
+const infoButton = 'press inline-flex h-8 pointer-coarse:h-10 pointer-coarse:min-w-10 items-center justify-center gap-1.5 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 text-xs font-semibold text-[var(--brand-600)] hover:border-[#cfdce5] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'
+
+// Placeholder rows shaped like the table while the first page loads
+const TableSkeleton = () => (
+    <div role='status' aria-label='Loading employees' className='glass-strong overflow-hidden rounded-2xl'>
+        <div className={`${headerRow} h-11`} />
+        <div className='divide-y divide-slate-100/80'>
+            {Array.from({ length: 6 }, (_, index) => (
+                <div key={index} className='flex items-center gap-4 px-4 py-3'>
+                    <div className='skeleton hidden h-3 w-14 md:block' />
+                    <div className='skeleton h-9 w-9 shrink-0 rounded-xl' />
+                    <div className='min-w-0 flex-1 space-y-2'>
+                        <div className='skeleton h-3 w-40 max-w-full' />
+                        <div className='skeleton h-2.5 w-56 max-w-full' />
+                    </div>
+                    <div className='skeleton hidden h-3 w-24 md:block' />
+                    <div className='skeleton hidden h-3 w-24 lg:block' />
+                    <div className='skeleton h-5 w-14 rounded-md' />
+                </div>
+            ))}
+        </div>
+    </div>
+)
+
+const WorkforceTable = ({ employees, pagination, loading, error, page, onPage }) => {
     if (error) {
         return (
-            <div role='alert' className='bg-red-50 rounded-xl border border-red-200 p-6 text-sm text-red-800'>
+            <div role='alert' className='flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50/90 p-5 text-sm text-red-800'>
+                <Icon aria-hidden='true' className='fa-solid fa-circle-exclamation mt-0.5 shrink-0 text-red-600' />
                 {error.message || 'Unable to load employees.'}
             </div>
         )
     }
 
     if (loading && employees.length === 0) {
-        return (
-            <div role='status' className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center text-sm text-slate-500'>
-                Loading employees…
-            </div>
-        )
+        return <TableSkeleton />
     }
 
     if (employees.length === 0) {
         return (
-            <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center'>
-                <i className="fa-solid fa-users-slash text-4xl text-slate-300 mb-3"></i>
-                <p className='text-slate-500 text-sm'>No employees match your filters</p>
+            <div className='glass-panel flex flex-col items-center rounded-2xl px-6 py-12 text-center'>
+                <span aria-hidden='true' className='mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f2f5f7] text-[var(--brand-600)] ring-1 ring-inset ring-[#cfdce5]/70'>
+                    <Icon className="fa-solid fa-users-slash text-xl" />
+                </span>
+                <p className='text-sm font-semibold text-[var(--ink)]'>No employees match these filters.</p>
+                <p className='mt-1 max-w-sm text-[13px] text-slate-500'>Try a shorter search, or reset the filters to see everyone.</p>
             </div>
         )
     }
 
     return (
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
+        <div className='glass-strong overflow-hidden rounded-2xl'>
 
             {/* ============ DESKTOP TABLE ============ */}
-            <div className='hidden md:block overflow-x-auto'>
-                <table className='w-full text-sm'>
-                    <thead className='bg-[#062139] border-b border-[#0a2f52]'>
-                        <tr className='text-left text-[11px] uppercase text-slate-200 font-semibold tracking-wide'>
-                            <th className='px-4 py-3'>Emp ID</th>
-                            <th className='px-4 py-3'>Employee Details</th>
-                            <th className='px-4 py-3'>Department</th>
-                            <th className='px-4 py-3'>Designation</th>
-                            <th className='px-4 py-3'>Branch</th>
-                            <th className='px-4 py-3'>Status</th>
-                            <th className='px-4 py-3 text-center'>More Info</th>
+            <div className='hidden md:block'>
+                <table className='w-full table-fixed text-sm'>
+                    <thead className={headerRow}>
+                        <tr>
+                            <th scope='col' className={cn(th, 'w-24')}>ID</th>
+                            <th scope='col' className={th}>Employee</th>
+                            <th scope='col' className={th}>Department</th>
+                            <th scope='col' className={cn(th, 'hidden lg:table-cell')}>Designation</th>
+                            <th scope='col' className={cn(th, 'hidden xl:table-cell')}>Branch</th>
+                            <th scope='col' className={cn(th, 'w-24')}>Status</th>
+                            <th scope='col' className={cn(th, 'w-14 text-right')}><span className='sr-only'>Details</span></th>
                         </tr>
                     </thead>
                     <tbody>
                         {employees.map((emp) => (
-                            <tr key={emp._id} className='border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition'>
-                                <td className='px-4 py-3'>
-                                    <span className='font-mono text-xs font-semibold text-slate-700'>{emp.empId}</span>
+                            <tr key={emp._id} className='border-b border-slate-100/80 transition-colors last:border-0 hover:bg-[#f2f5f7]/60'>
+                                <td className='whitespace-nowrap px-4 py-3'>
+                                    <span className='font-mono text-xs font-semibold tabular-nums text-slate-700'>{emp.empId}</span>
                                 </td>
                                 <td className='px-4 py-3'>
                                     <div className='flex items-center gap-2.5'>
-                                        <Initials name={emp.name} size='sm' />
+                                        <Initials name={emp.name} />
                                         <div className='min-w-0'>
-                                            <p className='text-sm font-medium text-slate-800 truncate'>{emp.name}</p>
-                                            <p className='text-[11px] text-slate-400 truncate'>{emp.email}</p>
+                                            <p className='truncate text-sm font-medium text-[var(--ink)]'>{emp.name}</p>
+                                            <p className='truncate text-xs text-slate-500'>{emp.email}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td className='px-4 py-3 text-slate-600 text-[13px]'>{emp.department}</td>
-                                <td className='px-4 py-3 text-slate-600 text-[13px]'>{emp.designation}</td>
-                                <td className='px-4 py-3 text-slate-600 text-[13px]'>{emp.branch}</td>
-                                <td className='px-4 py-3'><StatusBadge status={emp.status} /></td>
-                                <td className='px-4 py-3 text-center'>
-                                    <button
-                                        onClick={() => onMoreInfo(emp)}
-                                        className='w-8 h-8 rounded-lg bg-slate-100 hover:bg-[#062139] hover:text-white text-slate-600 transition inline-flex items-center justify-center'
-                                        title='View full details'
+                                <td className='px-4 py-3 text-[13px] text-slate-600 [overflow-wrap:anywhere]'>{emp.department}</td>
+                                <td className='hidden px-4 py-3 text-[13px] text-slate-600 lg:table-cell'>{emp.designation}</td>
+                                <td className='hidden px-4 py-3 text-[13px] text-slate-600 xl:table-cell'>{emp.branch}</td>
+                                <td className='whitespace-nowrap px-4 py-3'><StatusBadge status={emp.status} /></td>
+                                <td className='px-4 py-3 text-right'>
+                                    <Link
+                                        to={`/workforce/${emp._id}`}
+                                        aria-label={`Open ${emp.name}`}
+                                        title='Open employee'
+                                        className={cn(infoButton, 'w-8 px-0')}
                                     >
-                                        <i className="fa-solid fa-eye text-xs"></i>
-                                    </button>
+                                        <Icon aria-hidden='true' className="fa-solid fa-arrow-right text-sm" />
+                                    </Link>
                                 </td>
                             </tr>
                         ))}
@@ -100,63 +130,70 @@ const WorkforceTable = ({ employees, pagination, loading, error, page, onPage, o
             </div>
 
             {/* ============ MOBILE CARDS ============ */}
-            <div className='md:hidden divide-y divide-slate-100'>
+            <ul className='divide-y divide-slate-100/80 md:hidden'>
                 {employees.map((emp) => (
-                    <div key={emp._id} className='p-4 flex items-start gap-3'>
+                    <li key={emp._id} className='flex items-start gap-3 p-4'>
 
-                        <Initials name={emp.name} size='sm' />
+                        <Initials name={emp.name} />
 
-                        <div className='flex-1 min-w-0'>
-                            {/* Name + Status */}
-                            <div className='flex items-start justify-between gap-2 mb-1'>
+                        <div className='min-w-0 flex-1'>
+                            {/* Name + status */}
+                            <div className='flex items-start justify-between gap-2'>
                                 <div className='min-w-0'>
-                                    <p className='text-sm font-semibold text-slate-800 truncate'>{emp.name}</p>
-                                    <p className='text-[11px] text-slate-400 truncate'>{emp.empId} · {emp.branch}</p>
+                                    <p className='truncate text-sm font-semibold text-[var(--ink)]'>{emp.name}</p>
+                                    <p className='truncate text-xs text-slate-500'>
+                                        <span className='font-mono tabular-nums'>{emp.empId}</span>
+                                        {emp.branch && <span>, {emp.branch}</span>}
+                                    </p>
                                 </div>
                                 <StatusBadge status={emp.status} />
                             </div>
 
-                            {/* Department + Designation */}
-                            <div className='grid grid-cols-2 gap-2 mt-2 text-[11px]'>
+                            {/* Department + designation */}
+                            <dl className='mt-2.5 grid grid-cols-2 gap-2 text-xs'>
                                 <div className='min-w-0'>
-                                    <p className='text-[9px] uppercase text-slate-400 font-semibold tracking-wide'>Department</p>
-                                    <p className='text-slate-600 truncate'>{emp.department}</p>
+                                    <dt className='text-[11px] text-slate-500'>Department</dt>
+                                    <dd className='truncate text-slate-700'>{emp.department || '—'}</dd>
                                 </div>
                                 <div className='min-w-0'>
-                                    <p className='text-[9px] uppercase text-slate-400 font-semibold tracking-wide'>Designation</p>
-                                    <p className='text-slate-600 truncate'>{emp.designation}</p>
+                                    <dt className='text-[11px] text-slate-500'>Designation</dt>
+                                    <dd className='truncate text-slate-700'>{emp.designation || '—'}</dd>
                                 </div>
-                            </div>
+                            </dl>
 
-                            {/* More Info button */}
-                            <button
-                                onClick={() => onMoreInfo(emp)}
-                                className='mt-3 flex items-center gap-1.5 text-[11px] font-medium text-[#062139] hover:text-[#0a3f6e] transition'
+                            {/* Opens the employee page */}
+                            <Link
+                                to={`/workforce/${emp._id}`}
+                                aria-label={`Open ${emp.name}`}
+                                className={cn(infoButton, 'ml-auto mt-3 flex h-10 w-fit')}
                             >
-                                <i className="fa-solid fa-eye text-[10px]"></i>
-                                More Info
-                                <i className="fa-solid fa-arrow-right text-[9px]"></i>
-                            </button>
+                                Open
+                                <Icon aria-hidden='true' className="fa-solid fa-arrow-right text-sm" />
+                            </Link>
                         </div>
-                    </div>
+                    </li>
                 ))}
-            </div>
+            </ul>
 
-            {/* Footer */}
-            <div className='flex justify-between items-center px-4 py-3 border-t border-slate-100 bg-slate-50'>
-                <p className='text-xs text-slate-500'>
-                    Showing <span className='font-semibold text-slate-700'>{employees.length}</span> of{' '}
-                    <span className='font-semibold text-slate-700'>{pagination?.total ?? employees.length}</span> employees
+            {/* Footer: server-side pages */}
+            <nav aria-label='Pagination' className='flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-4 py-3'>
+                <p className='text-xs text-slate-500' aria-live='polite'>
+                    Showing <span className='font-semibold tabular-nums text-slate-700'>{employees.length}</span> of{' '}
+                    <span className='font-semibold tabular-nums text-slate-700'>{pagination?.total ?? employees.length}</span> employees
                     {loading && <span className='ml-2 text-slate-400'>Updating…</span>}
                 </p>
                 {pagination?.pages > 1 && (
-                    <div className='flex items-center gap-2'>
-                        <button type='button' disabled={page <= 1} onClick={() => onPage(page - 1)} className='px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg bg-white disabled:opacity-40'>Previous</button>
-                        <span className='text-xs text-slate-500'>Page {page} of {pagination.pages}</span>
-                        <button type='button' disabled={page >= pagination.pages} onClick={() => onPage(page + 1)} className='px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg bg-white disabled:opacity-40'>Next</button>
+                    <div className='flex items-center gap-1.5'>
+                        <button type='button' disabled={page <= 1} onClick={() => onPage(page - 1)} aria-label='Previous page' className={pagerButton}>
+                            <Icon aria-hidden='true' className='fa-solid fa-chevron-left text-[10px]' />
+                        </button>
+                        <span className='px-1.5 text-xs tabular-nums text-slate-500'>Page <span className='font-semibold text-slate-700'>{page}</span> of {pagination.pages}</span>
+                        <button type='button' disabled={page >= pagination.pages} onClick={() => onPage(page + 1)} aria-label='Next page' className={pagerButton}>
+                            <Icon aria-hidden='true' className='fa-solid fa-chevron-right text-[10px]' />
+                        </button>
                     </div>
                 )}
-            </div>
+            </nav>
         </div>
     )
 }

@@ -1,28 +1,30 @@
 import React from 'react'
+import { createPortal } from 'react-dom'
 import { CandidateCard } from './CandidateDetailsModal'
+import { modalPanel, modalHeader, modalTitle, modalClose } from './ui'
 
+import Icon from '../../Common/Icon'
 // Pop-up with one candidate's complete details in card form (opened by the eye icon
 // in the Recruitment Tracker table).
 const CandidateViewModal = ({ candidate, onClose }) => {
     if (!candidate) return null
 
-    return (
-        <div className='fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center p-4' onClick={onClose}>
+    return createPortal(
+        <div className='fixed inset-0 bg-slate-950/40 backdrop-blur-[6px] z-[1000] flex items-center justify-center p-4 [animation:ui-fade_160ms_ease-out_backwards]' onClick={onClose}>
             <div
-                className='bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col'
+                role='dialog'
+                aria-modal='true'
+                aria-labelledby='candidate-view-title'
+                className={`${modalPanel} max-w-2xl`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className='relative bg-gradient-to-r from-[#062139] to-[#0a3f6e] rounded-t-2xl px-6 py-4 shrink-0'>
-                    <button
-                        onClick={onClose}
-                        className='absolute top-3 right-4 text-white/70 hover:text-white w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition'
-                        aria-label='Close'
-                    >
-                        <i className='fa-solid fa-xmark'></i>
+                <div className={modalHeader}>
+                    <h2 id='candidate-view-title' className={`${modalTitle} pt-1.5`}>Candidate details</h2>
+                    <button onClick={onClose} className={modalClose} aria-label='Close'>
+                        <Icon className='fa-solid fa-xmark' />
                     </button>
-                    <h2 className='text-base font-bold text-white pr-10'>Candidate Details</h2>
                 </div>
-                <div className='p-5 overflow-y-auto'>
+                <div className='p-4 sm:p-5 overflow-y-auto'>
                     <CandidateCard
                         c={candidate}
                         position={candidate.vacancyDesignation}
@@ -31,7 +33,7 @@ const CandidateViewModal = ({ candidate, onClose }) => {
                 </div>
             </div>
         </div>
-    )
+    , document.body)
 }
 
 export default CandidateViewModal

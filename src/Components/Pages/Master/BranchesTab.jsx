@@ -9,6 +9,7 @@ import { useEmployeeOptions } from '../../../Hooks/useEmployees'
 import { SALARY_ROLES } from '../../../api/employees'
 import { Badge, Button, Check, ErrorBanner, Field, LoadState, Notice, Table, inputClass, useAction, useLoad } from './ui'
 
+import Icon from '../../Common/Icon'
 const toNumber = (value) => (value === '' || value === null || value === undefined ? null : Number(value))
 
 function BranchForm({ branch, managers, onSaved, onClose }) {
@@ -56,8 +57,8 @@ function BranchForm({ branch, managers, onSaved, onClose }) {
                     <div className='sm:col-span-2'><Check label='Active' checked={form.isActive} onChange={set('isActive')} /></div>
                 </fieldset>
                 <div className='flex justify-end gap-2 border-t border-slate-100 pt-3'>
-                    <Button onClick={onClose} disabled={busy}>Cancel</Button>
-                    <Button type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
+                    <Button size='md' onClick={onClose} disabled={busy}>Cancel</Button>
+                    <Button size='md' type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
                 </div>
             </form>
         </RequestModal>
@@ -82,7 +83,7 @@ export default function BranchesTab() {
 
     return (
         <div className='space-y-3'>
-            {canEdit && <div className='flex justify-end'><Button variant='primary' onClick={() => { setNotice(''); setEditing({ branch: null }) }}><i className='fa-solid fa-plus' />Add branch</Button></div>}
+            {canEdit && <div className='flex flex-wrap justify-end gap-2'><Button size='md' variant='primary' onClick={() => { setNotice(''); setEditing({ branch: null }) }}><Icon aria-hidden='true' className='fa-solid fa-plus text-sm' />Add branch</Button></div>}
             <Notice message={notice} />
             <ErrorBanner message={remove.error} />
             {branches.loading || branches.error ? <LoadState {...branches} /> : (

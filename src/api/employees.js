@@ -88,6 +88,9 @@ export const fromApi = (employee) => ({
   category: employee.category || "",
   // Salary roles get these back; others don't
   hasSalaryAccess: Boolean(employee.salary),
+  // The linked login, when the backend sends it ({ _id, email, role, isActive } or null);
+  // undefined when the record does not carry it, so the screen looks it up on /users
+  user: employee.user === undefined ? undefined : employee.user || null,
 });
 
 // Form -> backend fields for create / update (salary and reporting manager go separately)

@@ -4,6 +4,7 @@ import AnimatedGradientText from "../../MagicUI/AnimatedGradientText";
 import BorderBeam from "../../MagicUI/BorderBeam";
 
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 
 import { IconButton, cn, focusRing } from "./AttendanceUI";
 
@@ -19,8 +20,10 @@ import {
   formatWeekdayShort,
   getDatesBetween,
   toDateKey,
+  matchesSummaryCode,
 } from "../../../Utils/attendance";
 
+import Icon from "../../Common/Icon";
 // Date range picker: local component, sharing the report presentation helpers.
 const PICKER_WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
@@ -90,16 +93,16 @@ const CalendarMonth = ({ month, start, end, onSelect }) => {
                 "relative flex h-11 items-center justify-center rounded-lg text-sm font-semibold transition duration-200",
                 focusRing,
                 selected
-                  ? "bg-gradient-to-br from-[#2A5F98] to-[#2A5F98] text-white shadow-md shadow-[#3A7DC0]/20"
+                  ? "bg-gradient-to-br from-[#2b6485] to-[#2b6485] text-white shadow-md shadow-[#2b6485]/20"
                   : inside
-                    ? "bg-[#F0F6FA] text-[#1B4A7B]"
+                    ? "bg-[#f2f5f7] text-[#1f4e6b]"
                     : "text-slate-600 hover:bg-slate-100",
               )}
             >
               {date.getDate()}
 
               {today && !selected && (
-                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[#3A7DC0]" />
+                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[#2b6485]" />
               )}
             </button>
           );
@@ -260,14 +263,14 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
           }
         }}
       >
-        <div className="relative flex max-h-[92dvh] w-full max-w-[760px] flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_35px_120px_rgba(15,23,42,.4)]">
+        <div className="relative flex max-h-[92dvh] w-full max-w-[760px] flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_35px_120px_rgba(8,26,46,.4)]">
           <BorderBeam />
 
           <header className="relative shrink-0 border-b border-slate-100 px-4 py-4 sm:px-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F0F6FA] px-2.5 py-1 text-xs font-bold uppercase tracking-[.08em] text-[#2A5F98]">
-                  <i className="fa-regular fa-calendar text-xs" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f2f5f7] px-2.5 py-1 text-xs font-bold uppercase tracking-[.08em] text-[#2b6485]">
+                  <Icon className="fa-regular fa-calendar text-xs" />
                   Attendance Filter
                 </span>
 
@@ -289,7 +292,7 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
                   focusRing,
                 )}
               >
-                <i className="fa-solid fa-xmark text-xs" />
+                <Icon className="fa-solid fa-xmark text-xs" />
               </button>
             </div>
           </header>
@@ -302,7 +305,7 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
               ].map(([label, value], index) => (
                 <React.Fragment key={label}>
                   {index === 1 && (
-                    <i className="fa-solid fa-arrow-right text-xs text-slate-300" />
+                    <Icon className="fa-solid fa-arrow-right text-xs text-slate-300" />
                   )}
 
                   <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
@@ -331,7 +334,7 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
                   onClick={() => setQuickRange(value)}
                   className={cn(
                     "shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition",
-                    "hover:border-[#A4C8E1] hover:bg-[#F0F6FA] hover:text-[#2A5F98]",
+                    "hover:border-[#cfdce5] hover:bg-[#f2f5f7] hover:text-[#2b6485]",
                     focusRing,
                   )}
                 >
@@ -350,11 +353,11 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
                   )
                 }
                 className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-[#F0F6FA] hover:text-[#2A5F98]",
+                  "flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-[#f2f5f7] hover:text-[#2b6485]",
                   focusRing,
                 )}
               >
-                <i className="fa-solid fa-chevron-left text-xs" />
+                <Icon className="fa-solid fa-chevron-left text-xs" />
               </button>
 
               <span className="text-center text-xs font-semibold uppercase tracking-[.08em] text-slate-400">
@@ -370,11 +373,11 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
                   )
                 }
                 className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-[#F0F6FA] hover:text-[#2A5F98]",
+                  "flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-[#f2f5f7] hover:text-[#2b6485]",
                   focusRing,
                 )}
               >
-                <i className="fa-solid fa-chevron-right text-xs" />
+                <Icon className="fa-solid fa-chevron-right text-xs" />
               </button>
             </div>
 
@@ -420,7 +423,7 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
                     focusRing,
                   )}
                 >
-                  <i className="fa-solid fa-eraser mr-1.5 text-xs" />
+                  <Icon className="fa-solid fa-eraser mr-1.5 text-xs" />
                   Clear
                 </button>
 
@@ -440,12 +443,12 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
                   disabled={!start || !end}
                   onClick={apply}
                   className={cn(
-                    "rounded-xl bg-gradient-to-r from-[#2A5F98] to-[#2A5F98] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#3A7DC0]/20 transition",
+                    "rounded-xl bg-gradient-to-r from-[#2b6485] to-[#2b6485] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#2b6485]/20 transition",
                     "hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-40",
                     focusRing,
                   )}
                 >
-                  <i className="fa-solid fa-check mr-1.5 text-xs" />
+                  <Icon className="fa-solid fa-check mr-1.5 text-xs" />
                   Apply
                 </button>
               </div>
@@ -465,11 +468,11 @@ const AttendanceDateRangePicker = ({ startDate, endDate, onApply }) => {
         aria-label="Change date range"
         title="Date Range"
         className={cn(
-          "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-white/20 xl:w-auto xl:gap-1.5 xl:px-2.5",
+          "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-white/20 pointer-coarse:h-10 pointer-coarse:w-10 xl:w-auto xl:gap-1.5 xl:px-2.5",
           focusRing,
         )}
       >
-        <i className="fa-regular fa-calendar text-xs text-[#A4C8E1]" />
+        <Icon className="fa-regular fa-calendar text-xs text-[#cfdce5]" />
 
         <span className="hidden text-xs font-semibold xl:inline">
           Date Range
@@ -522,11 +525,16 @@ const CalendarView = ({
   onSelect,
 
   todayKey,
+
+  highlight = null,
+
+  // Page the clock / tick on a tile opens: My Requests for yourself, Applications for others
+  requestsPath = "/attendance/requests",
 }) => {
   const leadingBlanks = dates[0]?.getDay() || 0;
 
   return (
-    <div className="att-calendar bg-white px-2 py-2 sm:px-3 lg:py-1.5">
+    <div className="att-calendar px-2 py-2 sm:px-3 lg:py-1.5">
       <div className="att-calendar-inner mx-auto w-full max-w-[880px] px-2 sm:px-5 lg:max-w-[820px] lg:px-3">
         {/* WEEKDAYS */}
 
@@ -545,7 +553,7 @@ const CalendarView = ({
 
         {/* CALENDAR */}
 
-        <div className="att-calendar-grid grid auto-rows-[56px] grid-cols-7 content-start gap-x-2 gap-y-2 sm:auto-rows-[68px] sm:gap-x-4 sm:gap-y-3 lg:auto-rows-[58px] lg:gap-x-3 lg:gap-y-2">
+        <div className="att-calendar-grid grid auto-rows-[64px] grid-cols-7 content-start gap-x-2 gap-y-2 sm:auto-rows-[68px] sm:gap-x-4 sm:gap-y-3 lg:auto-rows-[58px] lg:gap-x-3 lg:gap-y-2">
           {Array.from(
             {
               length: leadingBlanks,
@@ -573,8 +581,6 @@ const CalendarView = ({
               record?.lateMinutes > 0 ||
               displayStatusCode === "LC";
             const isEarlyLeaving = record?.isEarlyLeaving === true;
-            const disciplineCode =
-              isLate && isEarlyLeaving ? "LE" : isLate ? "LC" : "EL";
             const tileStatus =
               displayStatusCode === "LC" ? ATTENDANCE_STATUS.P : status;
             // The backend supplies the active application's status for this date.
@@ -589,9 +595,18 @@ const CalendarView = ({
 
             const today = key === todayKey;
 
+            // A summary row picked on the left: show its days, fade the rest
+            const matched = Boolean(highlight) && matchesSummaryCode(highlight, record);
+            const faded = Boolean(highlight) && !matched;
+
+            // The clock / tick opens the request behind it on its requests page
+            const requestHref = record?.applicationId
+              ? `${requestsPath}?request=${encodeURIComponent(record.applicationId)}`
+              : `${requestsPath}?date=${key}`;
+
             return (
+              <div key={key} className="relative h-full min-w-0">
               <button
-                key={key}
                 type="button"
                 onClick={() => onSelect(key)}
                 aria-pressed={selected}
@@ -599,25 +614,37 @@ const CalendarView = ({
                   status ? `, ${status.label}` : ", no attendance record"
                 }${isLate ? ", late coming" : ""}${isEarlyLeaving ? ", early leaving" : ""}${hasApplicationIndicator ? `, application ${applicationStatus.toLowerCase()}` : ""}`}
                 className={cn(
-                  `att-calendar-cell relative flex h-full min-w-0 flex-col justify-between overflow-hidden rounded-xl border p-1 text-left transition duration-200 @min-[480px]:p-2 `,
+                  `att-calendar-cell relative flex h-full w-full min-w-0 flex-col justify-between overflow-hidden rounded-xl border p-1 text-left transition duration-200 @min-[480px]:p-2 `,
                   focusRing,
                   tileStatus
                     ? tileStatus.cellClass
                     : "border-slate-200/70 bg-white text-slate-600",
                   !selected && "hover:-translate-y-0.5 hover:shadow-sm",
+                  faded && !selected && "opacity-25 saturate-0",
+                  matched && !selected && "ring-2 ring-[#1f4e6b]/40 shadow-[0_6px_18px_rgba(8,26,46,.18)]",
                   selected &&
-                    `z-10 border-blue-500! shadow-[0_5px_16px_rgba(37,99,235,.16)] ring-2 ring-blue-500/20`,
+                    `z-10 border-[#2b6485]! shadow-[0_5px_16px_rgba(31,78,107,.16)] ring-2 ring-[#2b6485]/25`,
                 )}
               >
                 {(isLate || isEarlyLeaving) && (
                   <span
-                    title={ATTENDANCE_STATUS[disciplineCode].label}
+                    title={[isLate && "Late Entry", isEarlyLeaving && "Early Leaving"].filter(Boolean).join(" and ")}
                     aria-hidden="true"
                     className={cn(
                       "pointer-events-none absolute right-0 top-0 h-5 w-5 @min-[480px]:h-6 @min-[480px]:w-6 [clip-path:polygon(0_0,100%_0,100%_100%)]",
-                      ATTENDANCE_STATUS[disciplineCode].markerClass,
+                      ATTENDANCE_STATUS[isLate ? "LC" : "EL"].markerClass,
                     )}
-                  />
+                  >
+                    {/* Both on one day: half Late Entry, half Early Leaving */}
+                    {isLate && isEarlyLeaving && (
+                      <span
+                        className={cn(
+                          "absolute inset-0 [clip-path:polygon(100%_0,100%_100%,50%_50%)]",
+                          ATTENDANCE_STATUS.EL.markerClass,
+                        )}
+                      />
+                    )}
+                  </span>
                 )}
                 {/* TOP */}
 
@@ -626,7 +653,7 @@ const CalendarView = ({
                     className={cn(
                       "text-xs font-bold leading-none sm:text-sm",
 
-                      selected ? "text-blue-800" : "text-slate-700",
+                      selected ? "text-[#1f4e6b]" : "text-slate-700",
                     )}
                   >
                     {date.getDate()}
@@ -636,7 +663,7 @@ const CalendarView = ({
                     <span
                       title="Today"
                       className={cn(
-                        "h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600",
+                        "h-1.5 w-1.5 shrink-0 rounded-full bg-[#2b6485]",
                         (isLate || isEarlyLeaving) && "mr-4",
                       )}
                     />
@@ -671,42 +698,43 @@ const CalendarView = ({
                     </span>
                   )}
                   {hasApplicationIndicator && (
-                    <span
-                      title={
-                        applicationStatus === "PENDING"
-                          ? "Application pending"
-                          : "Application approved"
-                      }
-                      aria-hidden="true"
-                      className={cn(
-                        "inline-flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded-full bg-white/90 @min-[480px]:h-3.5 @min-[480px]:w-3.5",
-                        applicationStatus === "PENDING"
-                          ? "text-amber-700"
-                          : "text-emerald-700",
-                      )}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-2.5 w-2.5 @min-[480px]:h-3 @min-[480px]:w-3"
-                      >
-                        {applicationStatus === "PENDING" ? (
-                          <>
-                            <circle cx="12" cy="12" r="9" />
-                            <path d="M12 7v5l3 2" />
-                          </>
-                        ) : (
-                          <path d="m5 12 4 4L19 6" />
-                        )}
-                      </svg>
-                    </span>
+                    <span aria-hidden="true" className="hidden shrink-0 @min-[480px]:block @min-[480px]:h-5 @min-[480px]:w-5" />
                   )}
                 </div>
               </button>
+
+              {hasApplicationIndicator && (
+                <Link
+                  to={requestHref}
+                  title={applicationStatus === "PENDING" ? "Open the pending application" : "Open the approved application"}
+                  aria-label={`Open the ${applicationStatus === "PENDING" ? "pending" : "approved"} application for ${formatDayLabel(date)}`}
+                  className={cn(
+                    "absolute bottom-[22px] right-1 z-20 inline-flex h-4 w-4 @min-[480px]:h-5 @min-[480px]:w-5 items-center justify-center rounded-full bg-white/95 shadow-sm ring-1 transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] @min-[480px]:bottom-1.5 @min-[480px]:right-1.5",
+                    applicationStatus === "PENDING" ? "text-amber-700 ring-amber-200" : "text-emerald-700 ring-emerald-200",
+                  )}
+                >
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-2.5 w-2.5 @min-[480px]:h-3 @min-[480px]:w-3"
+                  >
+                    {applicationStatus === "PENDING" ? (
+                      <>
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 7v5l3 2" />
+                      </>
+                    ) : (
+                      <path d="m5 12 4 4L19 6" />
+                    )}
+                  </svg>
+                </Link>
+              )}
+              </div>
             );
           })}
         </div>
@@ -728,8 +756,6 @@ const CalendarActionBar = ({
   const actions = record?.actions || {};
   const availability = actions.missedPunch || {};
   const webPunch = actions.webPunch || {};
-  const canApplyLeave = actions.canApplyLeave === true;
-  const canApplyWFH = actions.canApplyWFH === true;
   const canPunchToday = actions.canPunchToday === true;
   const canRequestMissedPunch = actions.canRequestMissedPunch === true;
   const showMissedPunchUnavailable =
@@ -742,7 +768,7 @@ const CalendarActionBar = ({
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1">
           <div className="flex items-start gap-2">
             <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-              <i className="fa-solid fa-lock text-xs" />
+              <Icon className="fa-solid fa-lock text-xs" />
             </span>
 
             <div className="min-w-0">
@@ -751,8 +777,8 @@ const CalendarActionBar = ({
               </p>
 
               <p className="mt-0.5 text-xs leading-relaxed text-slate-400 sm:text-xs">
-                Apply Leave, Work From Home and Missed Punch are available only
-                for your own attendance.
+                Punching in or out and Missed Punch are available only for your
+                own attendance.
               </p>
             </div>
           </div>
@@ -766,8 +792,6 @@ const CalendarActionBar = ({
   }
 
   if (
-    !canApplyLeave &&
-    !canApplyWFH &&
     !canRequestMissedPunch &&
     !canPunchToday &&
     webPunch.reasonCode !== "SHIFT_NOT_ENDED" &&
@@ -784,10 +808,9 @@ const CalendarActionBar = ({
           role="status"
           className="mb-1 text-right text-[10px] font-bold text-amber-800"
         >
-          <i
+          <Icon
             aria-hidden="true"
-            className="fa-solid fa-triangle-exclamation mr-1"
-          />
+            className="fa-solid fa-triangle-exclamation mr-1" />
           Punch Out after {webPunch.shiftEndLabel}
         </p>
       )}
@@ -795,7 +818,7 @@ const CalendarActionBar = ({
         role="group"
         aria-label="Attendance actions"
         className="
-          att-action-row flex flex-nowrap min-h-9 items-center justify-start overflow-x-auto sm:justify-end
+          att-action-row flex flex-nowrap min-h-9 items-center justify-end overflow-x-auto
           gap-1.5 rounded-lg
           text-[11px] font-semibold
 
@@ -811,51 +834,13 @@ const CalendarActionBar = ({
               title={availability.message}
               className="inline-flex h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 text-xs font-semibold text-slate-400"
             >
-              <i className="fa-regular fa-clock text-xs" />
+              <Icon className="fa-regular fa-clock text-xs" />
               Missed Punch unavailable
             </button>
           </div>
         )}
 
-        {canApplyLeave && (
-          <button
-            type="button"
-            onClick={() =>
-              onRecordAction("applyLeave", {
-                date,
-
-                record,
-              })
-            }
-            className={cn(
-              "att-action-button att-button-leave bg-[linear-gradient(135deg,#F0F6FA,#D8E7F2)] inline-flex h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#A4C8E1] bg-white px-2.5 text-[11px] font-semibold text-[#1B4A7B] shadow-sm transition hover:brightness-105 sm:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
-            )}
-          >
-            <i className="fa-regular fa-calendar-plus text-xs" />
-            Apply Leave
-          </button>
-        )}
-
-        {canApplyWFH && (
-          <button
-            type="button"
-            aria-label="Work From Home"
-            onClick={() =>
-              onRecordAction("workFromHome", {
-                date,
-
-                record,
-              })
-            }
-            className={cn(
-              "att-action-button att-button-wfh bg-[linear-gradient(135deg,#F0F6FA,#D8E7F2)] inline-flex h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#A4C8E1] bg-white px-2.5 text-[11px] font-semibold text-[#1B4A7B] shadow-sm transition hover:brightness-105 sm:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
-            )}
-          >
-            <i className="fa-solid fa-house-laptop text-xs" />
-            <span className="hidden sm:inline">Work From Home</span>
-            <span className="sm:hidden">WFH</span>
-          </button>
-        )}
+        {/* Leave and work from home are applied for under Attendance > My Requests */}
 
         {canPunchToday && (
           <button
@@ -868,10 +853,10 @@ const CalendarActionBar = ({
               })
             }
             className={cn(
-              "att-action-button att-button-primary inline-flex h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#1B4A7B] bg-[linear-gradient(120deg,#2A5F98,#1B4A7B_55%,#0C3453)] px-2.5 text-[11px] font-semibold text-white shadow-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
+              "att-action-button att-button-primary inline-flex h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#1f4e6b] bg-[linear-gradient(120deg,#2b6485,#1B4A7B_55%,#163a58)] px-2.5 text-[11px] font-semibold text-white shadow-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
             )}
           >
-            <i className="fa-regular fa-clock" />
+            <Icon className="fa-regular fa-clock" />
             {webPunch.type === "PUNCH_IN" ? "Punch In" : "Punch Out"}
           </button>
         )}
@@ -886,10 +871,10 @@ const CalendarActionBar = ({
               })
             }
             className={cn(
-              "att-action-button att-button-primary inline-flex h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#1B4A7B] bg-[linear-gradient(120deg,#2A5F98,#1B4A7B_55%,#0C3453)] px-2.5 text-[11px] font-semibold text-white shadow-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
+              "att-action-button att-button-primary inline-flex h-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-[#1f4e6b] bg-[linear-gradient(120deg,#2b6485,#1B4A7B_55%,#163a58)] px-2.5 text-[11px] font-semibold text-white shadow-sm transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
             )}
           >
-            <i className="fa-regular fa-clock text-xs" />
+            <Icon className="fa-regular fa-clock text-xs" />
 
             {missedPunchLabel}
           </button>
@@ -903,7 +888,7 @@ const DetailMetric = ({ icon, label, value }) => (
   <div className="att-detail-metric min-w-0 rounded-xl border border-slate-100 bg-slate-50/70 px-2 py-1.5">
     <div className="flex items-center gap-2">
       <span className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm @min-[760px]:flex">
-        <i className={`${icon} text-xs`} />
+        <Icon className={`${icon} text-xs`} />
       </span>
 
       <div className="min-w-0">
@@ -930,7 +915,7 @@ const SelectedDay = ({ date, record }) => {
     : null;
 
   return (
-    <section className="att-selected-day border-b border-slate-100 bg-white px-2 py-2 sm:px-3">
+    <section className="att-selected-day border-b border-slate-100 bg-white/40 px-2 py-2 sm:px-3">
       <div className="sm:hidden">
         <div className="flex items-center justify-between gap-2">
           <div>
@@ -1103,6 +1088,9 @@ const AttendanceReport = ({
   onSelectedDateChange,
   onRecordAction,
   actionsAllowed = true,
+  highlight = null,
+  onClearHighlight,
+  requestsPath,
 }) => {
   const dates = useMemo(
     () => getDatesBetween(periodStart, periodEnd),
@@ -1122,22 +1110,23 @@ const AttendanceReport = ({
 
   const selectedIndex = foundIndex === -1 ? 0 : foundIndex;
 
-  const selected = dates[selectedIndex] || dates[0];
+  // No day selected (e.g. after picking a summary row): no day panel, no actions
+  const selected = selectedDate ? dates[selectedIndex] || dates[0] : null;
 
   const selectedRecord = selected
     ? recordMap.get(toDateKey(selected)) || null
     : null;
 
   return (
-    <section className="att-report @container relative min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_30px_rgba(15,23,42,.06)]">
+    <section className="att-report glass-strong rise @container relative min-w-0 overflow-hidden rounded-2xl" style={{ "--i": 2 }}>
       <BorderBeam />
-      <header className="relative bg-gradient-to-r from-[#081F34] via-[#133F66] to-[#2A5F98] px-3 py-2.5 text-white sm:px-3">
+      <header className="relative bg-gradient-to-r from-[#081a2e] via-[#163a58] to-[#2b6485] px-3 py-2.5 text-white sm:px-3">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2  h-13">
           <div className="min-w-0">
             <h2 className="truncate text-[15px] font-bold leading-tight sm:text-[15px]">
               <AnimatedGradientText
                 colorFrom="#ffffff"
-                colorTo="#A4C8E1"
+                colorTo="#cfdce5"
                 speed={10}
               >
                 {periodLabel}
@@ -1162,12 +1151,12 @@ const AttendanceReport = ({
               aria-label="Reset date range"
               title="Reset to current month"
               className={cn(
-                "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/10 p-0 font-bold text-white transition hover:bg-white/20 xl:w-auto xl:gap-2 xl:px-3",
+                "inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/10 p-0 font-bold text-white transition hover:bg-white/20 pointer-coarse:h-10 pointer-coarse:w-10 xl:w-auto xl:gap-2 xl:px-3",
 
                 focusRing,
               )}
             >
-              <i className="fa-solid fa-rotate-left text-xs" />
+              <Icon className="fa-solid fa-rotate-left text-xs" />
 
               <span className="hidden font-semibold xl:inline">Reset</span>
             </button>
@@ -1175,17 +1164,17 @@ const AttendanceReport = ({
             <IconButton
               onClick={onPreviousPeriod}
               aria-label="Previous period"
-              className="att-period-arrow h-8! w-8! rounded-lg"
+              className="att-period-arrow h-8! w-8! rounded-lg pointer-coarse:h-10! pointer-coarse:w-10!"
             >
-              <i className="fa-solid fa-chevron-left text-xs" />
+              <Icon className="fa-solid fa-chevron-left text-xs" />
             </IconButton>
 
             <IconButton
               onClick={onNextPeriod}
               aria-label="Next period"
-              className="att-period-arrow h-8! w-8! rounded-lg"
+              className="att-period-arrow h-8! w-8! rounded-lg pointer-coarse:h-10! pointer-coarse:w-10!"
             >
-              <i className="fa-solid fa-chevron-right text-xs" />
+              <Icon className="fa-solid fa-chevron-right text-xs" />
             </IconButton>
           </div>
         </div>
@@ -1193,12 +1182,43 @@ const AttendanceReport = ({
 
       {selected && <SelectedDay date={selected} record={selectedRecord} />}
 
+      {highlight && ATTENDANCE_STATUS[highlight] && (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-2 border-b border-[#dce6ed] bg-[#f2f5f7] px-3 py-1.5 text-xs text-[#1f4e6b]"
+        >
+          <span className="min-w-0">
+            Showing only{" "}
+            <strong>{ATTENDANCE_STATUS[highlight].label}</strong> days ·{" "}
+            <span className="tabular-nums">
+              {dates.filter((date) => matchesSummaryCode(highlight, recordMap.get(toDateKey(date)))).length}
+            </span>{" "}
+            in view
+          </span>
+          {onClearHighlight && (
+            <button
+              type="button"
+              onClick={onClearHighlight}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 font-semibold hover:bg-white",
+                focusRing,
+              )}
+            >
+              <Icon aria-hidden="true" className="fa-solid fa-xmark" />
+              Show all
+            </button>
+          )}
+        </div>
+      )}
+
       <CalendarView
         todayKey={todayKey}
         dates={dates}
         recordMap={recordMap}
         selectedDate={selectedDate}
         onSelect={onSelectedDateChange}
+        highlight={highlight}
+        requestsPath={requestsPath}
       />
 
       <div className="att-action-slot h-18 shrink-0 overflow-y-auto overscroll-contain border-t border-slate-100">

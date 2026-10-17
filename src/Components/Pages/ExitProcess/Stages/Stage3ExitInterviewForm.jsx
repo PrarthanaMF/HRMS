@@ -6,15 +6,17 @@ import FormField from '../../../Common/FormField'
 import SuccessScreen, { PreviewRow, PreviewSection, RatingPreview } from '../../../Common/SuccessScreen'
 import RatingRow from '../../../Common/RatingRow'
 
+import Icon from '../../../Common/Icon'
+import { primaryButton, secondaryButton } from '../../../Common/PageHeader'
 const FormSection = ({ title, subtitle, icon, children }) => (
-    <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-5 md:p-6'>
+    <div className='glass-panel rounded-2xl p-5 md:p-6'>
         <div className='flex items-center gap-3 mb-5 pb-3 border-b border-slate-100'>
-            <div className='w-9 h-9 rounded-lg bg-[#062139] flex items-center justify-center shrink-0'>
-                <i className={`fa-solid ${icon} text-white text-sm`}></i>
+            <div aria-hidden='true' className='w-9 h-9 rounded-xl bg-gradient-to-br from-[#E3EEF6] to-[#CFE2F0] text-[var(--brand-600)] ring-1 ring-inset ring-white flex items-center justify-center shrink-0'>
+                <Icon className={`fa-solid ${icon} text-sm`} />
             </div>
             <div className='min-w-0'>
-                <h3 className='text-sm font-bold text-slate-800'>{title}</h3>
-                {subtitle && <p className='text-[11px] text-slate-500'>{subtitle}</p>}
+                <h3 className='text-[15px] font-semibold text-[var(--ink)]'>{title}</h3>
+                {subtitle && <p className='mt-0.5 text-xs text-slate-500'>{subtitle}</p>}
             </div>
         </div>
         {children}
@@ -28,21 +30,21 @@ const YesNoRadio = ({ label, name, value, onChange, error }) => (
         </label>
         <div className='flex flex-col sm:flex-row gap-2'>
             {['Yes', 'No'].map((option) => (
-                <label key={option} className={`flex-1 flex items-center gap-3 px-4 py-2.5 rounded-lg border cursor-pointer transition ${
+                <label key={option} className={`flex-1 flex items-center gap-3 px-4 py-2.5 min-h-11 rounded-xl border cursor-pointer transition-colors ${
                     value === option
-                        ? 'border-[#062139] bg-slate-50 ring-2 ring-slate-100'
-                        : 'border-slate-200 hover:bg-slate-50'
+                        ? 'border-[#2b6485] bg-[#f2f5f7] ring-2 ring-[#2b6485]/20'
+                        : 'border-slate-200/80 bg-white/70 hover:border-[#cfdce5] hover:bg-white'
                 }`}>
                     <input type='radio' name={name} value={option}
                         checked={value === option} onChange={onChange}
-                        className='w-4 h-4 accent-[#062139]' />
+                        className='w-4 h-4 accent-[#1f4e6b]' />
                     <span className='text-sm font-medium text-slate-700'>{option}</span>
                 </label>
             ))}
         </div>
         {error && (
             <p className='text-[11px] text-red-600 flex items-center gap-1 mt-2'>
-                <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                <Icon className="fa-solid fa-circle-exclamation text-[10px]" />
                 {error}
             </p>
         )}
@@ -96,9 +98,9 @@ const Stage3ExitInterviewForm = () => {
     const [errors, setErrors] = useState({})
     const [submitted, setSubmitted] = useState(null)
 
-    if (!record) return <LockScreen title='Record Not Found' navigate={navigate} />
+    if (!record) return <LockScreen title='Record not found' navigate={navigate} />
     if (record.status !== 'F&F Initiated' && !submitted) {
-        return <LockScreen title='Stage 3 Not Available' record={record} navigate={navigate} />
+        return <LockScreen title='Stage 3 not available' record={record} navigate={navigate} />
     }
 
     const handleChange = (e) => {
@@ -170,28 +172,28 @@ const Stage3ExitInterviewForm = () => {
     if (submitted) {
         return (
             <SuccessScreen
-                title='Stage 3 Submitted'
+                title='Stage 3 submitted'
                 subtitle='Exit interview feedback has been recorded'
                 recordId={record._id}
             >
-                <PreviewSection title='Open Questions' icon='fa-comment'>
+                <PreviewSection title='Open questions' icon='fa-comment'>
                     <PreviewRow label='What prevented departure?' value={submitted.preventDepartureAnswer} full />
-                    <PreviewRow label='Liked Most' value={submitted.likedMost} full />
-                    <PreviewRow label='Liked Least' value={submitted.likedLeast} full />
-                    <PreviewRow label='Duties Met Expectations' value={submitted.dutiesMetExpectations} />
-                    <PreviewRow label='New Company Attraction' value={submitted.newCompanyAttraction} full />
+                    <PreviewRow label='Liked most' value={submitted.likedMost} full />
+                    <PreviewRow label='Liked least' value={submitted.likedLeast} full />
+                    <PreviewRow label='Duties met expectations' value={submitted.dutiesMetExpectations} />
+                    <PreviewRow label='New company attraction' value={submitted.newCompanyAttraction} full />
                     <PreviewRow label='Suggestions' value={submitted.suggestions} full />
                     {submitted.remarks && <PreviewRow label='Remarks' value={submitted.remarks} full />}
-                    <PreviewRow label='Removed from WhatsApp' value={submitted.removedFromWhatsappGroup} />
+                    <PreviewRow label='Removed from WhatsApp groups' value={submitted.removedFromWhatsappGroup} />
                 </PreviewSection>
 
-                <PreviewSection title='Reporting Manager Ratings' icon='fa-user-tie'>
+                <PreviewSection title='Reporting manager ratings' icon='fa-user-tie'>
                     {rmRatingFields.map((f) => (
                         <RatingPreview key={f.key} label={f.label} value={submitted.reportingManagerRatings[f.key]} />
                     ))}
                 </PreviewSection>
 
-                <PreviewSection title='Company Ratings' icon='fa-building'>
+                <PreviewSection title='Company ratings' icon='fa-building'>
                     {companyRatingFields.map((f) => (
                         <RatingPreview key={f.key} label={f.label} value={submitted.companyRatings[f.key]} />
                     ))}
@@ -203,30 +205,30 @@ const Stage3ExitInterviewForm = () => {
     // ---- FORM ----
     return (
         <div className='w-full max-w-4xl mx-auto pb-8'>
-            <button onClick={handleCancel} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-                <i className="fa-solid fa-arrow-left text-xs"></i>
-                Back to Record
+            <button onClick={handleCancel} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+                <Icon className="fa-solid fa-arrow-left text-xs" />
+                Back to record
             </button>
 
             <form onSubmit={handleSubmit} className='space-y-4'>
 
-                <div className='bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden'>
-                    <div className='flex items-center gap-3 px-5 py-4 border-b border-slate-100'>
-                        <div className='w-10 h-10 rounded-lg bg-[#062139] flex items-center justify-center shrink-0'>
-                            <i className="fa-solid fa-comment-dots text-white text-sm"></i>
+                <div className='rise glass-strong rounded-2xl overflow-hidden'>
+                    <div className='flex items-center gap-3.5 px-5 py-4 border-b border-slate-200/70'>
+                        <div aria-hidden='true' className='gradient-brand w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-white shadow-[0_10px_24px_-12px_rgb(8_26_46/0.9)] ring-1 ring-white/20'>
+                            <Icon className="fa-solid fa-comment-dots text-base" />
                         </div>
                         <div className='min-w-0'>
-                            <h2 className='text-base font-bold text-slate-800'>Stage 3 — Exit Interview Feedback</h2>
-                            <p className='text-[11px] text-slate-500'>Exit interview for {record.name}</p>
+                            <h2 className='text-base font-semibold leading-tight text-[var(--ink)] sm:text-[17px]'>Stage 3: Exit interview feedback</h2>
+                            <p className='mt-0.5 text-[13px] text-slate-500'>Exit interview for {record.name}</p>
                         </div>
                     </div>
-                    <div className='px-5 py-3 bg-slate-50 text-[11px] text-slate-500 flex items-start gap-2'>
-                        <i className="fa-solid fa-circle-info text-slate-400 text-[10px] mt-0.5"></i>
-                        <span>Ratings use a <strong>1–5 scale</strong>: Very Poor · Poor · Average · Good · Excellent</span>
+                    <div className='px-5 py-3 bg-[#f2f5f7]/70 text-xs text-slate-600 flex items-start gap-2'>
+                        <Icon className="fa-solid fa-circle-info text-[#2b6485] text-xs mt-0.5" />
+                        <span>Ratings use a <strong>1 to 5 scale</strong>, from very poor (1) to excellent (5).</span>
                     </div>
                 </div>
 
-                <FormSection title='Open Questions' subtitle='General feedback about the employee experience' icon='fa-comment'>
+                <FormSection title='Open questions' subtitle='General feedback about the employee experience' icon='fa-comment'>
                     <div className='space-y-4'>
                         <FormField label='What circumstances would have prevented your departure?' name='preventDepartureAnswer'
                             value={formData.preventDepartureAnswer} onChange={handleChange}
@@ -248,7 +250,7 @@ const Stage3ExitInterviewForm = () => {
                     </div>
                 </FormSection>
 
-                <FormSection title='Rate Your Reporting Manager'
+                <FormSection title='Rate your reporting manager'
                     subtitle='What do you think of your reporting manager on the following heads?' icon='fa-user-tie'>
                     <div className='space-y-0'>
                         {rmRatingFields.map((f) => (
@@ -260,7 +262,7 @@ const Stage3ExitInterviewForm = () => {
                     </div>
                 </FormSection>
 
-                <FormSection title='Rate Our Company'
+                <FormSection title='Rate our company'
                     subtitle='What do you think of our company on the following heads?' icon='fa-building'>
                     <div className='space-y-0'>
                         {companyRatingFields.map((f) => (
@@ -272,7 +274,7 @@ const Stage3ExitInterviewForm = () => {
                     </div>
                 </FormSection>
 
-                <FormSection title='Final Questions' subtitle='A few last questions before you go' icon='fa-clipboard-list'>
+                <FormSection title='Final questions' subtitle='A few last questions before you go' icon='fa-clipboard-list'>
                     <div className='space-y-4'>
                         <FormField label='What is more attractive about the new company you are joining?' name='newCompanyAttraction'
                             value={formData.newCompanyAttraction} onChange={handleChange}
@@ -283,7 +285,7 @@ const Stage3ExitInterviewForm = () => {
                         <FormField label='Remarks (Do you have anything else to tell us?)' name='remarks'
                             value={formData.remarks} onChange={handleChange} textarea />
 
-                        <YesNoRadio label='Whether removed from All official WhatsApp Group?'
+                        <YesNoRadio label='Whether removed from all official WhatsApp groups?'
                             name='removedFromWhatsappGroup'
                             value={formData.removedFromWhatsappGroup}
                             onChange={handleChange}
@@ -291,14 +293,14 @@ const Stage3ExitInterviewForm = () => {
                     </div>
                 </FormSection>
 
-                <div className='bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col-reverse sm:flex-row justify-end gap-3 px-5 py-4'>
+                <div className='glass-strong rounded-2xl flex flex-col-reverse sm:flex-row justify-end gap-2.5 px-5 py-4'>
                     <button type='button' onClick={handleCancel}
-                        className='w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition cursor-pointer'>
+                        className={`${secondaryButton} w-full sm:w-auto cursor-pointer`}>
                         Cancel
                     </button>
                     <button type='submit'
-                        className='w-full sm:w-auto px-6 py-2.5 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition shadow-sm hover:shadow-md cursor-pointer'>
-                        Submit Stage 3
+                        className={`${primaryButton} w-full sm:w-auto px-6 cursor-pointer`}>
+                        Submit stage 3
                     </button>
                 </div>
 
@@ -309,20 +311,20 @@ const Stage3ExitInterviewForm = () => {
 
 const LockScreen = ({ title, record, navigate }) => (
     <div className='w-full max-w-2xl mx-auto'>
-        <button onClick={() => navigate('/exit-process')} className='flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800 mb-4 transition cursor-pointer'>
-            <i className="fa-solid fa-arrow-left text-xs"></i>
-            Back to Exit Dashboard
+        <button onClick={() => navigate('/exit-process')} className='press -ml-3 mb-3 inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-white/70 hover:text-[var(--ink)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'>
+            <Icon className="fa-solid fa-arrow-left text-xs" />
+            Back to exit dashboard
         </button>
-        <div className='bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center'>
-            <i className="fa-solid fa-lock text-4xl text-slate-300 mb-3"></i>
-            <h3 className='text-base font-bold text-slate-700 mb-1'>{title}</h3>
+        <div className='rise glass-panel rounded-2xl p-8 sm:p-12 text-center'>
+            <span aria-hidden='true' className='mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-[#E3EEF6] text-slate-500 ring-1 ring-inset ring-white'><Icon className="fa-solid fa-lock text-2xl" /></span>
+            <h3 className='text-base font-semibold text-[var(--ink)] mb-1'>{title}</h3>
             {record ? (
                 <>
                     <p className='text-sm text-slate-500'>This record is at stage: <span className='font-semibold'>{record.status}</span></p>
-                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className='mt-4 px-5 py-2.5 text-sm font-medium text-white bg-[#062139] hover:bg-[#0a2f52] rounded-lg transition cursor-pointer'>View Record</button>
+                    <button onClick={() => navigate(`/exit-process/records/${record._id}`)} className={`${primaryButton} mt-5 cursor-pointer`}>View record</button>
                 </>
             ) : (
-                <p className='text-sm text-slate-500'>This resignation record does not exist.</p>
+                <p className='text-sm text-slate-500'>This resignation record does not exist. Go back to the exit dashboard to open another one.</p>
             )}
         </div>
     </div>

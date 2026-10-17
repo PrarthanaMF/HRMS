@@ -1,36 +1,286 @@
 @import "tailwindcss";
 
+/*
+ * Navy & white theme. Tailwind's slate scale is pinned to the app's cool greys, so every existing
+ * slate-* class (text, borders, fills) takes them without touching the components.
+ */
+@theme {
+    --font-sans: "Inter", "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+
+    --color-slate-50: #f7f9fb;
+    --color-slate-100: #edf1f4;
+    --color-slate-200: #dce4ea;
+    --color-slate-300: #c4d1db;
+    --color-slate-400: #8fa3b3;
+    --color-slate-500: #64788a;
+    --color-slate-600: #4a5d6e;
+    --color-slate-700: #334455;
+    --color-slate-800: #1e2e3d;
+    --color-slate-900: #081a2e;
+    --color-slate-950: #081a2e;
+}
+
 :root {
-    --brand-100: #A4C8E1;
-    --brand-200: #7FBBD8;
-    --brand-300: #5AA3D0;
-    --brand-400: #3A7DC0;
-    --brand-500: #2A5F98;
-    --brand-600: #1B4A7B;
-    --brand-700: #133F66;
-    --brand-800: #0C3453;
-    --brand-900: #0A2B43;
-    --brand-950: #081F34;
+    /* Navy, light to dark */
+    --brand-50: #f2f5f7;
+    --brand-100: #dce6ed;
+    --brand-200: #9fb8c9;
+    --brand-300: #6f9bb4;
+    --brand-400: #2b6485;
+    --brand-500: #2b6485;
+    --brand-600: #1f4e6b;
+    --brand-700: #163a58;
+    --brand-800: #0e2a47;
+    --brand-900: #081a2e;
+    --brand-950: #061426;
+
+    /* One accent: sky blue, bright enough to read on navy and on white */
+    --accent: #2b6485;
+    --accent-strong: #1f4e6b;
+    --accent-bright: #9fb8c9;
+    --accent-soft: #e6eef3;
+    --accent-line: #cfdce5;
+
+    /* Ink and surfaces */
+    --ink: #081a2e;
+    --ink-soft: #334455;
+    --muted: #64788a;
+    --line: #dce4ea;
+    --line-strong: #c4d1db;
+    --surface: #ffffff;
+    --canvas: #f2f5f7;
+    --canvas-2: #e6ecf1;
+
+    /* Depth: ambient + direct light, tinted toward navy */
+    --shadow-card: 0 1px 2px rgb(8 26 46 / 0.04), 0 10px 28px -16px rgb(8 26 46 / 0.18);
+    --shadow-lift: 0 2px 6px rgb(8 26 46 / 0.06), 0 22px 44px -22px rgb(8 26 46 / 0.32);
+    --shadow-pop: 0 28px 60px -28px rgb(8 26 46 / 0.45), 0 2px 6px rgb(8 26 46 / 0.08);
+    --focus: 0 0 0 3px rgb(43 100 133 / 0.3);
+    --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+    --radius-sm: 9px;
+    --radius: 14px;
+    --radius-lg: 20px;
+
+    /* Stacking order, so overlays never fight */
+    --z-sticky: 20;
+    --z-nav: 50;
+    --z-dropdown: 80;
+    --z-drawer: 90;
+    --z-modal: 1000;
+}
+
+/* ============================================================
+   DESIGN SYSTEM — see DESIGN.md
+   ============================================================ */
+
+html {
+    scroll-behavior: smooth;
 }
 
 html,
 body,
 #root {
-    font-family:
-        "Inter",
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+}
+
+/* Headings: tighter tracking and balanced line breaks */
+:is(h1, h2, h3) {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+
+p {
+    text-wrap: pretty;
 }
 
 body {
     margin: 0;
-    color: #334155;
+    color: var(--ink-soft);
     font-size: 14px;
     font-weight: 400;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    background-color: var(--canvas);
+}
+
+/*
+ * Smoke: two soft light fields (indigo and gold) drifting slowly behind everything, and a fine
+ * grain over them. Both move with transform only, so they cost no repaints.
+ */
+body::before {
+    content: "";
+    position: fixed;
+    inset: -20vmax;
+    z-index: -2;
+    pointer-events: none;
+    background:
+        radial-gradient(38vmax 30vmax at 18% 12%, rgb(31 78 107 / 0.16), transparent 70%),
+        radial-gradient(34vmax 28vmax at 86% 18%, rgb(43 100 133 / 0.12), transparent 70%),
+        radial-gradient(40vmax 30vmax at 60% 96%, rgb(111 155 180 / 0.12), transparent 70%);
+    animation: aurora 28s var(--ease-out) infinite alternate;
+    --animation-reduced: none;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: -50%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.06 0 0 0 0 0.12 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 9s steps(6) infinite;
+    --animation-reduced: none;
+}
+
+@keyframes aurora {
+    0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50% { transform: translate3d(5vmax, 3vmax, 0) scale(1.1) rotate(6deg); }
+    100% { transform: translate3d(-4vmax, 4vmax, 0) scale(1.04) rotate(-4deg); }
+}
+
+@keyframes grain {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-3%, 2%); }
+    40% { transform: translate(2%, -3%); }
+    60% { transform: translate(-2%, -1%); }
+    80% { transform: translate(3%, 3%); }
+    100% { transform: translate(0, 0); }
+}
+
+/* Dark midnight surfaces (banners, top bar, login): a dot grid and moving smoke */
+@utility smoke-dark {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: #fff;
+    background-color: var(--brand-800);
+    background-image:
+        radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.07) 1px, transparent 0),
+        linear-gradient(120deg, #081a2e 0%, #0e2a47 38%, #163a58 100%);
+    background-size: 18px 18px, 100% 100%;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        z-index: -1;
+        pointer-events: none;
+        background:
+            radial-gradient(28% 34% at 22% 30%, rgb(111 155 180 / 0.38), transparent 70%),
+            radial-gradient(24% 30% at 82% 60%, rgb(43 100 133 / 0.26), transparent 70%),
+            radial-gradient(30% 26% at 55% 90%, rgb(31 78 107 / 0.3), transparent 70%);
+        animation: aurora 22s var(--ease-out) infinite alternate;
+        --animation-reduced: none;
+    }
+}
+
+/*
+ * Controls placed inside a midnight page banner: light buttons and panels become dark glass.
+ * Unlayered, so they win over Tailwind's (layered) utilities, hover included.
+ */
+.page-banner .btn-secondary,
+.page-banner .glass-panel {
+    background-color: rgb(255 255 255 / 0.07);
+    background-image: none;
+    border-color: rgb(255 255 255 / 0.14);
+    outline-color: transparent;
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.page-banner .btn-secondary:hover {
+    background-color: rgb(255 255 255 / 0.13);
+    border-color: rgb(159 184 201 / 0.55);
+}
+
+.page-banner .glass-panel :is(button, span) {
+    color: #fff;
+}
+
+.page-banner .glass-panel button:hover {
+    background-color: rgb(255 255 255 / 0.12);
+}
+
+/* Gold label with a short leading rule: "— WORKFORCE" */
+@utility eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+
+    &::before {
+        content: "";
+        width: 22px;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.7;
+    }
+}
+
+/* Gold primary action, as on the reference sign-in */
+@utility gradient-accent {
+    position: relative;
+    overflow: hidden;
+    color: #ffffff;
+    background-image: linear-gradient(110deg, #4a8cb0 0%, #2b6485 55%, #1f4e6b 100%);
+    box-shadow: 0 12px 26px -14px rgb(43 100 133 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.4);
+
+    /* A light sweep across the button on hover */
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.28) 50%, transparent 70%);
+        translate: -100% 0;
+        pointer-events: none;
+    }
+
+    &:hover::after {
+        animation: ui-sweep 700ms var(--ease-out) forwards;
+        --animation-reduced: none;
+    }
+}
+
+/* A screen entering after a route change */
+@utility page-enter {
+    animation: ui-rise 280ms var(--ease-out) backwards;
+    --animation-reduced: none;
+}
+
+@utility font-display {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+}
+
+/* Skip link: hidden until focused from the keyboard */
+.skip-link {
+    position: fixed;
+    left: 12px;
+    top: 10px;
+    z-index: 2000;
+    translate: 0 -150%;
+    border-radius: 10px;
+    background: var(--brand-600);
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: translate 160ms var(--ease-out);
+}
+
+.skip-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 button,
@@ -42,21 +292,245 @@ textarea {
 
 button {
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 button:disabled {
     cursor: not-allowed;
 }
 
+/* Windows dark mode otherwise renders native selects with unreadable colours */
+select {
+    background-color: #fff;
+    color: var(--ink);
+}
+
+:focus-visible {
+    outline: 2px solid var(--brand-400);
+    outline-offset: 2px;
+}
+
+/* Elements that draw their own focus ring (Tailwind ring-*) opt out of the outline */
+.focus-visible\:ring-2:focus-visible {
+    outline: none;
+}
+
+@utility glass {
+    background-color: rgb(255 255 255 / 0.66);
+    border: 1px solid rgb(255 255 255 / 0.8);
+    box-shadow: var(--shadow-card), inset 0 1px 0 rgb(255 255 255 / 0.7);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    backdrop-filter: blur(16px) saturate(150%);
+
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        background-color: #fff;
+        border-color: var(--line);
+    }
+}
+
+/* Floating menus (account, notifications, nav dropdown, select lists): solid, so whatever is
+   behind them — including a dark banner — never shows through */
+@utility popover {
+    background-color: #fff;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-pop);
+}
+
+/* Tables, forms and modals: more opaque so dense text stays crisp over the blur */
+@utility glass-strong {
+    background-color: rgb(255 255 255 / 0.88);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card), inset 0 1px 0 rgb(255 255 255 / 0.8);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+}
+
+@utility glass-dark {
+    background-color: rgb(8 26 46 / 0.92);
+    background-image: linear-gradient(100deg, rgb(8 26 46 / 0.96) 0%, rgb(8 26 46 / 0.94) 45%, rgb(22 58 88 / 0.92) 100%);
+    border-bottom: 1px solid rgb(255 255 255 / 0.06);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 14px 34px -20px rgb(8 26 46 / 0.85);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+}
+
+/* Clickable cards only: rise on hover, settle on press */
+@utility lift {
+    transition:
+        translate 220ms var(--ease-out),
+        box-shadow 220ms var(--ease-out),
+        border-color 220ms var(--ease-out);
+
+    &:hover {
+        translate: 0 -2px;
+        box-shadow: var(--shadow-lift);
+    }
+
+    &:active {
+        translate: 0 0;
+        transition-duration: 80ms;
+    }
+}
+
+/* Entrance; stagger siblings with style={{ "--i": index }} */
+@utility rise {
+    animation: ui-rise 320ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+    --animation-reduced: none;
+}
+
+/* Press feedback for buttons and clickable rows */
+@utility press {
+    transition-property: scale, translate, box-shadow, background-color, border-color, color, filter;
+    transition-duration: 160ms;
+    transition-timing-function: var(--ease-out);
+
+    &:active:not(:disabled) {
+        scale: 0.97;
+        transition-duration: 60ms;
+    }
+}
+
+/* Loading placeholder shaped like the content it stands in for */
+@utility skeleton {
+    border-radius: 8px;
+    background-color: rgb(196 209 219 / 0.5);
+    background-image: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.7) 50%, transparent 80%);
+    background-size: 200% 100%;
+    animation: ui-shimmer 1.3s linear infinite;
+    --animation-reduced: none;
+}
+
+/* Glass panel with a 1px inner highlight and an inner shadow ("true" glassmorphism) */
+@utility glass-panel {
+    background-image: linear-gradient(160deg, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.68));
+    border: 1px solid rgb(255 255 255 / 0.85);
+    outline: 1px solid rgb(220 228 234 / 0.7);
+    outline-offset: -1px;
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.95),
+        var(--shadow-card);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        background-image: none;
+        background-color: #fff;
+        border-color: var(--line);
+    }
+}
+
+@utility gradient-brand {
+    background-image: linear-gradient(120deg, #0e2a47 0%, #163a58 55%, #1f4e6b 100%);
+}
+
+@utility gradient-text {
+    background-image: linear-gradient(110deg, #4a8cb0 0%, #1f4e6b 55%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+@keyframes ui-rise {
+    from {
+        opacity: 0;
+        translate: 0 8px;
+    }
+
+    to {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes ui-sweep {
+    to {
+        translate: 100% 0;
+    }
+}
+
+@keyframes ui-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* The clock's colon, as on a desk clock */
+@keyframes clock-blink {
+    50% { opacity: 0.25; }
+}
+
+/* The bell nudges every couple of seconds while something is unread */
+@keyframes notif-ring {
+    0%, 70%, 100% { rotate: 0deg; }
+    75% { rotate: 14deg; }
+    80% { rotate: -12deg; }
+    85% { rotate: 8deg; }
+    90% { rotate: -5deg; }
+}
+
+@keyframes ui-shimmer {
+    from {
+        background-position: 150% 0;
+    }
+
+    to {
+        background-position: -50% 0;
+    }
+}
+
+@keyframes ui-slide {
+    from {
+        opacity: 0;
+        translate: -16px 0;
+    }
+
+    to {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes ui-pop {
+    from {
+        opacity: 0;
+        scale: 0.97;
+        translate: 0 6px;
+    }
+
+    to {
+        opacity: 1;
+        scale: 1;
+        translate: 0 0;
+    }
+}
+
+/* A spinner still means "working" under reduced motion, so it slows down rather than stopping */
+.animate-spin {
+    --animation-reduced: spin 3s linear infinite;
+}
+
+/* Reduced-motion variants live beside each animation (modern-web-guidance "motion") */
+@property --animation-reduced {
+    syntax: "*";
+    inherits: false;
+    initial-value: none;
+}
+
 .attendance-ui {
     --att-bg: #f3f7fa;
     --att-card: #ffffff;
-    --att-navy-950: #081F34;
-    --att-navy-900: #0A2B43;
-    --att-navy-800: #133F66;
-    --att-blue: #2A5F98;
+    --att-navy-950: #081a2e;
+    --att-navy-900: #0e2a47;
+    --att-navy-800: #163a58;
+    --att-blue: #2b6485;
     --att-text: #0f172a;
-    --att-muted: #64748b;
+    --att-muted: #64788a;
     --att-border: #e2e8f0;
 
     font-feature-settings:
@@ -67,12 +541,37 @@ button:disabled {
     font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Thin, quiet scrollbars, so scrollable areas (wide tables on phones) are discoverable.
+ * .hide-scrollbar opts an element out (swipeable rows like tab bars and steppers).
+ */
 * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(100 116 139 / 0.35) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: rgb(100 116 139 / 0.35);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.hide-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
 
-*::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar {
     display: none;
 }
 
@@ -118,14 +617,21 @@ button:disabled {
     }
 }
 
+/*
+ * Reduced motion: each animation declares its own reduced variant in --animation-reduced
+ * (default: none). Movement on hover is dropped; colour and opacity changes stay, since
+ * they carry state and do not cause motion sickness.
+ */
 @media (prefers-reduced-motion: reduce) {
 
     *,
     *::before,
     *::after {
         scroll-behavior: auto !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        animation: var(--animation-reduced) !important;
+    }
+
+    .lift:hover {
+        translate: none;
     }
 }

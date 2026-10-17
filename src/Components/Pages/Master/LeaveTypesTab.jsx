@@ -7,6 +7,7 @@ import { useEmployeeOptions } from '../../../Hooks/useEmployees'
 import { DROPDOWN_OPTIONS } from '../../../Utils/employeeSchema'
 import { Badge, Button, Check, ErrorBanner, Field, LoadState, Notice, Table, inputClass, useAction, useLoad } from './ui'
 
+import Icon from '../../Common/Icon'
 const GENDERS = [['MALE', 'Male'], ['FEMALE', 'Female'], ['OTHER', 'Other']]
 
 const numberOrNull = (value) => (value === '' || value === null ? null : Number(value))
@@ -87,8 +88,8 @@ function LeaveTypeForm({ type, branches, onSaved, onClose }) {
                     <Field label='Description' className='sm:col-span-2'><textarea rows={2} maxLength={500} value={form.description} onChange={(e) => set('description')(e.target.value)} className={inputClass} /></Field>
                 </fieldset>
                 <div className='flex justify-end gap-2 border-t border-slate-100 pt-3'>
-                    <Button onClick={onClose} disabled={busy}>Cancel</Button>
-                    <Button type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
+                    <Button size='md' onClick={onClose} disabled={busy}>Cancel</Button>
+                    <Button size='md' type='submit' variant='primary' disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
                 </div>
             </form>
         </RequestModal>
@@ -114,7 +115,7 @@ export default function LeaveTypesTab() {
 
     return (
         <div className='space-y-3'>
-            <div className='flex justify-end'><Button variant='primary' onClick={() => { setNotice(''); setEditing({ type: null }) }}><i className='fa-solid fa-plus' />Add leave type</Button></div>
+            <div className='flex flex-wrap justify-end gap-2'><Button size='md' variant='primary' onClick={() => { setNotice(''); setEditing({ type: null }) }}><Icon aria-hidden='true' className='fa-solid fa-plus text-sm' />Add leave type</Button></div>
             <Notice message={notice} />
             <ErrorBanner message={remove.error} />
             {types.loading || types.error ? <LoadState {...types} /> : (

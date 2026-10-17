@@ -1,17 +1,15 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import GridPattern from "../Components/MagicUI/GridPattern";
 import BorderBeam from "../Components/MagicUI/BorderBeam";
 import AnimatedGradientText from "../Components/MagicUI/AnimatedGradientText";
 
 import AttendanceReport from "../Components/Pages/Attendance/AttendanceReport";
+import PageHeader, { secondaryButton } from "../Components/Common/PageHeader";
 
 import {
-  ApplyLeaveModal,
   MissedPunchModal,
   RequestModal,
-  WorkFromHomeModal,
 } from "../Components/Pages/Attendance/AttendanceForms";
 
 import {
@@ -23,7 +21,6 @@ import {
 
 import {
   useAttendanceAccess,
-  useAttendanceApprovals,
   useAttendanceReport,
   useAttendanceRequests,
 } from "../Hooks/useAttendance";
@@ -37,11 +34,12 @@ import {
   shiftDateRangeByMonths,
   toDateKey,
 } from "../Utils/attendance";
+import Icon from "../Components/Common/Icon";
 // Employee header and summary remain independent components in this file.
 const MetaItem = ({ icon, label, value }) => (
-  <div className="att-employee-meta flex min-w-0 items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/70 px-1 py-1 transition hover:border-[#D8E7F2] hover:bg-white hover:shadow-sm">
-    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#F0F6FA] text-[#2A5F98]">
-      <i className={`${icon} text-xs`} />
+  <div className="att-employee-meta flex min-w-0 items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/70 px-1 py-1 transition hover:border-[#dce6ed] hover:bg-white hover:shadow-sm">
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#f2f5f7] text-[#2b6485]">
+      <Icon className={`${icon} text-xs`} />
     </span>
 
     <div className="min-w-0">
@@ -126,7 +124,7 @@ const EmployeeSearch = ({
   return (
     <div
       ref={refContainer}
-      className="att-employee-search relative z-50 flex min-w-0 flex-col justify-center rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50/80 px-2.5 py-2 shadow-[0_8px_24px_rgba(15,23,42,.05)]"
+      className="att-employee-search relative z-50 flex min-w-0 flex-col justify-center rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white via-white to-slate-50/80 px-2.5 py-2 shadow-[0_8px_24px_rgba(8,26,46,.05)]"
     >
       <div className="mb-1 flex items-center justify-between gap-2">
         <label
@@ -137,8 +135,8 @@ const EmployeeSearch = ({
         </label>
 
         {canChangeEmployee && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#F0F6FA] px-2 py-0.5 text-xs font-bold text-[#2A5F98]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#3A7DC0]" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#f2f5f7] px-2 py-0.5 text-xs font-bold text-[#2b6485]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#2b6485]" />
             Switch
           </span>
         )}
@@ -149,11 +147,11 @@ const EmployeeSearch = ({
           className={cn(
             "pointer-events-none absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-xl transition",
             open
-              ? "bg-[#2A5F98] text-white shadow-[0_4px_12px_rgba(37,99,235,.22)]"
-              : "bg-[#F0F6FA] text-[#3A7DC0]",
+              ? "bg-[#2b6485] text-white shadow-[0_4px_12px_rgba(31,78,107,.22)]"
+              : "bg-[#f2f5f7] text-[#2b6485]",
           )}
         >
-          <i className="fa-solid fa-magnifying-glass text-xs" />
+          <Icon className="fa-solid fa-magnifying-glass text-xs" />
         </span>
 
         <input
@@ -184,7 +182,7 @@ const EmployeeSearch = ({
           }}
           className={cn(
             "h-10 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-16 text-sm font-semibold text-slate-700 outline-none transition-all duration-200",
-            "placeholder:font-medium placeholder:text-slate-400 hover:border-slate-300 focus:border-[#5AA3D0] focus:shadow-[0_0_0_3px_rgba(59,130,246,.08)] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400",
+            "placeholder:font-medium placeholder:text-slate-400 hover:border-slate-300 focus:border-[#9fb8c9] focus:shadow-[0_0_0_3px_rgba(59,130,246,.08)] disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400",
             focusRing,
           )}
         />
@@ -199,11 +197,11 @@ const EmployeeSearch = ({
               setFocused(-1);
             }}
             className={cn(
-              "absolute right-10 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700",
+              "absolute right-10 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 pointer-coarse:h-10 pointer-coarse:w-10",
               focusRing,
             )}
           >
-            <i className="fa-solid fa-xmark text-xs" />
+            <Icon className="fa-solid fa-xmark text-xs" />
           </button>
         )}
 
@@ -216,16 +214,15 @@ const EmployeeSearch = ({
               setFocused(-1);
             }}
             className={cn(
-              "absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-[#F0F6FA] hover:text-[#2A5F98]",
+              "absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-[#f2f5f7] hover:text-[#2b6485] pointer-coarse:h-10 pointer-coarse:w-10",
               focusRing,
             )}
           >
-            <i
+            <Icon
               className={cn(
                 "fa-solid fa-chevron-down text-xs transition-transform duration-200",
-                open && "rotate-180 text-[#2A5F98]",
-              )}
-            />
+                open && "rotate-180 text-[#2b6485]",
+              )} />
           </button>
         )}
 
@@ -240,7 +237,7 @@ const EmployeeSearch = ({
               overflow-hidden rounded-2xl
               border border-slate-200/80
               bg-white/95
-              shadow-[0_24px_70px_rgba(15,23,42,.20)]
+              shadow-[0_24px_70px_rgba(8,26,46,.20)]
               backdrop-blur-xl
 
               sm:w-[360px]
@@ -252,8 +249,8 @@ const EmployeeSearch = ({
             <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-white px-3.5 py-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#F0F6FA] text-[#2A5F98]">
-                    <i className="fa-solid fa-users text-xs" />
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#f2f5f7] text-[#2b6485]">
+                    <Icon className="fa-solid fa-users text-xs" />
                   </span>
 
                   <div className="min-w-0">
@@ -267,7 +264,7 @@ const EmployeeSearch = ({
                 </div>
               </div>
 
-              <span className="inline-flex shrink-0 items-center rounded-full border border-[#D8E7F2] bg-[#F0F6FA] px-2 py-1 text-xs font-extrabold text-[#2A5F98]">
+              <span className="inline-flex shrink-0 items-center rounded-full border border-[#dce6ed] bg-[#f2f5f7] px-2 py-1 text-xs font-extrabold text-[#2b6485]">
                 {results.length} {results.length === 1 ? "result" : "results"}
               </span>
             </div>
@@ -296,7 +293,7 @@ const EmployeeSearch = ({
                           "group flex min-h-[62px] w-full items-center gap-3 rounded-xl border px-2.5 py-2 text-left transition-all duration-200",
                           focusRing,
                           selected
-                            ? "border-[#D8E7F2] bg-gradient-to-r from-[#F0F6FA] via-[#F0F6FA]/80 to-[#F0F6FA]/70 shadow-[0_4px_14px_rgba(37,99,235,.07)]"
+                            ? "border-[#dce6ed] bg-gradient-to-r from-[#f2f5f7] via-[#f2f5f7]/80 to-[#f2f5f7]/70 shadow-[0_4px_14px_rgba(31,78,107,.07)]"
                             : keyboardFocused
                               ? "border-slate-200 bg-slate-50"
                               : "border-transparent bg-white hover:border-slate-200 hover:bg-slate-50/80",
@@ -306,7 +303,7 @@ const EmployeeSearch = ({
                           className={cn(
                             "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-black transition",
                             selected
-                              ? "bg-[#2A5F98] text-white shadow-[0_5px_14px_rgba(37,99,235,.20)]"
+                              ? "bg-[#2b6485] text-white shadow-[0_5px_14px_rgba(31,78,107,.20)]"
                               : "bg-slate-100 text-slate-600 group-hover:bg-white group-hover:shadow-sm",
                           )}
                         >
@@ -353,12 +350,12 @@ const EmployeeSearch = ({
                           className={cn(
                             "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition",
                             selected
-                              ? "border-[#2A5F98] bg-[#2A5F98] text-white shadow-[0_4px_10px_rgba(37,99,235,.20)]"
+                              ? "border-[#2b6485] bg-[#2b6485] text-white shadow-[0_4px_10px_rgba(31,78,107,.20)]"
                               : "border-slate-200 bg-white text-transparent group-hover:text-slate-300",
                           )}
                           aria-hidden="true"
                         >
-                          <i className="fa-solid fa-check text-xs" />
+                          <Icon className="fa-solid fa-check text-xs" />
                         </span>
                       </button>
                     );
@@ -367,7 +364,7 @@ const EmployeeSearch = ({
               ) : (
                 <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                    <i className="fa-solid fa-user-slash text-xs" />
+                    <Icon className="fa-solid fa-user-slash text-xs" />
                   </span>
 
                   <p className="mt-2 text-xs font-bold text-slate-600">
@@ -384,8 +381,8 @@ const EmployeeSearch = ({
             {results.length > 0 && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-slate-100 bg-slate-50/70 px-3.5 py-2 text-xs font-semibold text-slate-400">
                 <span className="inline-flex items-center gap-1">
-                  <i className="fa-solid fa-arrow-up text-[6px]" />
-                  <i className="fa-solid fa-arrow-down text-[6px]" />
+                  <Icon className="fa-solid fa-arrow-up text-[6px]" />
+                  <Icon className="fa-solid fa-arrow-down text-[6px]" />
                   Navigate
                 </span>
                 <span>Enter to select</span>
@@ -510,14 +507,14 @@ const EmployeeAttendanceHeader = ({
   };
 
   return (
-    <section className="att-employee-header relative z-30 overflow-visible rounded-2xl border border-white bg-white/90 p-2 shadow-[0_12px_40px_rgba(15,23,42,.06)] backdrop-blur-xl">
+    <section className="att-employee-header glass rise relative z-30 overflow-visible rounded-2xl p-2">
       <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
         <BorderBeam />
       </div>
 
       <div className="relative z-10 grid gap-2 lg:grid-cols-[200px_minmax(0,1fr)_220px] xl:grid-cols-[240px_minmax(0,1fr)_260px]">
-        <div className="relative order-1 flex min-h-[60px] items-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#081F34] via-[#133F66] to-[#2A5F98] px-3 py-2 text-white shadow-md">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#5AA3D0] to-[#3A7DC0] lg:text-[13px] text-sm font-black ring-4 ring-white/10">
+        <div className="relative order-1 flex min-h-[60px] items-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#081a2e] via-[#163a58] to-[#2b6485] px-3 py-2 text-white shadow-md">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#9fb8c9] to-[#2b6485] lg:text-[13px] text-sm font-black ring-4 ring-white/10">
             {initials || "NA"}
           </div>
 
@@ -546,19 +543,18 @@ const EmployeeAttendanceHeader = ({
             aria-expanded={detailsOpen}
             onClick={() => setDetailsOpen((value) => !value)}
             className={cn(
-              "absolute right-3 top-3 inline-flex h-7 items-center gap-1.5 rounded-lg bg-white/10 px-2.5 text-xs font-semibold text-white transition hover:bg-white/20 lg:hidden",
+              "absolute right-3 top-3 inline-flex h-7 items-center gap-1.5 rounded-lg bg-white/10 px-2.5 text-xs font-semibold text-white transition hover:bg-white/20 pointer-coarse:h-10 lg:hidden",
 
               focusRing,
             )}
           >
             Details
-            <i
+            <Icon
               className={cn(
                 "fa-solid fa-chevron-down text-xs transition-transform",
 
                 detailsOpen && "rotate-180",
-              )}
-            />
+              )} />
           </button>
         </div>
 
@@ -596,9 +592,6 @@ const EmployeeAttendanceHeader = ({
   );
 };
 
-const toolbarButtonClass =
-  "att-toolbar-button relative inline-flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#A4C8E1] bg-[#F0F6FA] text-xs font-semibold text-[#133F66] shadow-sm transition hover:bg-[#D8E7F2] active:scale-[.98] sm:w-auto sm:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3A7DC0] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
-
 const days = (value) => Number(Number(value || 0).toFixed(2));
 // HOP retains the existing holiday-presence color when only legacy HP exists.
 const SUMMARY_STATUS = {
@@ -616,12 +609,18 @@ const legendText = (code) =>
     .split(" ")
     .find((value) => value.startsWith("text-"));
 
-function AttendanceSummary({ employee, periodLabel, summary = {} }) {
+function AttendanceSummary({ employee, periodLabel, summary = {}, highlight = null, onHighlight }) {
+  // Picking a row shows only its days on the calendar; picking it again shows every day
+  const toggle = (code) => onHighlight?.(highlight === code ? null : code);
   const [expanded, setExpanded] = useState(false);
   const bodyId = useId();
   const leave = days(summary.leave);
   const unapproved = days(summary.unapprovedLeave);
   const rate = summary.attendancePercentage ?? 0;
+  // The percentage covers one month: the latest month in the selected period
+  const rateMonth = summary.attendancePercentageMonth
+    ? new Date(`${summary.attendancePercentageMonth}-01T00:00:00`).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
+    : "";
   const groups = [
     {
       title: "Discipline",
@@ -632,12 +631,6 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
           summary.earlyLeaving ?? summary.lessThanDuration,
           summary.earlyLeavingPayable ?? summary.lessThanDurationPayable,
           "EL",
-        ],
-        [
-          "Late Entry & Early Leaving",
-          summary.lateAndEarly,
-          summary.lateAndEarlyPayable,
-          "LE",
         ],
       ],
     },
@@ -677,15 +670,15 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
     },
   ];
   return (
-    <aside className="att-summary relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,.06)]">
+    <aside className="att-summary glass-strong rise relative overflow-hidden rounded-2xl" style={{ "--i": 1 }}>
       <BorderBeam />
-      <header className="att-summary-header bg-gradient-to-br from-[#081F34] via-[#133F66] to-[#2A5F98] px-3 py-2.5 lg:py-2">
+      <header className="att-summary-header bg-gradient-to-br from-[#081a2e] via-[#163a58] to-[#2b6485] px-3 py-2.5 lg:py-2">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-[13px] font-bold leading-tight sm:text-[15px]">
               <AnimatedGradientText
                 colorFrom="#ffffff"
-                colorTo="#A4C8E1"
+                colorTo="#cfdce5"
                 speed={10}
               >
                 Attendance Summary
@@ -697,15 +690,15 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <strong
-              className="att-attendance-rate rounded-lg border border-white/15 bg-white/10 px-2 py-1.5 text-sm text-[#7FBBD8]"
-              aria-label={`Attendance ${rate}%`}
-              title="Payable days as a share of the days so far (today and future days are left out). Present, holidays, week offs and approved leave count 1; Half Day and WFH 0.5; Unapproved Leave 0."
+              className="att-attendance-rate rounded-lg border border-white/15 bg-white/10 px-2 py-1.5 text-sm text-[#9fb8c9]"
+              aria-label={`Attendance ${rate}%${rateMonth ? ` in ${rateMonth}` : ""}`}
+              title={`Attendance${rateMonth ? ` for ${rateMonth}` : ""}: payable days as a share of that month's days so far (today and future days are left out). Present, holidays, week offs and approved leave count 1; Half Day and WFH 0.5; Unapproved Leave 0.`}
             >
               {rate}%
             </strong>
             <button
               type="button"
-              className="att-summary-toggle inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 lg:hidden"
+              className="att-summary-toggle inline-flex h-9 w-9 items-center justify-center rounded-lg pointer-coarse:h-10 pointer-coarse:w-10 border border-white/20 bg-white/10 text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 lg:hidden"
               aria-label={`${expanded ? "Collapse" : "Expand"} attendance summary`}
               aria-expanded={expanded}
               aria-controls={bodyId}
@@ -737,7 +730,7 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
           className="att-total-progress mt-2 h-1.5 overflow-hidden rounded-full bg-white/15 lg:mt-1.5"
         >
           <div
-            className="att-progress-fill h-full rounded-full bg-gradient-to-r from-[#7FBBD8] via-[#5AA3D0] to-[#A4C8E1] transition-[width] duration-500"
+            className="att-progress-fill h-full rounded-full bg-gradient-to-r from-[#9fb8c9] via-[#9fb8c9] to-[#cfdce5] transition-[width] duration-500"
             style={{ width: `${rate}%` }}
           />
         </div>
@@ -754,18 +747,21 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
             ["Approved Leave", leave, "AL"],
             ["Unapproved Leave", unapproved, "UL"],
           ].map(([label, value, code]) => (
-            <div
+            <button
+              type="button"
               key={label}
-              className={`rounded-lg border px-1 py-1.5 lg:py-1 ${SUMMARY_STATUS[code].cellClass}`}
-              title={`${label}: ${days(value)} days`}
+              onClick={() => toggle(code)}
+              aria-pressed={highlight === code}
+              className={`rounded-lg border px-1 py-1.5 transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] lg:py-1 ${SUMMARY_STATUS[code].cellClass} ${highlight === code ? "ring-2 ring-[#1f4e6b]/50" : highlight ? "opacity-60" : ""}`}
+              title={`${label}: ${days(value)} days. Click to show only these days on the calendar.`}
             >
-              <p className="flex min-h-7 items-center justify-center text-[10px] leading-3.5 text-slate-500 lg:min-h-6">
+              <span className="flex min-h-7 items-center justify-center text-[10px] leading-3.5 text-slate-500 lg:min-h-6">
                 {label}
-              </p>
-              <p className={`text-base font-bold ${legendText(code)}`}>
+              </span>
+              <span className={`block text-base font-bold ${legendText(code)}`}>
                 {days(value)}
-              </p>
-            </div>
+              </span>
+            </button>
           ))}
         </div>
         <div className="att-summary-groups space-y-3 px-3 py-2.5 lg:space-y-2 lg:py-2">
@@ -777,11 +773,15 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
                 <span className="text-right">Pay</span>
               </div>
               {group.rows.map(([label, value, pay, code]) => (
-                <div
+                <button
+                  type="button"
                   key={label}
-                  className="att-summary-row grid min-h-9 grid-cols-[minmax(0,1fr)_36px_36px] items-center gap-x-2 border-b border-slate-100 py-1.5 text-xs leading-4 text-slate-700 transition-colors hover:bg-slate-50 lg:min-h-8 lg:py-1"
+                  onClick={() => toggle(code)}
+                  aria-pressed={highlight === code}
+                  title={`Show only ${label} days on the calendar`}
+                  className={`att-summary-row grid min-h-9 w-full grid-cols-[minmax(0,1fr)_36px_36px] items-center gap-x-2 rounded-md border-b border-slate-100 py-1.5 text-left text-xs leading-4 text-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485] lg:min-h-8 lg:py-1 ${highlight === code ? "bg-[#f2f5f7] font-semibold" : "hover:bg-slate-50"}`}
                 >
-                  <div className="flex min-w-0 items-center gap-2">
+                  <span className="flex min-w-0 items-center gap-2">
                     <span
                       aria-hidden="true"
                       title={label}
@@ -796,7 +796,7 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
                       )}
                     </span>
                     <span className="min-w-0">{label}</span>
-                  </div>
+                  </span>
                   <span
                     className={`text-right font-semibold tabular-nums sm:text-sm ${days(value) === 0 ? "text-slate-400" : legendText(code)}`}
                   >
@@ -805,19 +805,19 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
                   <span className="text-right font-medium tabular-nums text-slate-800 sm:text-sm">
                     {days(pay)}
                   </span>
-                </div>
+                </button>
               ))}
             </section>
           ))}
         </div>
         <footer
           title="Leave is unpaid. Discipline and leave rows overlap categories and are not added twice."
-          className="att-payroll relative overflow-hidden m-2.5 rounded-xl border border-[#2A5F98] bg-gradient-to-r from-[#081F34] via-[#133F66] to-[#2A5F98] px-3 py-2 text-white lg:m-2 lg:py-1.5"
+          className="att-payroll relative overflow-hidden m-2.5 rounded-xl border border-[#2b6485] bg-gradient-to-r from-[#081a2e] via-[#163a58] to-[#2b6485] px-3 py-2 text-white lg:m-2 lg:py-1.5"
         >
           <BorderBeam />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold">Total Payable</span>
-            <strong className="text-xl text-[#7FBBD8]">
+            <strong className="text-xl text-[#9fb8c9]">
               {days(summary.totalPayable)}
             </strong>
           </div>
@@ -828,7 +828,6 @@ function AttendanceSummary({ employee, periodLabel, summary = {} }) {
 }
 
 const Attendance = () => {
-  const navigate = useNavigate();
 
   // ============================================================
   // ACCESS
@@ -868,9 +867,13 @@ const Attendance = () => {
   const [range, setRange] = useState(() => getMonthRange(new Date()));
 
   const [selectedDate, setSelectedDate] = useState(() => toDateKey(new Date()));
+  // Summary row picked to filter the calendar (e.g. "AL" shows only approved leave days)
+  const [highlight, setHighlight] = useState(null);
+  const chooseHighlight = (code) => {
+    setHighlight(code);
+    if (code) setSelectedDate("");
+  };
 
-  const [leaveOpen, setLeaveOpen] = useState(false);
-  const [wfhOpen, setWfhOpen] = useState(false);
   const [punchOpen, setPunchOpen] = useState(false);
   const [punchType, setPunchType] = useState(null);
   const [lockDialogMonth, setLockDialogMonth] = useState("");
@@ -953,15 +956,11 @@ const Attendance = () => {
   // ============================================================
 
   const {
-    submitLeave,
-    submitWFH,
     submitMissedPunch,
     submitPunch,
-    pendingRequestCount,
     setMonthLocked,
     isSubmitting,
   } = useAttendanceRequests();
-  const { pendingApprovalCount, canAccessApprovals } = useAttendanceApprovals();
 
   // ============================================================
   // KEEP SELECTED DATE INSIDE CURRENT RANGE
@@ -1058,16 +1057,6 @@ const Attendance = () => {
       setSelectedDate(date);
     }
 
-    if (action === "applyLeave") {
-      setLeaveOpen(true);
-      return;
-    }
-
-    if (action === "workFromHome") {
-      setWfhOpen(true);
-      return;
-    }
-
     if (action === "webPunch") {
       setPunchType(payload?.punchType);
       setPunchOpen(true);
@@ -1085,7 +1074,7 @@ const Attendance = () => {
   // ============================================================
 
   const periodLabel = formatRangeTitle(range.start, range.end);
-  const selectedMonth = selectedDate.slice(0, 7);
+  const selectedMonth = (selectedDate || toDateKey(range.start)).slice(0, 7);
   const isSelectedMonthLocked = monthControls[selectedMonth]?.locked === true;
   const isDialogMonthLocked = monthControls[lockDialogMonth]?.locked === true;
 
@@ -1110,7 +1099,7 @@ const Attendance = () => {
     return (
       <div className="attendance-ui min-h-full bg-[#f5f7fb] p-4">
         <StatusBanner type="warning">
-          <i className="fa-solid fa-user-lock mr-2" />
+          <Icon className="fa-solid fa-user-lock mr-2" />
           No employees are currently available within your attendance access
           scope.
         </StatusBanner>
@@ -1127,7 +1116,7 @@ const Attendance = () => {
   }
 
   return (
-    <div className="attendance-ui att-workspace relative min-h-full bg-[radial-gradient(ellipse_at_top_left,#A4C8E133,transparent_45%),radial-gradient(ellipse_at_bottom_right,#7FBBD826,transparent_55%)] bg-[var(--att-bg)] px-2.5 pb-3 pt-2 sm:px-3">
+    <div className="attendance-ui att-workspace relative min-h-full">
       {/* ======================================================
           BACKGROUND
       ====================================================== */}
@@ -1135,134 +1124,42 @@ const Attendance = () => {
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <GridPattern className="opacity-10 [mask-image:linear-gradient(to_bottom,black,transparent_82%)]" />
       </div>
-      <main className="att-main relative z-10 mx-auto w-full max-w-[1360px]">
+      <div className="att-main relative z-10 w-full">
         {/* ====================================================
             PAGE HEADER
         ==================================================== */}
 
-        <header className="att-page-header mb-2">
-          <div className="flex flex-col gap-3">
-            {/* LEFT */}
-            <div className="min-w-0">
-              <h1 className="flex items-center gap-2.5 text-[22px] font-bold tracking-[-.035em] text-slate-900 sm:text-[24px]">
-                <span
-                  aria-hidden="true"
-                  className="h-6 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-[#1B4A7B] to-[#2A5F98]"
-                />
-                Attendance Report
-              </h1>
-
-              <p className="mt-0.5 max-w-xl text-xs leading-4 text-slate-500">
-                Attendance, punches, payable days and employee activity in one
-                workspace.
-              </p>
-            </div>
-
-            {/* ==================================================
-                ACTIONS BELOW THE PAGE HEADING
-
-                Mobile: icon-only buttons with compact badges.
-                sm+: labels and inline counts are restored.
-            ================================================== */}
-
-            <div className="flex w-full flex-wrap items-center justify-end gap-2 pb-1">
-              {monthControls[selectedMonth]?.visible && (
-                <button
-                  type="button"
-                  disabled={!monthControls[selectedMonth]?.canChange}
-                  onClick={() => {
-                    setLockError("");
-                    setLockDialogMonth(selectedMonth);
-                  }}
-                  className={toolbarButtonClass}
-                  aria-label={`${isSelectedMonthLocked ? "Reopen" : "Lock"} attendance month ${selectedMonth}`}
-                >
-                  <i
-                    className={`fa-solid fa-${isSelectedMonthLocked ? "lock" : "lock-open"}`}
-                  />
-                  <span className="hidden sm:inline">
-                    {selectedMonth} ·{" "}
-                    {isSelectedMonthLocked ? "Locked" : "Open"}
-                  </span>
-                </button>
-              )}
-              {/* FETCH STATUS */}
-
-              {isFetching && (
-                <span
-                  aria-label="Updating attendance"
-                  title="Updating attendance"
-                  className={toolbarButtonClass}
-                >
-                  <i className="fa-solid fa-spinner animate-spin text-xs" />
-                  <span className="hidden text-xs font-semibold sm:inline">
-                    Updating
-                  </span>
-                </span>
-              )}
-
-              {/* MY REQUESTS */}
-
+        <PageHeader
+          icon="fa-regular fa-calendar-days"
+          title="Attendance report"
+          description="Attendance, punches, payable days and activity for one employee, month by month."
+          actions={<>
+            {monthControls[selectedMonth]?.visible && (
               <button
                 type="button"
-                onClick={() => navigate("/attendance/requests")}
-                aria-label="My Requests"
-                title="My Requests"
-                className={toolbarButtonClass}
+                disabled={!monthControls[selectedMonth]?.canChange}
+                onClick={() => {
+                  setLockError("");
+                  setLockDialogMonth(selectedMonth);
+                }}
+                className={secondaryButton}
+                aria-label={`${isSelectedMonthLocked ? "Reopen" : "Lock"} attendance month ${selectedMonth}`}
               >
-                <i className="fa-regular fa-file-lines shrink-0 text-xs" />
-
-                <span className="hidden truncate text-xs font-semibold sm:inline">
-                  My Requests
+                <Icon className={isSelectedMonthLocked ? "fa-solid fa-lock" : "fa-solid fa-lock-open"} />
+                <span>{selectedMonth}</span>
+                <span className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ring-1 ring-inset ${isSelectedMonthLocked ? "bg-amber-50 text-amber-800 ring-amber-200" : "bg-emerald-50 text-emerald-700 ring-emerald-200"}`}>
+                  {isSelectedMonthLocked ? "Locked" : "Open"}
                 </span>
-
-                {pendingRequestCount > 0 && (
-                  <>
-                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#2A5F98] px-1 text-xs font-extrabold leading-none text-white shadow-sm sm:hidden">
-                      {pendingRequestCount > 99 ? "99+" : pendingRequestCount}
-                    </span>
-
-                    <span className="hidden min-w-[18px] items-center justify-center rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-extrabold text-slate-500 sm:inline-flex">
-                      {pendingRequestCount > 99 ? "99+" : pendingRequestCount}
-                    </span>
-                  </>
-                )}
               </button>
-
-              {/* APPROVALS */}
-
-              {canAccessApprovals && (
-                <button
-                  type="button"
-                  onClick={() => navigate("/attendance/applications")}
-                  aria-label={`Applications${pendingApprovalCount > 0 ? `, ${pendingApprovalCount} awaiting your approval` : ""}`}
-                  title="Applications"
-                  className={`att-toolbar-button relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border shadow-sm transition active:scale-[.98] sm:w-auto sm:gap-2 sm:px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3A7DC0] focus-visible:ring-offset-2 ${
-                    pendingApprovalCount > 0
-                      ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                      : "border-slate-200 bg-white text-[#1B4A7B] hover:border-[#A4C8E1] hover:bg-[#F0F6FA]"
-                  }`}
-                >
-                  <i
-                    aria-hidden="true"
-                    className="fa-regular fa-file-lines shrink-0 text-xs"
-                  />
-                  <span className="hidden text-xs font-semibold sm:inline">
-                    Applications
-                  </span>
-                  {pendingApprovalCount > 0 && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-600 px-1 text-[10px] font-bold leading-none text-white sm:static"
-                    >
-                      {pendingApprovalCount > 99 ? "99+" : pendingApprovalCount}
-                    </span>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-        </header>
+            )}
+            {isFetching && (
+              <span role="status" className="inline-flex h-10 items-center gap-2 rounded-xl px-2 text-[13px] font-medium text-slate-500">
+                <Icon className="fa-solid fa-spinner animate-spin" />
+                Updating…
+              </span>
+            )}
+          </>}
+        />
 
         {/* ====================================================
             CONTENT
@@ -1298,7 +1195,7 @@ const Attendance = () => {
 
             {!canSwitchEmployee && !showSelfActions && (
               <div className="mt-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-                <i className="fa-solid fa-lock text-xs" />
+                <Icon className="fa-solid fa-lock text-xs" />
                 Attendance access is restricted to your authorized employee
                 scope.
               </div>
@@ -1311,7 +1208,7 @@ const Attendance = () => {
             {!isAuthorized && (
               <div className="mt-4">
                 <StatusBanner type="error">
-                  <i className="fa-solid fa-shield-halved mr-2" />
+                  <Icon className="fa-solid fa-shield-halved mr-2" />
                   You do not have permission to view this employee&apos;s
                   attendance.
                 </StatusBanner>
@@ -1327,7 +1224,7 @@ const Attendance = () => {
                 {isError && (
                   <div className="mt-4">
                     <StatusBanner type="error">
-                      <i className="fa-solid fa-triangle-exclamation mr-2" />
+                      <Icon className="fa-solid fa-triangle-exclamation mr-2" />
 
                       {error?.message ||
                         "Unable to load attendance information."}
@@ -1342,7 +1239,7 @@ const Attendance = () => {
                 {!isError && !records.length && (
                   <div className="mt-4">
                     <StatusBanner type="info">
-                      <i className="fa-regular fa-calendar-xmark mr-2" />
+                      <Icon className="fa-regular fa-calendar-xmark mr-2" />
                       No attendance records were found for this employee and
                       date range.
                     </StatusBanner>
@@ -1360,6 +1257,8 @@ const Attendance = () => {
                       employee={employee}
                       periodLabel={periodLabel}
                       summary={summary}
+                      highlight={highlight}
+                      onHighlight={chooseHighlight}
                     />
                   </div>
 
@@ -1381,6 +1280,9 @@ const Attendance = () => {
                       onNextPeriod={() => handlePeriodShift(1)}
                       onRecordAction={handleRecordAction}
                       actionsAllowed={showSelfActions}
+                      highlight={highlight}
+                      onClearHighlight={() => setHighlight(null)}
+                      requestsPath={String(employee?.empId) === String(user?.empId) ? "/attendance/requests" : "/attendance/applications"}
                     />
                   </div>
                 </section>
@@ -1388,27 +1290,7 @@ const Attendance = () => {
             )}
           </>
         )}
-      </main>
-
-      {/* ======================================================
-          ATTENDANCE REQUEST MODALS
-      ====================================================== */}
-
-      <ApplyLeaveModal
-        isSubmitting={isSubmitting}
-        open={leaveOpen}
-        initialDate={selectedDate}
-        onClose={() => setLeaveOpen(false)}
-        onSubmit={submitLeave}
-      />
-
-      <WorkFromHomeModal
-        isSubmitting={isSubmitting}
-        open={wfhOpen}
-        initialDate={selectedDate}
-        onClose={() => setWfhOpen(false)}
-        onSubmit={submitWFH}
-      />
+      </div>
 
       <MissedPunchModal
         isSubmitting={isSubmitting}
@@ -1426,7 +1308,7 @@ const Attendance = () => {
         icon="fa-solid fa-lock"
         onClose={() => setLockDialogMonth("")}
       >
-        <div className="space-y-4 p-5 text-sm text-[#133F66]">
+        <div className="space-y-4 p-5 text-sm text-[#163a58]">
           <p>
             {isDialogMonthLocked
               ? `Reopen ${lockDialogMonth} only if payroll permits corrections. Missed-punch applications and approvals will become available again.`
@@ -1440,7 +1322,7 @@ const Attendance = () => {
                 onChange={(event) => setUnlockReason(event.target.value)}
                 maxLength={500}
                 rows={2}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#3A7DC0]"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2b6485]"
               />
             </label>
           )}
@@ -1473,7 +1355,7 @@ const Attendance = () => {
                 setUnlockReason("");
                 setLockDialogMonth("");
               }}
-              className="rounded-lg bg-gradient-to-r from-[#133F66] to-[#2A5F98] px-4 py-2 font-semibold text-white"
+              className="rounded-lg bg-gradient-to-r from-[#163a58] to-[#2b6485] px-4 py-2 font-semibold text-white"
             >
               {isDialogMonthLocked ? "Confirm reopen" : "Confirm lock"}
             </button>

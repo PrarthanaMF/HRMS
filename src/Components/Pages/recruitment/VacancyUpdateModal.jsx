@@ -1,30 +1,37 @@
 import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { DatePicker } from '../../Common/DateTimePicker'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateVacancy, addCandidateToVacancy } from '../../../Store/Redux/Recruitment/VacancySlice'
 import VacancyStatusBadge from './VacancyStatusBadge'
 import RecruitmentTrackerForm from './RecruitmentTrackerForm'
 import { todayISO } from '../../../Utils/formatDate'
+import { primaryButton, secondaryButton } from '../../Common/PageHeader'
+import { inputClass, labelClass, modalPanel, modalHeader, modalTitle, modalClose } from './ui'
 
+import Icon from '../../Common/Icon'
 const OPTIONS = [
     {
         key: 'postpone',
         icon: 'fa-calendar-days',
-        title: 'Postpone Timeline',
+        title: 'Postpone timeline',
         desc: 'Push the target hiring date to a new deadline.',
     },
     {
         key: 'new-recruitment',
         icon: 'fa-user-plus',
-        title: 'New Recruitment',
+        title: 'New recruitment',
         desc: 'Open the candidate application form for this position.',
     },
     {
         key: 'closed',
         icon: 'fa-circle-check',
-        title: 'Closed Hiring',
+        title: 'Closed hiring',
         desc: 'Mark this hiring request as closed.',
     },
 ]
+
+const backButton = 'press -ml-2 inline-flex h-10 items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium text-slate-600 hover:bg-slate-100 hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'
 
 const VacancyUpdateModal = ({ vacancy, onClose }) => {
     const dispatch = useDispatch()
@@ -98,33 +105,35 @@ const VacancyUpdateModal = ({ vacancy, onClose }) => {
     // Same centered-popup treatment as every other step in this modal, just a
     // wider dialog to fit the extra fields, with its own scroll.
     if (step === 'new-recruitment') {
-        return (
-            <div className='fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center p-4' onClick={close}>
+        return createPortal(
+            <div className='fixed inset-0 bg-slate-950/40 backdrop-blur-[6px] z-[1000] flex items-center justify-center p-4 [animation:ui-fade_160ms_ease-out_backwards]' onClick={close}>
                 <div
-                    className='bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-all'
+                    role='dialog'
+                    aria-modal='true'
+                    aria-labelledby='new-recruitment-title'
+                    className={`${modalPanel} max-w-2xl`}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Banner */}
-                    <div className='relative bg-gradient-to-r from-[#062139] to-[#0a3f6e] rounded-t-2xl px-6 py-5'>
-                        <button
-                            onClick={() => setStep('menu')}
-                            className='flex items-center gap-1.5 text-xs font-medium text-white/70 hover:text-white mb-2'
-                        >
-                            <i className="fa-solid fa-arrow-left text-[10px]"></i>
-                            Back
+                    <div className={modalHeader}>
+                        <div className='min-w-0'>
+                            <button onClick={() => setStep('menu')} className={`${backButton} -mt-1.5 mb-1`}>
+                                <Icon className="fa-solid fa-arrow-left text-[11px]" />
+                                Back
+                            </button>
+                            <p className='flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-medium text-slate-500'>
+                                <span className='tabular-nums'>S.No {vacancy.jobId}</span>
+                                <span className='inline-flex items-center gap-1'>
+                                    <Icon className='fa-solid fa-location-dot text-[10px] text-slate-400' />{vacancy.branch}
+                                </span>
+                            </p>
+                            <h2 id='new-recruitment-title' className={`${modalTitle} mt-0.5 text-lg`}>New recruitment — {vacancy.designation}</h2>
+                        </div>
+                        <button onClick={close} className={modalClose} aria-label='Close'>
+                            <Icon className="fa-solid fa-xmark" />
                         </button>
-                        <button
-                            onClick={close}
-                            className='absolute top-4 right-4 text-white/70 hover:text-white w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition'
-                            aria-label='Close'
-                        >
-                            <i className="fa-solid fa-xmark"></i>
-                        </button>
-                        <p className='font-mono text-xs text-slate-300 mb-1'>S.No {vacancy.jobId} · {vacancy.branch}</p>
-                        <h2 className='text-lg font-bold text-white pr-10'>New Recruitment — {vacancy.designation}</h2>
                     </div>
 
-                    <div className='p-6'>
+                    <div className='p-4 sm:p-5 overflow-y-auto'>
                         <RecruitmentTrackerForm
                             vacancy={vacancy}
                             hrName={user?.name || ''}
@@ -135,46 +144,47 @@ const VacancyUpdateModal = ({ vacancy, onClose }) => {
                     </div>
                 </div>
             </div>
-        )
+        , document.body)
     }
 
-    return (
-        <div className='fixed inset-0 bg-black/50 z-[1000] flex items-center justify-center p-4' onClick={close}>
+    return createPortal(
+        <div className='fixed inset-0 bg-slate-950/40 backdrop-blur-[6px] z-[1000] flex items-center justify-center p-4 [animation:ui-fade_160ms_ease-out_backwards]' onClick={close}>
             <div
-                className='bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto transition-all'
+                role='dialog'
+                aria-modal='true'
+                aria-labelledby='vacancy-update-title'
+                className={`${modalPanel} max-w-md`}
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Banner */}
-                <div className='relative bg-gradient-to-r from-[#062139] to-[#0a3f6e] rounded-t-2xl px-6 py-5'>
-                    <button
-                        onClick={close}
-                        className='absolute top-4 right-4 text-white/70 hover:text-white w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition'
-                    >
-                        <i className="fa-solid fa-xmark"></i>
+                <div className={modalHeader}>
+                    <div className='min-w-0'>
+                        <p className='text-xs font-medium text-slate-500 tabular-nums'>S.No {vacancy.jobId}</p>
+                        <h2 id='vacancy-update-title' className={`${modalTitle} mt-0.5 text-lg`}>{vacancy.designation}</h2>
+                        <div className='mt-2'><VacancyStatusBadge status={vacancy.status} /></div>
+                    </div>
+                    <button onClick={close} className={modalClose} aria-label='Close'>
+                        <Icon className="fa-solid fa-xmark" />
                     </button>
-                    <p className='font-mono text-xs text-slate-300 mb-1'>S.No {vacancy.jobId}</p>
-                    <h2 className='text-lg font-bold text-white pr-10'>{vacancy.designation}</h2>
-                    <div className='mt-2'><VacancyStatusBadge status={vacancy.status} /></div>
                 </div>
 
-                <div className='p-6'>
+                <div className='p-4 sm:p-5 overflow-y-auto'>
                     {/* ---------- Step 1: choose an update type ---------- */}
                     {step === 'menu' && (
-                        <div className='space-y-3'>
+                        <div className='space-y-2.5'>
                             {OPTIONS.map((opt) => (
                                 <button
                                     key={opt.key}
                                     onClick={() => setStep(opt.key)}
-                                    className='w-full flex items-center gap-3.5 text-left p-3.5 rounded-xl border border-slate-200 hover:border-[#062139] hover:bg-slate-50 transition group'
+                                    className='glass-panel lift press group flex w-full items-center gap-3.5 rounded-2xl p-3.5 text-left hover:border-[#cfdce5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2b6485]'
                                 >
-                                    <div className='w-10 h-10 shrink-0 rounded-lg bg-slate-100 group-hover:bg-[#062139] flex items-center justify-center transition'>
-                                        <i className={`fa-solid ${opt.icon} text-slate-500 group-hover:text-white transition`}></i>
+                                    <div aria-hidden='true' className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f2f5f7] text-[var(--brand-600)] ring-1 ring-inset ring-[#cfdce5]/60 transition-colors group-hover:bg-[var(--brand-600)] group-hover:text-white'>
+                                        <Icon className={`fa-solid ${opt.icon}`} />
                                     </div>
                                     <div className='min-w-0'>
-                                        <p className='text-sm font-semibold text-slate-800'>{opt.title}</p>
-                                        <p className='text-xs text-slate-500 truncate'>{opt.desc}</p>
+                                        <p className='text-sm font-semibold text-[var(--ink)]'>{opt.title}</p>
+                                        <p className='text-[13px] text-slate-500'>{opt.desc}</p>
                                     </div>
-                                    <i className="fa-solid fa-chevron-right text-slate-300 ml-auto text-xs shrink-0"></i>
+                                    <Icon className="fa-solid fa-chevron-right text-slate-400 ml-auto text-xs shrink-0" />
                                 </button>
                             ))}
                         </div>
@@ -183,47 +193,37 @@ const VacancyUpdateModal = ({ vacancy, onClose }) => {
                     {/* ---------- Step: Postpone Timeline ---------- */}
                     {step === 'postpone' && (
                         <div>
-                            <button
-                                onClick={() => setStep('menu')}
-                                className='flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 mb-4'
-                            >
-                                <i className="fa-solid fa-arrow-left text-[10px]"></i>
+                            <button onClick={() => setStep('menu')} className={`${backButton} mb-3`}>
+                                <Icon className="fa-solid fa-arrow-left text-[11px]" />
                                 Back
                             </button>
 
-                            <p className='text-sm font-semibold text-slate-800 mb-1'>Postpone Timeline</p>
-                            <p className='text-xs text-slate-500 mb-4'>
-                                Current target date: <span className='font-medium text-slate-700'>{vacancy.targetDate || '—'}</span>
+                            <p className='text-[15px] font-semibold text-[var(--ink)] mb-1'>Postpone timeline</p>
+                            <p className='text-[13px] text-slate-500 mb-4'>
+                                Current target date: <span className='font-medium text-slate-700 tabular-nums'>{vacancy.targetDate || '—'}</span>
                             </p>
 
-                            <label className='text-xs font-medium text-slate-700'>New Target Date <span className='text-red-500'>*</span></label>
-                            <input
-                                type='date'
-                                value={newTargetDate}
-                                onChange={(e) => setNewTargetDate(e.target.value)}
-                                min={todayISO()}
-                                className='mt-1.5 w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:border-[#062139] focus:ring-2 focus:ring-slate-100'
-                            />
+                            <label htmlFor='vacancy-new-target-date' className={labelClass}>New target date <span className='text-red-500'>*</span></label>
+                            <div className='mt-1.5'>
+                                <DatePicker id='vacancy-new-target-date' value={newTargetDate} min={todayISO()} onChange={setNewTargetDate} placeholder='New target date' />
+                            </div>
                             {newTargetDate && newTargetDate < todayISO() && (
-                                <p className='text-[11px] text-red-600 flex items-center gap-1 mt-2'>
-                                    <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                                <p className='text-[12px] text-red-600 flex items-center gap-1 mt-2'>
+                                    <Icon className="fa-solid fa-circle-exclamation text-[11px]" />
                                     Date can't be before today. Please pick today or a later date.
                                 </p>
                             )}
 
-                            <div className='flex justify-end gap-2 mt-5'>
-                                <button
-                                    onClick={() => setStep('menu')}
-                                    className='px-4 py-2 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition'
-                                >
+                            <div className='flex flex-wrap justify-end gap-2 mt-5'>
+                                <button onClick={() => setStep('menu')} className={secondaryButton}>
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handlePostponeSave}
                                     disabled={!newTargetDate || newTargetDate < todayISO()}
-                                    className='px-4 py-2 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] disabled:opacity-40 disabled:cursor-not-allowed rounded-lg transition'
+                                    className={primaryButton}
                                 >
-                                    Save New Date
+                                    Save new date
                                 </button>
                             </div>
                         </div>
@@ -232,35 +232,29 @@ const VacancyUpdateModal = ({ vacancy, onClose }) => {
                     {/* ---------- Step: Closed Hiring ---------- */}
                     {step === 'closed' && (
                         <div>
-                            <button
-                                onClick={() => setStep('menu')}
-                                className='flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 mb-4'
-                            >
-                                <i className="fa-solid fa-arrow-left text-[10px]"></i>
+                            <button onClick={() => setStep('menu')} className={`${backButton} mb-3`}>
+                                <Icon className="fa-solid fa-arrow-left text-[11px]" />
                                 Back
                             </button>
 
-                            <div className='flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl p-4'>
-                                <i className="fa-solid fa-circle-exclamation text-amber-500 mt-0.5"></i>
+                            <div className='flex items-start gap-3 rounded-xl bg-amber-50/70 p-4 ring-1 ring-inset ring-amber-200'>
+                                <Icon className="fa-solid fa-circle-exclamation text-amber-500 mt-0.5 shrink-0" />
                                 <p className='text-sm text-slate-700'>
                                     Mark <span className='font-semibold'>{vacancy.designation}</span> ({vacancy.jobId}) as <span className='font-semibold'>Closed</span>?
                                     This hiring request will stop appearing as an open vacancy.
                                 </p>
                             </div>
 
-                            <div className='flex justify-end gap-2 mt-5'>
-                                <button
-                                    onClick={() => setStep('menu')}
-                                    className='px-4 py-2 text-sm font-medium text-slate-600 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg transition'
-                                >
+                            <div className='flex flex-wrap justify-end gap-2 mt-5'>
+                                <button onClick={() => setStep('menu')} className={secondaryButton}>
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleConfirmClosed}
                                     disabled={saving}
-                                    className='px-4 py-2 text-sm font-semibold text-white bg-[#062139] hover:bg-[#0a2f52] disabled:opacity-40 rounded-lg transition'
+                                    className={primaryButton}
                                 >
-                                    Yes, Close Hiring
+                                    Yes, close hiring
                                 </button>
                             </div>
                         </div>
@@ -268,7 +262,7 @@ const VacancyUpdateModal = ({ vacancy, onClose }) => {
                 </div>
             </div>
         </div>
-    )
+    , document.body)
 }
 
 export default VacancyUpdateModal

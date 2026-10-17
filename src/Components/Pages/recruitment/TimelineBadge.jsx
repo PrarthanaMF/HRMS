@@ -1,10 +1,13 @@
 import React from 'react'
 import { getTimelineInfo } from '../../../Utils/formatDate'
 
+import Icon from '../../Common/Icon'
+import { badgeBase } from './ui'
+
 const TONES = {
-    ok: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    soon: 'bg-amber-50 text-amber-700 border-amber-200',
-    overdue: 'bg-red-50 text-red-600 border-red-200',
+    ok: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+    soon: 'bg-amber-50 text-amber-700 ring-amber-200',
+    overdue: 'bg-red-50 text-red-700 ring-red-200',
 }
 
 // Live countdown to the vacancy's target date. Recalculated from today's date on
@@ -16,8 +19,8 @@ const TimelineBadge = ({ targetDate, status }) => {
     if (!info) return null
 
     return (
-        <span title={`Target date ${targetDate}, counted from today`} className={`inline-flex items-center gap-1 mt-1 text-[10.5px] font-semibold px-1.5 py-0.5 rounded-full border whitespace-nowrap ${TONES[info.tone]}`}>
-            <i className='fa-regular fa-clock text-[9px]'></i>
+        <span title={`Target date ${targetDate}, counted from today`} className={`${badgeBase} mt-1 ${TONES[info.tone]}`}>
+            <Icon className='fa-regular fa-clock text-[10px]' />
             {info.label}
         </span>
     )
